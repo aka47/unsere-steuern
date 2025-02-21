@@ -84,15 +84,9 @@ const calculatedPersonas = personas.map((persona) => {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   const results = calculateLifeIncome({
+    ...persona,
     currentIncome: persona.annualIncome,
-    currentAge: 25,
-    savingsRate: persona.savingsRate,
-    inheritanceAge: 45,
-    inheritanceAmount: persona.typicalInheritance,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
-    vatApplicableRate: 70,
-    yearlySpending: persona.annualIncome * (1 - persona.savingsRate),
+    yearlySpendingFromWealth: persona.annualIncome * (1 - persona.savingsRate),
     selectedPersona: null,
   })
 

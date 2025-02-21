@@ -12,15 +12,8 @@ export function PersonaCard({ persona, onClick }: PersonaCardProps) {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   const results = calculateLifeIncome({
-    currentIncome: persona.initialIncome,
-    currentAge: 25,
-    savingsRate: persona.savingsRate,
-    inheritanceAge: 45,
-    inheritanceAmount: persona.inheritanceAmount || 0,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
-    vatApplicableRate: 70,
-    yearlySpending: persona.initialIncome * (1 - persona.savingsRate),
+    ...persona,
+    currentAge: persona.initialAge,
     selectedPersona: persona,
   })
 
@@ -56,7 +49,16 @@ export function PersonaCard({ persona, onClick }: PersonaCardProps) {
             <BarChart data={lifetimeData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)}M`
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(0)}k`
+                  }
+                  return value
+                }}
+              />
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {

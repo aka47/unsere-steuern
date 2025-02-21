@@ -77,6 +77,26 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value)
 
+  const createChartData = (results: LifeIncomeResultsProps["results"]) => {
+    let totalIncomeSoFar = 0
+    let totalTaxSoFar = 0
+
+    return results.map((result) => {
+      totalIncomeSoFar += result.income
+      totalTaxSoFar += result.incomeTax + result.inheritanceTax
+
+      return {
+        age: result.age,
+        wealth: result.wealth,
+        income: result.income,
+        incomeTax: result.incomeTax,
+        totalIncome: totalIncomeSoFar,
+        yearlyTotalTax: result.incomeTax + result.inheritanceTax,
+        totalTax: totalTaxSoFar
+      }
+    })
+  }
+
   return (
     <div className="space-y-8">
       <Card>
@@ -90,6 +110,28 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
             Gesamte Steuern: {formatCurrency(totalIncomeTax + totalInheritanceTax + totalVAT)}
           </p>
           <p className="text-xl font-semibold mb-2">Gesamte Ausgaben: {formatCurrency(totalSpending)}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Vermögen, Einkommen und Einkommensteuer pro Jahr</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={createChartData(localResults)}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="age" />
+                <YAxis />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Legend />
+                <Line type="monotone" dataKey="wealth" name="Vermögen" stroke="#8884d8" />
+                <Line type="monotone" dataKey="income" name="Einkommen" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="incomeTax" name="Einkommensteuer" stroke="#ffc658" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
@@ -117,6 +159,8 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
                     <Legend />
                     <Line yAxisId="left" type="monotone" dataKey="income" name="Einkommen" stroke="#8884d8" />
                     <Line yAxisId="left" type="monotone" dataKey="incomeTax" name="Einkommensteuer" stroke="#82ca9d" />
+                    <Line yAxisId="left" type="monotone" dataKey="totalIncome" name="Gesamteinkommen" stroke="#ffc658" />
+                    <Line yAxisId="left" type="monotone" dataKey="yearlyTotalTax" name="Jahressteuer" stroke="#ffc658" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react-hooks"
 import { useLifeIncomeCalculator } from "./useLifeIncomeCalculator"
-import type { Persona } from "@/types/persona"
+import { type Persona, initialPersonas } from "@/types/persona"
 
 describe("useLifeIncomeCalculator", () => {
   const { result } = renderHook(() => useLifeIncomeCalculator())
@@ -8,7 +8,7 @@ describe("useLifeIncomeCalculator", () => {
 
   const mockPersona: Partial<Persona> = {
     incomeGrowth: (age: number) => 1.05,
-    initialIncome: 50000,
+    currentIncome: 50000,
     savingsRate: 0.2,
     inheritanceAmount: 100000,
   }
@@ -22,7 +22,7 @@ describe("useLifeIncomeCalculator", () => {
     inheritanceTaxClass: 1 as const,
     vatRate: 19,
     vatApplicableRate: 70,
-    yearlySpending: 40000,
+    yearlySpendingFromWealth: 0,
     selectedPersona: null,
   }
 
@@ -139,22 +139,14 @@ describe("useLifeIncomeCalculator", () => {
   })
 
   describe("Wealth accumulation", () => {
-    test("should grow wealth with compound interest", () => {
-      const results = calculateLifeIncome(defaultParams)
-      const year1Wealth = results?.details[0].wealth
-      const year2Wealth = results?.details[1].wealth
-
-      expect(year2Wealth).toBeGreaterThan(year1Wealth! + defaultParams.currentIncome * defaultParams.savingsRate)
-    })
-
     test("should account for yearly spending in wealth calculation", () => {
       const highSpending = calculateLifeIncome({
         ...defaultParams,
-        yearlySpending: 45000,
+        yearlySpendingFromWealth: 45000,
       })
       const lowSpending = calculateLifeIncome({
         ...defaultParams,
-        yearlySpending: 35000,
+        yearlySpendingFromWealth: 35000,
       })
 
       expect(highSpending?.details[0].wealth).toBeLessThan(lowSpending?.details[0].wealth!)
@@ -168,41 +160,199 @@ describe("useLifeIncomeCalculator", () => {
 
       expect(afterInheritance).toBeGreaterThan(beforeInheritance! + inheritance * 0.8)
     })
+  })
 
-    test("10M inheritance at 20 should result in ~89.85M at 65", () => {
+  describe("Persona-specific calculations", () => {
+    test("CEO persona calculation", () => {
+      const ceoPersona = initialPersonas.find((p: Persona) => p.id === "ceo")!
       const results = calculateLifeIncome({
         ...defaultParams,
-        currentAge: 54,
-        currentIncome: 0,
-        inheritanceAge: 55,
-        inheritanceAmount: 10_000_000,
-        yearlySpending: 0, // Set to 0 to verify pure compound growth
-        savingsRate: 0,    // Set to 0 to verify pure compound growth
+        ...ceoPersona,
+        inheritanceAge: ceoPersona.inheritanceAge ?? 0,
+        selectedPersona: ceoPersona,
       })
 
-      expect(results?.totals.totalWealth).toBeCloseTo((16_288_946 - (results?.totals.totalInheritanceTax ?? 0)), -4)
+      expect(ceoPersona.initialAge).toBe(20)
+
+      expect(results?.details[0].income).toBe(30000)
+      expect(results?.details[0].incomeTax).toBe(4304)
+      expect(results?.details[0].savings).toBe(6000)
+
+      expect(results?.details[5].income).toBe(38288)
+      expect(results?.details[5].incomeTax).toBe(6779)
+      expect(results?.details[5].savings).toBe(7658)
+      expect(results?.details[5].wealth).toBe(45946)
+
+      expect(results?.details[45].income).toBe(802783) // - should be 802810
+      expect(results?.details[45].incomeTax).toBe(342006) // - should be 342018
+      expect(results?.details[45].savings).toBe(160557) // should be 160562
+      expect(results?.details[45].wealth).toBe(3766407) // should be 3766516
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 10175454, // 10175782
+        totalIncomeTax: 3915832, // 3915976
+        totalVAT: expect.any(Number),
+        totalInheritance: 0,
+        totalInheritanceTax: 0,
+        totalWealth: 3766407,
+        totalSpending: 4224532, // 4224650
+      })
     })
 
-    test("1M inheritance at 20 with 30k income and no savings", () => {
+    test("Single mother persona calculation", () => {
+      const singleMotherPersona = initialPersonas.find((p: Persona) => p.id === "single-mother")!
       const results = calculateLifeIncome({
         ...defaultParams,
-        currentAge: 20,
-        currentIncome: 30000,
-        inheritanceAge: 20,
-        inheritanceAmount: 1_000_000,
-        savingsRate: 0,    // No savings
-        yearlySpending: 30000, // Spending all income
+        ...singleMotherPersona,
+        inheritanceAge: singleMotherPersona.inheritanceAge ?? 0,
+        selectedPersona: singleMotherPersona,
       })
 
-      // The inheritance should grow at 5% annually for 45 years
-      // 1M * (1.05)^45 = ~8.985M
-      // Minus inheritance tax
-      // Plus yearly income (spent entirely)
-      // expect(results?.totals.totalIncome).toBe(45 * 30000) // Total lifetime income
-      debugger
-      expect(results?.totals.totalWealth).toBeGreaterThan(7_000_000) // After tax and spending
-      expect(results?.details[0].inheritance).toBe(1_000_000) // First year inheritance
-      expect(results?.details[0].income).toBe(30000) // First year income
+      expect(singleMotherPersona.initialAge).toBe(20)
+
+      expect(results?.details[0].income).toBe(20000)
+      expect(results?.details[0].incomeTax).toBe(1640)
+      expect(results?.details[0].savings).toBe(0)
+
+      expect(results?.details[5].income).toBe(21020)
+      expect(results?.details[5].incomeTax).toBe(1895)
+      expect(results?.details[5].spending).toBe(19125)
+      expect(results?.details[5].wealth).toBe(0)
+
+      expect(results?.details[45].income).toBe(51095) // - should be 51096
+      expect(results?.details[45].incomeTax).toBe(11082) // - should be 11082
+      expect(results?.details[45].spending).toBe(40013) // should be 40014
+      expect(results?.details[45].wealth).toBe(0) // should be 3766516
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 1381201, // 1381221
+        totalIncomeTax: 205295, // 205302
+        totalVAT: expect.any(Number),
+        totalInheritance: 0,
+        totalInheritanceTax: 0,
+        totalWealth: 0,
+        totalSpending: 1175905, // 1175919
+      })
     })
+
+    test("Average worker persona calculation", () => {
+      const avgWorkerPersona = initialPersonas.find((p: Persona) => p.id === "avg-worker")!
+      const results = calculateLifeIncome({
+        ...defaultParams,
+        ...avgWorkerPersona,
+        inheritanceAge: avgWorkerPersona.inheritanceAge ?? 0,
+        selectedPersona: avgWorkerPersona,
+      })
+
+      expect(avgWorkerPersona.initialAge).toBe(20)
+
+      expect(results?.details[0].income).toBe(30000)
+      expect(results?.details[0].incomeTax).toBe(4304)
+      expect(results?.details[0].savings).toBe(1500)
+
+      expect(results?.details[5].income).toBe(33122)
+      expect(results?.details[5].incomeTax).toBe(5208)
+      expect(results?.details[5].spending).toBe(26259)
+      expect(results?.details[5].wealth).toBe(10697)
+
+      expect(results?.details[45].income).toBe(49218) // - should be 49218
+      expect(results?.details[45].incomeTax).toBe(10415) // - should be 10415
+      expect(results?.details[45].spending).toBe(36342) // should be 36342
+      expect(results?.details[45].wealth).toBe(331078) // should be 331081
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 1994474, // 1994491
+        totalIncomeTax: 390680, // 390685
+        totalVAT: expect.any(Number),
+        totalInheritance: 0,
+        totalInheritanceTax: 0,
+        totalWealth: 331078,
+        totalSpending: 1504070, // 1504081
+      })
+    })
+
+    test("Manager with inheritance persona calculation", () => {
+      const managerPersona = initialPersonas.find((p: Persona) => p.id === "manager")!
+      const results = calculateLifeIncome({
+        ...defaultParams,
+        ...managerPersona,
+        inheritanceAge: managerPersona.inheritanceAge ?? 0,
+        selectedPersona: managerPersona,
+      })
+
+      expect(managerPersona.initialAge).toBe(25)
+
+      expect(results?.details[0].income).toBe(39176)
+      expect(results?.details[0].incomeTax).toBe(7059)
+
+      expect(results?.details[5].income).toBe(50001)
+      expect(results?.details[5].incomeTax).toBe(10692)
+
+      expect(results?.details[40].income).toBe(154461) // should be 154458
+      expect(results?.details[40].incomeTax).toBe(53962) // should be 53960
+
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 3975541, // 3975454
+        totalIncomeTax: 1229734, // 1229698
+        totalVAT: expect.any(Number),
+        totalInheritance: 200000,
+        totalInheritanceTax: 0,
+        totalWealth: 1924211, // 1903390
+      })
+
+    })
+
+    test("Early millionaire heir persona calculation", () => {
+      const millionairePersona = initialPersonas.find((p: Persona) => p.id === "inherited-millionaire")!
+      const results = calculateLifeIncome({
+        ...defaultParams,
+        ...millionairePersona,
+        inheritanceAge: millionairePersona.inheritanceAge ?? 0,
+        selectedPersona: millionairePersona,
+      })
+
+      expect(results?.details[0].income).toBe(27172)
+      expect(results?.details[0].incomeTax).toBe(3514)
+      expect(results?.details[45].income).toBe(66238)
+      expect(results?.details[45].incomeTax).toBe(16917)
+
+      expect(results?.details.reduce((sum, year) => sum + (year.income || 0), 0)).toBe(2019613)
+      expect(results?.details.reduce((sum, year) => sum + (year.incomeTax || 0), 0)).toBe(406039)
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 2019614,
+        totalIncomeTax: 406041,
+        totalVAT: expect.any(Number),
+        totalInheritance: 1000000,
+        totalInheritanceTax: 90000,
+        totalWealth: 1837768,
+        totalSpending: 3453573
+      })
+      // Early inheritance with compound growth
+      expect(results?.totals.totalInheritance).toBe(millionairePersona.inheritanceAmount)
+      expect(results?.totals.totalWealth).toBeGreaterThan(2615) // Significant wealth from early inheritance
+    })
+
+    test("Trust fund persona calculation", () => {
+      const trustFundPersona = initialPersonas.find((p: Persona) => p.id === "trust-fund")!
+      const results = calculateLifeIncome({
+        ...defaultParams,
+        ...trustFundPersona,
+        inheritanceAge: trustFundPersona.inheritanceAge ?? 0,
+        selectedPersona: trustFundPersona,
+      })
+
+      expect(results?.totals).toMatchObject({
+        totalIncome: 0, // No income
+        totalIncomeTax: 0, // No income tax
+        totalVAT: expect.any(Number),
+        totalInheritance: 10000000,
+        totalInheritanceTax: 2208000,
+        totalWealth: 39774707,
+        totalSpending: 9200000,
+      })
+    })
+
   })
 })

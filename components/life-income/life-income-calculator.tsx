@@ -46,15 +46,13 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   const [inheritanceAge, setInheritanceAge] = useState("")
   const [inheritanceAmount, setInheritanceAmount] = useState("")
   const [inheritanceTaxClass, setInheritanceTaxClass] = useState("1")
-  const [vatRate, setVatRate] = useState("19")
-  const [vatApplicableRate, setVatApplicableRate] = useState("70")
   const [spending, setSpending] = useState("")
   const [personas, setPersonas] = useState(initialPersonas)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   useEffect(() => {
     if (selectedPersona) {
-      setCurrentIncome(selectedPersona.initialIncome.toString())
+      setCurrentIncome(selectedPersona.currentIncome.toString())
       setCurrentAge(selectedPersona.initialAge.toString())
       setSavingsRate((selectedPersona.savingsRate * 100).toString())
       setInheritanceAge(selectedPersona.inheritanceAge?.toString() || "")
@@ -64,6 +62,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   }, [selectedPersona])
 
   const handleCalculation = () => {
+    debugger
     const results = calculateLifeIncome({
       currentIncome: Number.parseFloat(currentIncome),
       currentAge: Number.parseInt(currentAge),
@@ -71,15 +70,15 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge) : undefined,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
       inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass),
-      vatRate: Number.parseFloat(vatRate),
-      vatApplicableRate: Number.parseFloat(vatApplicableRate),
-      yearlySpending: Number.parseFloat(spending),
+      vatRate: 19,
+      vatApplicableRate: 70,
+      yearlySpendingFromWealth: Number.parseInt(spending),
       selectedPersona,
     })
 
     if (!results) {
       alert(
-        "Bitte geben Sie gültige Werte ein. Das Alter muss zwischen 20 und 65 liegen, die Sparrate zwischen 0 und 100%, und die MwSt.-Sätze müssen gültige Zahlen sein.",
+        "Bitte geben Sie gültige Werte ein. Das Alter muss zwischen 20 und 65 liegen." + results,
       )
       return
     }
@@ -104,7 +103,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
     if (selectedPersona) {
       const updatedPersona: Persona = {
         ...selectedPersona,
-        initialIncome: Number.parseFloat(currentIncome),
+        currentIncome: Number.parseFloat(currentIncome),
         initialAge: Number.parseInt(currentAge),
         savingsRate: Number.parseFloat(savingsRate) / 100,
         inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge) : null,
@@ -119,7 +118,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   }
 
   return (
-    <Card>
+    <Card className="max-w-2xl mxs-auto">
       <CardHeader>
         <CardTitle>Lebenseinkommen Rechner</CardTitle>
         <CardDescription>
@@ -142,77 +141,97 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
                 ))}
               </SelectContent>
             </Select>
+
+
           </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="currentIncome">Aktuelles Jahreseinkommen (€)</Label>
-            <Input
-              id="currentIncome"
-              placeholder="z.B. 50000"
-              value={currentIncome}
-              onChange={(e) => setCurrentIncome(e.target.value)}
-            />
+          <div className="relative my-4 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <span className="relative z-10 bg-background px-2 text-muted-foreground">
+              oder geben Sie Ihre Daten ein
+            </span>
           </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="currentAge">Aktuelles Alter</Label>
-            <Input
-              id="currentAge"
-              placeholder="z.B. 30"
-              value={currentAge}
-              onChange={(e) => setCurrentAge(e.target.value)}
-            />
+          <h3 className="font-semibold mb-2">Einkommen</h3>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="currentIncome">Aktuelles Jahreseinkommen (€)</Label>
+              <Input
+                id="currentIncome"
+                placeholder="z.B. 50000"
+                value={currentIncome}
+                onChange={(e) => setCurrentIncome(e.target.value)}
+                type="number"
+                min={0}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="currentAge">Aktuelles Alter</Label>
+              <Input
+                id="currentAge"
+                placeholder="z.B. 30"
+                value={currentAge}
+                onChange={(e) => setCurrentAge(e.target.value)}
+                type="number"
+                min={0}
+                max={120}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="savingsRate">Sparrate (%)</Label>
+              <Select value={savingsRate} onValueChange={setSavingsRate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wählen Sie eine Sparrate" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1%</SelectItem>
+                  <SelectItem value="5">5%</SelectItem>
+                  <SelectItem value="10">10%</SelectItem>
+                  <SelectItem value="15">15%</SelectItem>
+                  <SelectItem value="20">20%</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground mt-1">Der monatliche Betrag, den Sie vom Einkommen sparen</p>
+            </div>
           </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="savingsRate">Sparrate (%)</Label>
-            <Input
-              id="savingsRate"
-              placeholder="z.B. 20"
-              value={savingsRate}
-              onChange={(e) => setSavingsRate(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="inheritanceAge">Alter bei Erbschaft</Label>
-            <Input
-              id="inheritanceAge"
-              placeholder="z.B. 40"
-              value={inheritanceAge}
-              onChange={(e) => setInheritanceAge(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="inheritanceAmount">Erbschaftsbetrag (€)</Label>
-            <Input
-              id="inheritanceAmount"
-              placeholder="z.B. 100000"
-              value={inheritanceAmount}
-              onChange={(e) => setInheritanceAmount(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="inheritanceTaxClass">Erbschaftssteuerklasse</Label>
-            <Select value={inheritanceTaxClass} onValueChange={setInheritanceTaxClass}>
-              <SelectTrigger>
-                <SelectValue placeholder="Wählen Sie eine Steuerklasse" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Klasse I</SelectItem>
-                <SelectItem value="2">Klasse II</SelectItem>
-                <SelectItem value="3">Klasse III</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="vatRate">Mehrwertsteuersatz (%)</Label>
-            <Input id="vatRate" placeholder="z.B. 19" value={vatRate} onChange={(e) => setVatRate(e.target.value)} />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="vatApplicableRate">Anteil MwSt.-pflichtiger Ausgaben (%)</Label>
-            <Input
-              id="vatApplicableRate"
-              placeholder="z.B. 70"
-              value={vatApplicableRate}
-              onChange={(e) => setVatApplicableRate(e.target.value)}
-            />
+
+
+          <div className="space-y-4 mt-4">
+            <h3 className="font-semibold">Erbe</h3>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="inheritanceAge">Alter bei Erbschaft</Label>
+              <Input
+                id="inheritanceAge"
+                placeholder="z.B. 40"
+                value={inheritanceAge}
+                onChange={(e) => setInheritanceAge(e.target.value)}
+                type="number"
+                min={0}
+                max={120}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="inheritanceAmount">Erbschaftsbetrag (€)</Label>
+              <Input
+                id="inheritanceAmount"
+                placeholder="z.B. 100000"
+                value={inheritanceAmount}
+                onChange={(e) => setInheritanceAmount(e.target.value)}
+                type="number"
+                min={0}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="inheritanceTaxClass">Erbschaftssteuerklasse</Label>
+              <Select value={inheritanceTaxClass} onValueChange={setInheritanceTaxClass}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wählen Sie eine Steuerklasse" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Klasse I</SelectItem>
+                  <SelectItem value="2">Klasse II</SelectItem>
+                  <SelectItem value="3">Klasse III</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="spending">Jährliche Ausgaben (€)</Label>
@@ -220,9 +239,15 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
               id="spending"
               placeholder="z.B. 30000"
               value={spending}
-              onChange={(e) => setSpending(e.target.value)}
+              onChange={(e) => setSpending(e.target.value || "0")}
+              type="number"
+              min={0}
+              defaultValue={0}
             />
+            <p className="text-sm text-muted-foreground mt-1">Jährliche Ausgaben aus dem Vermögen</p>
           </div>
+          <div className="mt-2"></div>
+
           <Button onClick={handleCalculation}>Berechnen</Button>
           {selectedPersona && <Button onClick={savePersona}>Persona Speichern</Button>}
         </div>

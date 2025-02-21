@@ -28,7 +28,7 @@ export function useLifetimeSimulation(persona: Persona, scenario: string) {
     let totalTaxesPaid = 0
 
     for (let age = persona.initialAge; age <= retirementAge; age++) {
-      const yearIncome = persona.initialIncome * Math.pow(persona.incomeGrowth(age), age - persona.initialAge)
+      const yearIncome = persona.currentIncome * Math.pow(persona.incomeGrowth(age), age - persona.initialAge)
       let yearTax = 0
 
       switch (scenario) {
