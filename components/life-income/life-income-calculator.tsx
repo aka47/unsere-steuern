@@ -6,7 +6,6 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Persona, initialPersonas } from "@/types/persona"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
@@ -14,8 +13,12 @@ import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { InfoIcon } from "lucide-react"
-import { type LifeIncomeResults } from "@/types/life-income"
-import { TypographyH3, TypographyP, TypographySmall, TypographyMuted } from "@/components/ui/typography"
+import { type LifeIncomeResults, type TaxScenario } from "@/types/life-income"
+import { TypographyH3, TypographyH4, TypographyP } from "@/components/ui/typography"
+import { useSessionPersona } from "@/hooks/useSessionPersona"
+import { TaxScenarioSelector } from "@/components/life-income/tax-scenario-selector"
+import { TaxScenarioComparison } from "@/components/life-income/tax-scenario-comparison"
+import { defaultTaxScenario } from "@/constants/tax-scenarios"
 
 interface LifeIncomeCalculatorProps {
   setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
@@ -37,8 +40,18 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   const [inheritanceAmount, setInheritanceAmount] = useState("")
   const [inheritanceTaxClass, setInheritanceTaxClass] = useState<"1" | "2" | "3">("1")
   const [spending, setSpending] = useState("")
+  const [wealth, setWealth] = useState("")
   const [personas, setPersonas] = useState(initialPersonas)
+  const [selectedTaxScenario, setSelectedTaxScenario] = useState<TaxScenario>(defaultTaxScenario)
+  const [showScenarioComparison, setShowScenarioComparison] = useState(false)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
+  const { persona: sessionPersona, setPersona } = useSessionPersona()
+
+  useEffect(() => {
+    if (!selectedPersona && sessionPersona) {
+      setSelectedPersona(sessionPersona)
+    }
+  }, [sessionPersona, selectedPersona, setSelectedPersona])
 
   useEffect(() => {
     if (selectedPersona) {
@@ -48,6 +61,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       setInheritanceAge(selectedPersona.inheritanceAge?.toString() ?? "")
       setInheritanceAmount(selectedPersona.inheritanceAmount.toString())
       setSpending(selectedPersona.yearlySpendingFromWealth.toString())
+      setWealth(selectedPersona.currentWealth?.toString() ?? "0")
     }
   }, [selectedPersona])
 
@@ -64,6 +78,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
       yearlySpendingFromWealth: Number.parseFloat(spending),
+      currentWealth: Number.parseFloat(wealth),
       inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass)
     }
 
@@ -73,7 +88,8 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       Number.isNaN(parsedValues.savingsRate) ||
       (inheritanceAge && Number.isNaN(parsedValues.inheritanceAge)) ||
       Number.isNaN(parsedValues.inheritanceAmount) ||
-      Number.isNaN(parsedValues.yearlySpendingFromWealth)
+      Number.isNaN(parsedValues.yearlySpendingFromWealth) ||
+      Number.isNaN(parsedValues.currentWealth)
     ) {
       alert("Bitte geben Sie gültige Zahlen ein.")
       return
@@ -82,7 +98,8 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
     const results = calculateLifeIncome({
       ...selectedPersona,
       ...parsedValues,
-      selectedPersona
+      selectedPersona,
+      taxScenario: selectedTaxScenario
     })
 
     if (!results) {
@@ -97,10 +114,18 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
     if (totals) {
       console.log({
         totalIncome: totals.totalIncome,
-        totalTaxes: totals.totalIncomeTax,
+        totalIncomeTax: totals.totalIncomeTax,
+        totalWealthIncome: totals.totalWealthIncome,
+        totalWealthIncomeTax: totals.totalWealthIncomeTax,
+        totalWealthTax: totals.totalWealthTax,
         finalWealth: totals.totalWealth
       })
     }
+  }
+
+  const handleCompareScenarios = () => {
+    setShowScenarioComparison(true)
+    handleCalculation()
   }
 
   const handlePersonaChange = (personaId: string) => {
@@ -118,18 +143,22 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       savingsRate: Number.parseFloat(savingsRate) / 100,
       inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
-      yearlySpendingFromWealth: Number.parseFloat(spending)
+      yearlySpendingFromWealth: Number.parseFloat(spending),
+      currentWealth: Number.parseFloat(wealth)
     }
 
     const updatedPersonas = personas.map((p) => (p.id === updatedPersona.id ? updatedPersona : p))
     setPersonas(updatedPersonas)
     localStorage.setItem("personas", JSON.stringify(updatedPersonas))
+
+    setPersona(updatedPersona)
+
     alert("Persona erfolgreich gespeichert!")
   }
 
   return (
     <div className="grid w-full items-center gap-6">
-      <div className="flex flex-col space-y-2">
+      {/* <div className="flex flex-col space-y-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="persona" className="text-base font-medium">Persona</Label>
           <TooltipProvider>
@@ -161,11 +190,11 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
         <span className="relative z-10 bg-background px-2 text-muted-foreground">
           oder geben Sie Ihre Daten ein
         </span>
-      </div>
+      </div> */}
 
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <TypographyH3>Einkommen</TypographyH3>
+          <TypographyH4>Einkommen</TypographyH4>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -207,6 +236,9 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
           <div className="flex flex-col space-y-1.5 md:col-span-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="savingsRate">Sparrate (%)</Label>
+              <TypographyP className="text-muted-foreground">
+                Der monatliche Betrag, den Sie vom Einkommen sparen
+              </TypographyP>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -236,7 +268,38 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
 
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <TypographyH3>Erbe</TypographyH3>
+          <TypographyH4>Vermögen heute</TypographyH4>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <InfoIcon className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <TypographyP>Geben Sie Ihr aktuelles Vermögen ein</TypographyP>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <Separator />
+        <div className="grid grid-cols-1 gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="currentWealth">Wie hoch ist Ihr Vermögen heute (€)</Label>
+            <Input
+              id="currentWealth"
+              placeholder="z.B. 50000"
+              value={wealth}
+              onChange={(e) => setWealth(e.target.value)}
+              type="number"
+              min={0}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TypographyH4>(zukünftiges) Erbe</TypographyH4>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -308,7 +371,7 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
 
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <TypographyH3>Ausgaben</TypographyH3>
+          <TypographyH4>Ausgaben</TypographyH4>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -335,9 +398,54 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
         </div>
       </div>
 
+      {/* <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TypographyH4>Steuerszenario</TypographyH4>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <InfoIcon className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <TypographyP>Wählen Sie ein Steuerszenario für die Berechnung</TypographyP>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <Separator />
+        <TaxScenarioSelector
+          selectedScenario={selectedTaxScenario}
+          onScenarioChange={setSelectedTaxScenario}
+          onCompareScenarios={handleCompareScenarios}
+        />
+      </div> */}
+
+      {/* {showScenarioComparison && selectedPersona && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>Szenario-Vergleich</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Vergleich verschiedener Steuerszenarien</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <TaxScenarioComparison
+            persona={selectedPersona}
+            currentWealth={Number.parseFloat(wealth) || 0}
+            yearlySpendingFromWealth={Number.parseFloat(spending) || 0}
+          />
+        </div>
+      )} */}
+
       <div className="flex flex-wrap gap-4 mt-4">
         <Button onClick={handleCalculation} className="bg-primary hover:bg-primary/90">
-          Berechnen
+          Lebenseinkommen - Übersicht erstellen
         </Button>
         {selectedPersona && (
           <Button onClick={savePersona} variant="outline" className="border-primary text-primary hover:bg-primary/10">

@@ -1,12 +1,10 @@
 "use client"
 
-import { Suspense } from "react"
 import { TaxScenarioSelector } from "@/components/tax-scenarios/tax-scenario-selector"
 import { PersonaSimulationList } from "@/components/tax-scenarios/persona-simulation-list"
 import { ScenarioSummary } from "@/components/tax-scenarios/scenario-summary"
 import { DataSources } from "@/components/tax-scenarios/data-sources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { PersonalTaxImpact } from "@/components/tax-scenarios/personal-tax-impact"
 import { initialPersonas } from "@/types/persona"
 import { TaxScenarioProvider } from "@/hooks/useTaxScenario"
@@ -28,40 +26,19 @@ export default function TaxScenariosPage() {
   return (
     <TaxScenarioProvider>
       <div className="flex flex-col gap-6">
-        <PageHeader title="Gemeinsam für ein faires Steuersystem" />
+        <PageHeader title="Steuerszenarien entdecken" subtitle="Wählen Sie verschiedene Steuermodelle aus und sehen Sie direkt, wie sich diese auf unterschiedliche Lebensrealitäten auswirken" />
 
 
-        <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex-1 space-y-4 p-8 pt-2">
 
 
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Willkommen bei unserem interaktiven Steuerrechner!</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
 
-              <TypographyP className="max-w-3xl">
-                Hier können Sie verschiedene Steuermodelle erkunden und deren Auswirkungen auf unterschiedliche Lebenssituationen verstehen.
-                Entdecken Sie, wie sich Änderungen im Steuersystem auf das Lebenseinkommen, den Vermögensaufbau und die
-                Steuerlast verschiedener Bevölkerungsgruppen auswirken. Mit diesem Tool möchten wir die Steuerdebatte
-                transparenter und zugänglicher machen - denn nur gemeinsam können wir ein gerechtes Steuersystem gestalten.
-              </TypographyP>
-            </CardContent>
-          </Card>
+          <TaxScenarioSelector />
 
-          {/* Steuerszenario-Auswahl */}
-          <Section>
-            <SectionHeader>
-              <SectionTitle>Steuermodell entdecken</SectionTitle>
-              <SectionDescription>
-                Wählen Sie verschiedene Steuermodelle aus und sehen Sie direkt, wie sich diese auf unterschiedliche Lebensrealitäten auswirken
-              </SectionDescription>
-            </SectionHeader>
-            <SectionContent>
-              <TaxScenarioSelector />
-            </SectionContent>
-          </Section>
+
+
+
 
           {/* Persönliche Auswirkungen */}
           <PersonalTaxImpact userPersona={userPersona} />

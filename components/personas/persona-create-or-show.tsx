@@ -1,31 +1,51 @@
 "use client"
 
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PersonaSimulationCard } from "@/components/tax-scenarios/persona-simulation-card"
+import { type Persona } from "@/types/persona"
 import { useRouter } from "next/navigation"
-import { Persona } from "@/types/persona"
-import { PersonaCard } from "./persona-card"
+import { useSessionPersona } from "@/hooks/useSessionPersona"
+import { PencilIcon, UserIcon, LogOutIcon } from "lucide-react"
 
-interface PersonalCreateOrShowProps {
-  userPersona: Persona | null
+interface PersonaCreateOrShowProps {
+  userPersona?: Persona | null
 }
 
-export function PersonalCreateOrShow({ userPersona }: PersonalCreateOrShowProps) {
+export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
   const router = useRouter()
+  const { persona: sessionPersona, setPersona, clearPersona } = useSessionPersona()
+  const [isEditing, setIsEditing] = useState(false)
 
-  if (!userPersona) {
+  // Use session persona if available, otherwise use the prop
+  const currentPersona = sessionPersona || userPersona
+
+  const handleSaveToSession = () => {
+    if (userPersona) {
+      setPersona(userPersona)
+    }
+  }
+
+  const handleEditPersona = () => {
+    router.push("/lebenseinkommen/rechner")
+    setIsEditing(true)
+  }
+
+  if (!currentPersona) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Wie wirkt sich das auf Sie aus?</CardTitle>
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/30 pb-4">
+          <CardTitle>Keine Persona ausgewählt</CardTitle>
           <CardDescription>
-            Erstellen Sie Ihr persönliches Profil, um zu sehen, wie die verschiedenen Steuermodelle Sie betreffen würden.
+            Wählen Sie eine Persona aus der Liste unten oder erstellen Sie eine neue
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={() => router.push("/lebenseinkommen/rechner")}>
-            Mein Profil erstellen
+        <CardContent className="pt-6">
+          <Button
+            onClick={() => router.push("/lebenseinkommen/rechner")}
+            className="w-full"
+          >
+            Zum Rechner
           </Button>
         </CardContent>
       </Card>
@@ -33,9 +53,72 @@ export function PersonalCreateOrShow({ userPersona }: PersonalCreateOrShowProps)
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl">Ihre Persona</h2>
-      <PersonaCard persona={userPersona} onClick={() => {}} />
-    </div>
+    <Card className="shadow-sm">
+      <CardHeader className="bg-muted/30 pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Was heisst das für dich?</CardTitle>
+            <CardDescription>
+              Deine Leben, dein Einkommen, deine Steuern und dein Vermögen.
+            </CardDescription>
+          </div>
+          {sessionPersona ? (
+            <div>
+              <Button variant="outline" size="icon" onClick={handleEditPersona} title="Persona bearbeiten">
+                <PencilIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="ml-2"
+                onClick={() => clearPersona()}
+              >
+                <LogOutIcon className="h-4 w-4 mr-2" />
+                Daten entfernen
+              </Button>
+            </div>
+
+          ) : (
+            <Button variant="outline" size="sm" onClick={handleSaveToSession} title="Als aktuelle Persona speichern">
+              <UserIcon className="h-4 w-4 mr-2" />
+              Als meine Persona speichern
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Dein Alter</p>
+            <p>{currentPersona.currentAge} Jahre</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Einkommen heute</p>
+            <p>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(currentPersona.currentIncome)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Sparrate</p>
+            <p>{(currentPersona.savingsRate * 100).toFixed(0)}%</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Erbschaft</p>
+            <p>
+              {currentPersona.inheritanceAge
+                ? `${new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(currentPersona.inheritanceAmount)} mit ${currentPersona.inheritanceAge} Jahren`
+                : "Keine"}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between pt-2">
+        {/* <Button
+          onClick={() => router.push("/lebenseinkommen/rechner")}
+          className="w-full"
+        >
+          {sessionPersona ? "Deine Daten bearbeiten" : "Deine Daten eingeben"}
+        </Button> */}
+
+
+      </CardFooter>
+    </Card>
   )
 }

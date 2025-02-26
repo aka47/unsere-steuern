@@ -15,6 +15,7 @@ export interface Persona {
   vatApplicableRate: number
   incomeGrowth: (age: number) => number
   yearlySpendingFromWealth: number
+  currentWealth: number
 }
 
 export const defaultPersona: Persona = {
@@ -34,6 +35,7 @@ export const defaultPersona: Persona = {
   vatApplicableRate: 70,
   incomeGrowth: (age) => (age <= 45 ? 1.02 : 1.0),
   yearlySpendingFromWealth: 0,
+  currentWealth: 0
 }
 
 export const initialPersonas: Persona[] = [
@@ -90,6 +92,7 @@ export const initialPersonas: Persona[] = [
     currentAge: 25,
     inheritanceAge: 20,
     inheritanceAmount: 1000000,
+    currentWealth: 1000000,
     incomeGrowth: () => 1.02,
     yearlySpendingFromWealth: 40000,
   },
@@ -103,6 +106,7 @@ export const initialPersonas: Persona[] = [
     currentIncome: 0,
     inheritanceAge: 20,
     inheritanceAmount: 10000000,
+    currentWealth: 10000000,
     incomeGrowth: () => 1,
     yearlySpendingFromWealth: 200000,
   },
@@ -125,7 +129,8 @@ export const avgPersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 60,
     incomeGrowth: (age) => (age <= 40 ? 1.01 : 1.005),
-    yearlySpendingFromWealth: 0
+    yearlySpendingFromWealth: 0,
+    currentWealth: 5000
   },
   {
     id: "persona_2",
@@ -143,7 +148,8 @@ export const avgPersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 65,
     incomeGrowth: (age) => (age <= 45 ? 1.02 : 1.01),
-    yearlySpendingFromWealth: 0
+    yearlySpendingFromWealth: 0,
+    currentWealth: 20000
   },
   {
     id: "persona_3",
@@ -161,7 +167,8 @@ export const avgPersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 70,
     incomeGrowth: (age) => (age <= 50 ? 1.03 : 1.015),
-    yearlySpendingFromWealth: 500
+    yearlySpendingFromWealth: 500,
+    currentWealth: 50000
   },
   {
     id: "persona_4",
@@ -179,7 +186,8 @@ export const avgPersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 75,
     incomeGrowth: (age) => (age <= 55 ? 1.04 : 1.02),
-    yearlySpendingFromWealth: 2000
+    yearlySpendingFromWealth: 2000,
+    currentWealth: 150000
   },
   {
     id: "persona_5",
@@ -197,7 +205,8 @@ export const avgPersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 80,
     incomeGrowth: (age) => (age <= 60 ? 1.05 : 1.02),
-    yearlySpendingFromWealth: 50000
+    yearlySpendingFromWealth: 50000,
+    currentWealth: 1000000
   }
 ]
 
@@ -218,7 +227,8 @@ export const highIncomePersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 80,
     incomeGrowth: (age) => (age <= 55 ? 1.045 : 1.025),
-    yearlySpendingFromWealth: 22500
+    yearlySpendingFromWealth: 22500,
+    currentWealth: 300000
   },
   {
     id: "persona_7",
@@ -236,7 +246,8 @@ export const highIncomePersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 85,
     incomeGrowth: (age) => (age <= 60 ? 1.05 : 1.03),
-    yearlySpendingFromWealth: 50000
+    yearlySpendingFromWealth: 50000,
+    currentWealth: 500000
   },
   {
     id: "persona_8",
@@ -249,36 +260,38 @@ export const highIncomePersonas: Persona[] = [
     currentIncomeFromWealth: 120000, // 40% aus Vermögen
     savingsRate: 0.32,
     inheritanceAge: 45,
-    inheritanceAmount: 1000000,
+    inheritanceAmount: 800000,
     inheritanceTaxClass: 1,
     vatRate: 19,
     vatApplicableRate: 90,
     incomeGrowth: (age) => (age <= 60 ? 1.06 : 1.03),
-    yearlySpendingFromWealth: 125000
+    yearlySpendingFromWealth: 100000,
+    currentWealth: 800000
   },
   {
     id: "persona_9",
-    name: "Superreiche Elite",
-    description: "95–99% der Einkommens- und Vermögensverteilung. Extrem hohes Einkommen, mehrere Millionen an Erbschaften.",
-    icon: "💰",
+    name: "Vermögenselite",
+    description: "95–99% der Einkommens- und Vermögensverteilung. Extrem hohes Einkommen und Vermögen, erhebliche Erbschaften.",
+    icon: "💎",
     initialAge: 20,
     currentAge: 65,
-    currentIncome: 700000,
-    currentIncomeFromWealth: 350000, // 50% aus Vermögen
-    savingsRate: 0.4,
-    inheritanceAge: 50,
-    inheritanceAmount: 5000000,
+    currentIncome: 500000,
+    currentIncomeFromWealth: 250000, // 50% aus Vermögen
+    savingsRate: 0.35,
+    inheritanceAge: 40,
+    inheritanceAmount: 2000000,
     inheritanceTaxClass: 1,
     vatRate: 19,
-    vatApplicableRate: 90,
-    incomeGrowth: (age) => (age <= 60 ? 1.07 : 1.035),
-    yearlySpendingFromWealth: 300000
+    vatApplicableRate: 95,
+    incomeGrowth: (age) => (age <= 60 ? 1.07 : 1.04),
+    yearlySpendingFromWealth: 200000,
+    currentWealth: 2000000
   },
   {
     id: "persona_10",
-    name: "Milliardär",
-    description: "99–100% der Einkommens- und Vermögensverteilung. Enormes Vermögen, das überwiegend durch Erbschaften und Kapitalwachstum entsteht.",
-    icon: "🏦",
+    name: "Superreiche",
+    description: "Top 1% der Einkommens- und Vermögensverteilung. Astronomisches Einkommen und Vermögen, lebt primär von Kapitalerträgen.",
+    icon: "👑",
     initialAge: 20,
     currentAge: 65,
     currentIncome: 5000000,
@@ -290,6 +303,7 @@ export const highIncomePersonas: Persona[] = [
     vatRate: 19,
     vatApplicableRate: 95,
     incomeGrowth: (age) => (age <= 60 ? 1.1 : 1.05),
-    yearlySpendingFromWealth: 2000000
+    yearlySpendingFromWealth: 2000000,
+    currentWealth: 5000000
   }
 ]

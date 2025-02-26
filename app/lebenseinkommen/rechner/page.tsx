@@ -4,9 +4,7 @@ import { useState } from "react"
 import { LifeIncomeCalculator } from "@/components/life-income/life-income-calculator"
 import { LifeIncomeResults } from "@/components/life-income/life-income-results"
 import { type Persona } from "@/types/persona"
-import { Separator } from "@/components/ui/separator"
 import { type LifeIncomeResults as LifeIncomeResultsType } from "@/types/life-income"
-import { TypographyP } from "@/components/ui/typography"
 import { PageHeader } from "@/components/ui/page-header"
 import {
   Section,
@@ -15,6 +13,7 @@ import {
   SectionDescription,
   SectionContent
 } from "@/components/ui/section"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
 
 export default function LifeIncomeCalculatorPage() {
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null)
@@ -29,19 +28,19 @@ export default function LifeIncomeCalculatorPage() {
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Calculator Column */}
-          <Section className="shadow-sm">
-            <SectionHeader className="bg-muted/30 pb-4">
-              <SectionTitle>Ihre Daten</SectionTitle>
-              <SectionDescription>Geben Sie Ihre persönlichen Daten ein</SectionDescription>
-            </SectionHeader>
-            <SectionContent className="pt-6">
+          <Card className="shadow-sm">
+            <CardHeader className="bg-muted/30 pb-4">
+              <CardTitle>Ihre Daten</CardTitle>
+              <CardDescription>Geben Sie Ihre persönlichen Daten ein</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
               <LifeIncomeCalculator
                 setResults={setResults}
                 selectedPersona={selectedPersona}
                 setSelectedPersona={setSelectedPersona}
               />
-            </SectionContent>
-          </Section>
+            </CardContent>
+          </Card>
 
           {/* Results Column */}
           {results && (

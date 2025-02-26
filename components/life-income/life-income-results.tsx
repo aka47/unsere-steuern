@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { type LifeIncomeYearlyResult, type LifeIncomeResults } from "@/types/life-income"
 import { type Persona } from "@/types/persona"
-import { TypographyH3, TypographyP, TypographySmall, TypographyLarge, TypographyMuted } from "@/components/ui/typography"
+import { TypographyH3, TypographySmall, TypographyLarge, TypographyMuted } from "@/components/ui/typography"
 
 interface LifeIncomeResultsProps {
   results: LifeIncomeYearlyResult[]

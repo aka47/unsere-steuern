@@ -1,6 +1,7 @@
 import { INHERITANCE_TAX_CLASSES, TAX_BRACKETS } from "@/constants/tax"
 import { type Persona } from "@/types/persona"
-import { type LifeIncomeYearlyResult } from "@/types/life-income"
+import { type LifeIncomeYearlyResult, type TaxScenario } from "@/types/life-income"
+import { defaultTaxScenario } from "@/constants/tax-scenarios"
 
 // This type has additional fields compared to LifeIncomeYearlyResult
 export type LifeIncomeResult = LifeIncomeYearlyResult & {
@@ -8,21 +9,35 @@ export type LifeIncomeResult = LifeIncomeYearlyResult & {
   spendingFromIncome: number
 }
 
-type CalculateLifeIncomeParams = Omit<Persona, 'id' | 'name' | 'description' | 'icon'> & {
-  selectedPersona: Persona | null
+type CalculateLifeIncomeParams = {
+  currentIncome: number
+  currentAge: number
+  savingsRate: number
+  inheritanceAge: number | undefined
+  inheritanceAmount: number
+  inheritanceTaxClass: 1 | 2 | 3
+  vatRate: number
+  vatApplicableRate: number
+  yearlySpendingFromWealth: number
+  currentWealth: number
+  selectedPersona?: Persona
   initialAge?: number
+  taxScenario?: TaxScenario
 }
 
 type LifeIncomeTotals = {
   totalWealth: number
   totalIncome: number
   totalIncomeTax: number
+  totalWealthIncome: number
+  totalWealthIncomeTax: number
+  totalWealthTax: number
   totalVAT: number
   totalInheritance: number
   totalInheritanceTax: number
   totalSpending: number
   totalSavings: number
-  totalSpendingFromWealth: number,
+  totalSpendingFromWealth: number
   totalSpendingFromIncome: number
 }
 
@@ -103,8 +118,10 @@ export function useLifeIncomeCalculator() {
     vatRate,
     vatApplicableRate,
     yearlySpendingFromWealth,
+    currentWealth,
     selectedPersona,
     initialAge = 20,
+    taxScenario = defaultTaxScenario
   }: CalculateLifeIncomeParams): LifeIncomeCalculatorResult | null => {
     if (
       isNaN(currentIncome) ||
@@ -117,6 +134,7 @@ export function useLifeIncomeCalculator() {
       isNaN(vatRate) ||
       isNaN(vatApplicableRate) ||
       isNaN(yearlySpendingFromWealth) ||
+      isNaN(currentWealth) ||
       initialAge < 18 ||
       initialAge > 65
     ) {
@@ -125,9 +143,10 @@ export function useLifeIncomeCalculator() {
 
     const defaultGrowthRate = () => 1.02
     const growthRate = selectedPersona?.incomeGrowth || defaultGrowthRate
-    const wealthGrowthRate = 0.05
+    const wealthGrowthRate = 0.05 // Base growth rate for wealth
+    const wealthIncomeRate = 0.03 // Income generated from wealth (e.g., dividends, interest)
     const results: LifeIncomeResult[] = []
-    let totalWealth = 0
+    let totalWealth = currentWealth || 0
 
     // Calculate initial income at initialAge by working backwards
     let initialIncome = currentIncome
@@ -141,6 +160,9 @@ export function useLifeIncomeCalculator() {
       totalWealth: 0,
       totalIncome: 0,
       totalIncomeTax: 0,
+      totalWealthIncome: 0,
+      totalWealthIncomeTax: 0,
+      totalWealthTax: 0,
       totalVAT: 0,
       totalInheritance: 0,
       totalInheritanceTax: 0,
@@ -152,44 +174,67 @@ export function useLifeIncomeCalculator() {
 
     // Calculate from initial age (20) to retirement
     for (let i = initialAge; i <= 65; i++) {
+      // Calculate work income
       const yearIncome = i === initialAge
         ? initialIncome
         : results[results.length - 1].income * (typeof growthRate === 'function' ? growthRate(i) : defaultGrowthRate())
-      const incomeTax = calculateIncomeTax(yearIncome)
-      const yearSavings = yearIncome * savingsRate
-      const vat = calculateVAT(yearIncome, vatRate, vatApplicableRate)
 
+      // Calculate wealth income (from investments)
+      const wealthIncome = totalWealth * wealthIncomeRate
+
+      // Calculate taxes using the provided tax scenario
+      const incomeTax = taxScenario.calculateIncomeTax(yearIncome)
+      const wealthIncomeTax = taxScenario.calculateWealthIncomeTax(wealthIncome)
+      const wealthTax = taxScenario.calculateWealthTax(totalWealth)
+      const vat = taxScenario.calculateVAT(yearIncome, vatRate, vatApplicableRate)
+
+      // Calculate savings from income
+      const yearSavings = yearIncome * savingsRate
+
+      // Handle inheritance if applicable
       let inheritance = 0
       let inheritanceTax = 0
       if (i === inheritanceAge) {
         inheritance = inheritanceAmount
-        inheritanceTax = calculateInheritanceTax(inheritance, inheritanceTaxClass)
+        inheritanceTax = taxScenario.calculateInheritanceTax(inheritance, inheritanceTaxClass)
         totalWealth += (inheritance - inheritanceTax)
       }
 
-      const yearContribution = yearSavings - yearlySpendingFromWealth
+      // Update wealth
+      // Add savings and wealth income (after tax), subtract spending and wealth tax
+      const netWealthIncome = wealthIncome - wealthIncomeTax
+      const yearContribution = yearSavings + netWealthIncome - yearlySpendingFromWealth - wealthTax
+
+      // Apply wealth growth rate to existing wealth, then add this year's contribution
       totalWealth = (totalWealth * (1 + wealthGrowthRate)) + yearContribution
+
+      // Calculate spending from income (after tax and savings)
       const yearSpendingFromIncome = yearIncome - incomeTax - yearSavings
 
       // Update totals
       totals.totalIncome += yearIncome
       totals.totalIncomeTax += incomeTax
+      totals.totalWealthIncome += wealthIncome
+      totals.totalWealthIncomeTax += wealthIncomeTax
+      totals.totalWealthTax += wealthTax
       totals.totalVAT += vat
       totals.totalInheritance += inheritance
       totals.totalInheritanceTax += inheritanceTax
       totals.totalSpending += yearlySpendingFromWealth + yearSpendingFromIncome
-
       totals.totalSavings += yearSavings
       totals.totalSpendingFromWealth += yearlySpendingFromWealth
-      totals.totalSpendingFromIncome += yearContribution
+      totals.totalSpendingFromIncome += yearSpendingFromIncome
 
+      // Add this year's results
       results.push({
         age: i,
         income: Math.round(yearIncome),
         incomeTax: Math.round(incomeTax),
         savings: Math.round(yearSavings),
         wealth: Math.round(totalWealth),
-        wealthCreatedThisYear: Math.round(yearSavings),
+        wealthCreatedThisYear: Math.round(yearContribution),
+        wealthIncome: Math.round(wealthIncome),
+        wealthTax: Math.round(wealthTax),
         inheritance: Math.round(inheritance),
         inheritanceTax: Math.round(inheritanceTax),
         vat: Math.round(vat),
@@ -202,6 +247,9 @@ export function useLifeIncomeCalculator() {
     totals.totalWealth = Math.round(totalWealth)
     totals.totalIncome = Math.round(totals.totalIncome)
     totals.totalIncomeTax = Math.round(totals.totalIncomeTax)
+    totals.totalWealthIncome = Math.round(totals.totalWealthIncome)
+    totals.totalWealthIncomeTax = Math.round(totals.totalWealthIncomeTax)
+    totals.totalWealthTax = Math.round(totals.totalWealthTax)
     totals.totalVAT = Math.round(totals.totalVAT)
     totals.totalInheritance = Math.round(totals.totalInheritance)
     totals.totalInheritanceTax = Math.round(totals.totalInheritanceTax)
@@ -209,8 +257,8 @@ export function useLifeIncomeCalculator() {
     totals.totalSavings = Math.round(totals.totalSavings)
     totals.totalSpendingFromWealth = Math.round(totals.totalSpendingFromWealth)
     totals.totalSpendingFromIncome = Math.round(totals.totalSpendingFromIncome)
-    return { totals, details: results }
 
+    return { totals, details: results }
   }
 
   return { calculateLifeIncome }

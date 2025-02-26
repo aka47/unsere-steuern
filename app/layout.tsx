@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
+import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={inter.className}>
-        <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
-          <Sidebar />
-          <main className="flex flex-col">{children}</main>
-        </div>
+        <Providers>
+          <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <main className="flex flex-col">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   )

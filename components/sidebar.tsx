@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Home, LayoutDashboard, PieChart, Users, TrendingUp } from "lucide-react"
+import { BarChart3, Home, LayoutDashboard, PieChart, Users, TrendingUp, LogIn, LogOut, User } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
+import { useSessionPersona } from "@/hooks/useSessionPersona"
 
 import { cn } from "@/lib/utils"
 
@@ -46,6 +49,12 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { data: session, status } = useSession()
+  const { persona } = useSessionPersona()
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" })
+  }
 
   return (
     <div className="hidden border-r border-zinc-200 bg-white lg:block">
@@ -73,6 +82,37 @@ export function Sidebar() {
             ))}
           </nav>
         </div>
+
+        {/* User section */}
+        <div className="border-t border-zinc-200 p-4">
+          {status === "authenticated" ? (
+            <div className="space-y-4">
+              {persona && (
+                <div className="flex items-center gap-2 px-2">
+                  <User className="h-4 w-4 text-zinc-500" />
+                  <span className="text-sm font-medium truncate">{persona.name}</span>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Abmelden
+              </Button>
+            </div>
+          ) : (
+            <Link href="/auth/signin">
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <LogIn className="mr-2 h-4 w-4" />
+                Anmelden
+              </Button>
+            </Link>
+          )}
+        </div>
+
         <div className="mt-auto p-4">
           <div className="fixed bottom-0 left-0 w-[280px] bg-white border-t border-zinc-200 p-4">
             <div className="flex flex-row gap-4 justify-center text-xs">
