@@ -4,8 +4,7 @@ import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function ScenarioSummary() {
-  // eslint-disable-next-line
-  const { selectedScenario, scenarioDetails } = useTaxScenario()
+  const { scenarioDetails } = useTaxScenario()
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

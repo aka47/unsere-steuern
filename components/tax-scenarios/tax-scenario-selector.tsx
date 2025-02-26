@@ -1,41 +1,58 @@
 "use client"
 
 import { useCallback } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
+import { cn } from "@/lib/utils"
 
-type ScenarioId = "flat" | "progressive-flat" | "no-exceptions" | "loophole-removal"
+type ScenarioId = "flat" | "progressive-flat" | "no-exceptions" | "loophole-removal" | "50es-tax-levels"
 
 const scenarios = [
-  { id: "flat", name: "Flat Tax" },
-  { id: "progressive-flat", name: "Progressive Flat Tax" },
-  { id: "no-exceptions", name: "Tax System Without Exceptions" },
-  { id: "loophole-removal", name: "Tax Loophole Removal" },
+  { id: "flat", name: "Einheitssteuer" },
+  { id: "progressive-flat", name: "Progressive Einheitssteuer" },
+  { id: "50es-tax-levels", name: "Die Steuern unter Kanzler Adenauer" },
+  { id: "no-exceptions", name: "Die heutigen Steuern, weniger Ausnahmen" },
+  { id: "loophole-removal", name: "Die heutigen Steuern, keine Ausnahmen" },
 ]
 
 export function TaxScenarioSelector() {
   const { selectedScenario, setSelectedScenario } = useTaxScenario()
 
   const handleScenarioChange = useCallback(
-    (value: string) => {
-      setSelectedScenario(value as ScenarioId)
+    (value: ScenarioId) => {
+      setSelectedScenario(value)
+      console.log("selectedScenario", value)
     },
     [setSelectedScenario],
   )
 
   return (
-    <Select onValueChange={handleScenarioChange} value={selectedScenario}>
-      <SelectTrigger className="w-[280px]">
-        <SelectValue placeholder="Select a tax scenario" />
-      </SelectTrigger>
-      <SelectContent>
+    <NavigationMenu className="max-w-full justify-start">
+      <NavigationMenuList className="space-x-2">
         {scenarios.map((scenario) => (
-          <SelectItem key={scenario.id} value={scenario.id}>
-            {scenario.name}
-          </SelectItem>
+          <NavigationMenuItem key={scenario.id}>
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "px-4 cursor-pointer",
+                selectedScenario === scenario.id && "font-medium bg-accent text-accent-foreground"
+              )}
+              onClick={() => handleScenarioChange(scenario.id as ScenarioId)}
+            >
+              {scenario.name}
+            </NavigationMenuLink>
+          </NavigationMenuItem>
         ))}
-      </SelectContent>
-    </Select>
+      </NavigationMenuList>
+    </NavigationMenu>
   )
 }
 

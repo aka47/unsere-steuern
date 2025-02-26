@@ -2,10 +2,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 
-// Constants for our calculations
+// Konstanten für unsere Berechnungen
 const WORK_YEARS = 45
 
-// Define our 10 personas (deciles)
+// Definition unserer 10 Personas (Dezile)
 const personas = [
   {
     decile: 1,
@@ -79,7 +79,7 @@ const personas = [
   },
 ]
 
-// Update the calculation part in calculatedPersonas
+// Aktualisierung des Berechnungsteils in calculatedPersonas
 const calculatedPersonas = personas.map((persona) => {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
@@ -88,6 +88,15 @@ const calculatedPersonas = personas.map((persona) => {
     currentIncome: persona.annualIncome,
     yearlySpendingFromWealth: persona.annualIncome * (1 - persona.savingsRate),
     selectedPersona: null,
+    currentAge: 20,
+    initialAge: 20,
+    inheritanceAge: persona.inheritanceChance > 0 ? 40 : undefined,
+    inheritanceAmount: persona.typicalInheritance,
+    inheritanceTaxClass: 1 as const,
+    vatRate: 19,
+    vatApplicableRate: 80,
+    currentIncomeFromWealth: 0,
+    incomeGrowth: (age: number) => (age <= 45 ? 1.02 : 1.0),
   })
 
   if (!results) return null
@@ -96,7 +105,7 @@ const calculatedPersonas = personas.map((persona) => {
   const expectedInheritance = persona.inheritanceChance * persona.typicalInheritance
 
   return {
-    decile: `Decile ${persona.decile}`,
+    decile: `Dezil ${persona.decile}`,
     annualIncome: persona.annualIncome,
     lifetimeIncome: totals.totalIncome,
     annualVAT: Number.parseFloat((totals.totalVAT / WORK_YEARS).toFixed(2)),
@@ -110,7 +119,7 @@ const calculatedPersonas = personas.map((persona) => {
   }
 }).filter(Boolean)
 
-// For the Tooltip formatter
+// Für den Tooltip-Formatierer
 function formatValue(value: number | string): string {
   const numValue = typeof value === 'string' ? parseFloat(value) : value
   return new Intl.NumberFormat("de-DE", {
@@ -123,7 +132,7 @@ function Personas() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Persona Financial Overview</CardTitle>
+        <CardTitle>Finanzübersicht der Personas</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={600}>
@@ -133,12 +142,12 @@ function Personas() {
             <YAxis />
             <Tooltip formatter={(value: number | string) => formatValue(value)} />
             <Legend />
-            <Bar dataKey="lifetimeIncome" fill="#8884d8" name="Lifetime Income" />
-            <Bar dataKey="lifetimeVAT" fill="#82ca9d" name="Lifetime VAT Paid" />
-            <Bar dataKey="lifetimeIncomeTax" fill="#ffc658" name="Lifetime Income Tax" />
-            <Bar dataKey="lifetimeSavings" fill="#ff8042" name="Lifetime Savings" />
-            <Bar dataKey="expectedInheritance" fill="#8dd1e1" name="Expected Inheritance" />
-            <Bar dataKey="inheritanceTax" fill="#a4de6c" name="Inheritance Tax" />
+            <Bar dataKey="lifetimeIncome" fill="#8884d8" name="Lebenseinkommen" />
+            <Bar dataKey="lifetimeVAT" fill="#82ca9d" name="Lebenszeitliche Mehrwertsteuer" />
+            <Bar dataKey="lifetimeIncomeTax" fill="#ffc658" name="Lebenszeitliche Einkommensteuer" />
+            <Bar dataKey="lifetimeSavings" fill="#ff8042" name="Lebensersparnisse" />
+            <Bar dataKey="expectedInheritance" fill="#8dd1e1" name="Erwartetes Erbe" />
+            <Bar dataKey="inheritanceTax" fill="#a4de6c" name="Erbschaftssteuer" />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

@@ -4,13 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IncomeTaxTab } from "@/components/tax-tabs/income-tax-tab"
 import IncomeVsInheritance from "@/components/tax-tabs/income-vs-inheritance"
 import { InheritanceTaxTab } from "@/components/tax-tabs/inheritance-tax-tab"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default function SteuernPage() {
   return (
     <div className="flex flex-col">
-      <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
-        <h1 className="text-lg font-semibold">Steuern in Deutschland</h1>
-      </header>
+      <PageHeader
+        title="Steuern in Deutschland"
+        subtitle="Vergleichen Sie verschiedene Steuerarten und ihre Auswirkungen"
+      />
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Tabs defaultValue="income" className="space-y-4">
           <TabsList>

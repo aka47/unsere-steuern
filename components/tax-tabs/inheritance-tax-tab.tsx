@@ -20,7 +20,7 @@ export function InheritanceTaxTab() {
               <p className="text-2xl font-bold">{(INHERITANCE_TAX_DATA.taxableInheritance / 1e9).toFixed(1)} Mrd. €</p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Steueraufkommen</h3>
+              <div className="text-sm font-medium">Steuereinnahmen</div>
               <p className="text-2xl font-bold">{(INHERITANCE_TAX_DATA.taxRevenue / 1e9).toFixed(1)} Mrd. €</p>
             </div>
           </div>
@@ -29,24 +29,20 @@ export function InheritanceTaxTab() {
 
       <Inheritance />
 
-
       {Object.entries(INHERITANCE_TAX_CLASSES).map(([classKey, classData]) => (
         <Card key={classKey}>
           <CardHeader>
             <CardTitle>{classData.description}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <div className="space-y-2">
               {classData.brackets.map((bracket, index) => (
-                <li key={index} className="flex justify-between">
-                  <span>
-                    {index === 0 ? "0" : `${classData.brackets[index - 1].limit + 1}`} € -{" "}
-                    {bracket.limit === Number.POSITIVE_INFINITY ? "∞" : `${bracket.limit} €`}
-                  </span>
-                  <span className="font-semibold">{(bracket.rate * 100).toFixed(1)}%</span>
-                </li>
+                <div key={index} className="flex justify-between text-sm">
+                  <span>Bis {(bracket.limit / 1000).toFixed(0)} Tsd. €</span>
+                  <span>{(bracket.rate * 100).toFixed(0)}%</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </CardContent>
         </Card>
       ))}

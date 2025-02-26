@@ -1,18 +1,11 @@
 import { INHERITANCE_TAX_CLASSES, TAX_BRACKETS } from "@/constants/tax"
 import { type Persona } from "@/types/persona"
+import { type LifeIncomeYearlyResult } from "@/types/life-income"
 
-export type LifeIncomeResult = {
-  age: number
-  income: number
-  incomeTax: number
-  wealth: number
-  wealthCreatedThisYear: number
-  inheritance: number
-  inheritanceTax: number
-  vat: number
+// This type has additional fields compared to LifeIncomeYearlyResult
+export type LifeIncomeResult = LifeIncomeYearlyResult & {
   savings: number
   spendingFromIncome: number
-  spending: number
 }
 
 type CalculateLifeIncomeParams = Omit<Persona, 'id' | 'name' | 'description' | 'icon'> & {
@@ -35,7 +28,7 @@ type LifeIncomeTotals = {
 
 type LifeIncomeCalculatorResult = {
   totals: LifeIncomeTotals
-  details: LifeIncomeResult[]
+  details: LifeIncomeYearlyResult[]
 }
 
 export function useLifeIncomeCalculator() {

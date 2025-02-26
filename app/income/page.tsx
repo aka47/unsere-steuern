@@ -9,22 +9,17 @@ import { DataSources } from "@/components/income/data-sources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
+import { PageHeader } from "@/components/ui/page-header"
 export default function IncomeDashboard() {
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="flex flex-col gap-6">
-        {/* Header Section */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Einkommen aus Löhnen in Deutschland</h1>
-          <p className="text-muted-foreground max-w-3xl">
-            Das Einkommen aus Löhnen (Arbeitseinkommen) ist die Haupteinnahmequelle für die meisten Menschen und ein
-            wichtiger Faktor für die Wirtschaft und öffentlichen Finanzen. Diese Übersicht zeigt die Verteilung und
-            steuerliche Auswirkung von Lohneinkommen in Deutschland.
-          </p>
-        </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Einkommen aus Löhnen in Deutschland"
+        subtitle="Das Einkommen aus Löhnen (Arbeitseinkommen) ist die Haupteinnahmequelle für die meisten Menschen und ein wichtiger Faktor für die Wirtschaft und öffentlichen Finanzen. Diese Übersicht zeigt die Verteilung und steuerliche Auswirkung von Lohneinkommen in Deutschland."
+      />
 
-        {/* Income Overview */}
+
+      <div className="flex-1 space-y-4 p-8 pt-6">
         <Suspense fallback={<IncomeOverviewSkeleton />}>
           <IncomeOverview />
         </Suspense>

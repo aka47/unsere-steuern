@@ -74,8 +74,9 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
                     <BarChart data={sortedStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                      <YAxis label={{ value: '%', position: 'insideLeft' }} />
-                      <Tooltip />
+                      <YAxis label={{ value: 'Prozent', position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => `${value}%`} />
+                      <Legend />
                       <Bar dataKey="effectiveTaxRate" fill="#8884d8" name="Effektive Steuerquote" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -84,7 +85,7 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Steueraufkommen</CardTitle>
+                  <CardTitle>Steueraufkommen nach Art</CardTitle>
                 </CardHeader>
                 <CardContent className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -96,13 +97,13 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
-                        label
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       >
                         {sortedStats.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={`hsl(${(index * 360) / sortedStats.length}, 70%, 50%)`} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip formatter={(value) => `${value.toLocaleString('de-DE')} €`} />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -122,8 +123,8 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
                     <LineChart data={sortedStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                      <YAxis />
-                      <Tooltip />
+                      <YAxis label={{ value: 'Euro', position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => `${value.toLocaleString('de-DE')} €`} />
                       <Line type="monotone" dataKey="totalIncome" stroke="#8884d8" name="Lebenseinkommen" />
                       <Line type="monotone" dataKey="disposableIncome" stroke="#82ca9d" name="Verfügbares Einkommen" />
                     </LineChart>
@@ -133,18 +134,18 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Sparquote vs. Vermögensaufbau</CardTitle>
+                  <CardTitle>Sparquote und Vermögensaufbau</CardTitle>
                 </CardHeader>
                 <CardContent className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={sortedStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                      <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                      <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                      <Tooltip />
-                      <Bar yAxisId="left" dataKey="savingsRate" fill="#8884d8" name="Sparquote %" />
-                      <Bar yAxisId="right" dataKey="totalWealth" fill="#82ca9d" name="Gesamtvermögen" />
+                      <YAxis label={{ value: 'Prozent/Euro', position: 'insideLeft' }} />
+                      <Tooltip formatter={(value, name) => name === 'savingsRate' ? `${value}%` : `${value.toLocaleString('de-DE')} €`} />
+                      <Legend />
+                      <Bar dataKey="savingsRate" fill="#8884d8" name="Sparquote" />
+                      <Bar dataKey="totalWealth" fill="#82ca9d" name="Vermögen" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -163,9 +164,10 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
                     <BarChart data={sortedStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="inheritance" fill="#8884d8" name="Erbschaft" />
+                      <YAxis label={{ value: 'Euro', position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => `${value.toLocaleString('de-DE')} €`} />
+                      <Legend />
+                      <Bar dataKey="inheritance" fill="#ffc658" name="Erbschaft" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -173,17 +175,18 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Vermögen mit/ohne Erbschaft</CardTitle>
+                  <CardTitle>Vermögensentwicklung</CardTitle>
                 </CardHeader>
                 <CardContent className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={sortedStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="totalWealth" fill="#8884d8" name="Gesamtvermögen" />
-                      <Bar dataKey="inheritance" fill="#82ca9d" name="Davon Erbschaft" />
+                      <YAxis label={{ value: 'Euro', position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => `${value.toLocaleString('de-DE')} €`} />
+                      <Legend />
+                      <Bar dataKey="totalWealth" fill="#8884d8" name="Ohne Erbschaft" />
+                      <Bar dataKey="inheritance" fill="#82ca9d" name="Mit Erbschaft" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>

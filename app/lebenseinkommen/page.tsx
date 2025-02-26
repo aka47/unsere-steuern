@@ -3,24 +3,15 @@
 import { useState, useEffect } from "react"
 import { LifeIncomeCalculator } from "@/components/life-income/life-income-calculator"
 import { LifeIncomeResults } from "@/components/life-income/life-income-results"
-import { PersonaList } from "@/components/life-income/persona-list"
+import { PersonaList } from "@/components/personas/persona-list"
 import { type Persona, initialPersonas } from "@/types/persona"
+import { type LifeIncomeResults as LifeIncomeResultsType } from "@/types/life-income"
+import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
+import { PersonalCreateOrShow } from "@/components/personas/persona-create-or-show"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default function LebenseinkommenPage() {
-  const [results, setResults] = useState<
-    | {
-        age: number
-        income: number
-        incomeTax: number
-        wealth: number
-        wealthCreatedThisYear: number
-        inheritance: number
-        inheritanceTax: number
-        vat: number
-        spending: number
-      }[]
-    | null
-  >(null)
+  const [results, setResults] = useState<LifeIncomeResultsType>(null)
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null)
   const [personas, setPersonas] = useState(initialPersonas)
 
@@ -59,21 +50,30 @@ export default function LebenseinkommenPage() {
 
   const handlePersonaClick = (persona: Persona) => {
     setSelectedPersona(persona)
+    const { calculateLifeIncome } = useLifeIncomeCalculator()
+    const results = calculateLifeIncome({
+      ...persona,
+      currentAge: persona.initialAge,
+      selectedPersona: persona,
+    })
+    setResults(results?.details || null)
   }
 
   return (
     <div className="flex flex-col">
-      <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
-        <h1 className="text-lg font-semibold">Lebenseinkommen Berechnung</h1>
-      </header>
+      <PageHeader
+        title="Lebenseinkommen"
+        subtitle="Berechnen Sie Ihr Lebenseinkommen und die Steuerbelastung"
+      />
       <div className="flex-1 space-y-4 p-8 pt-6">
+        <PersonalCreateOrShow userPersona={selectedPersona} />
         <PersonaList personas={personas} onPersonaClick={handlePersonaClick} />
-        <LifeIncomeCalculator
+        {/* <LifeIncomeCalculator
           setResults={setResults}
           selectedPersona={selectedPersona}
           setSelectedPersona={setSelectedPersona}
-        />
-        {results && <LifeIncomeResults results={results} setResults={setResults} />}
+        /> */}
+        {results && <LifeIncomeResults results={results} setResults={setResults} selectedPersona={selectedPersona} />}
       </div>
     </div>
   )

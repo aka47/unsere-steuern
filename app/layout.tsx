@@ -7,8 +7,8 @@ import { Sidebar } from "@/components/sidebar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "German Tax Visualization Dashboard",
-  description: "Analyze and compare different tax scenarios in Germany",
+  title: "Steuern verstehen - Gemeinsam gestalten",
+  description: "Entdecken Sie, wie verschiedene Steuermodelle sich auf unsere Gesellschaft auswirken",
 }
 
 export default function RootLayout({

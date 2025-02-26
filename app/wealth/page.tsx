@@ -9,27 +9,26 @@ import { DataSources } from "@/components/wealth/data-sources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { PageHeader } from "@/components/ui/page-header"
 
 export default function WealthDashboard() {
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="flex flex-col gap-6">
-        {/* Header Section */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Vermögen in Deutschland</h1>
-          <p className="text-muted-foreground max-w-3xl">
-            Das Vermögen (akkumulierte Vermögenswerte wie Ersparnisse, Immobilien, Aktien und Investitionen abzüglich
-            Verbindlichkeiten) und seine Verteilung sind zentrale Indikatoren für wirtschaftliche Chancengleichheit und
-            gesellschaftlichen Zusammenhalt.
-          </p>
-        </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Vermögen in Deutschland"
+        subtitle="Das Vermögen (akkumulierte Vermögenswerte wie Ersparnisse, Immobilien, Aktien und Investitionen abzüglich Verbindlichkeiten) und seine Verteilung sind zentrale Indikatoren für wirtschaftliche Chancengleichheit und gesellschaftlichen Zusammenhalt."
+      />
 
-        {/* Total Wealth Overview */}
+      {/* Total Wealth Overview */}
+
+
+      {/* Main Grid Layout */}
+      <div className="flex-1 space-y-4 p-8 pt-6">
+
         <Suspense fallback={<WealthOverviewSkeleton />}>
           <WealthOverview />
         </Suspense>
 
-        {/* Main Grid Layout */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Wealth Distribution */}
           <Card className="md:col-span-2">
@@ -82,10 +81,10 @@ export default function WealthDashboard() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Data Sources */}
-        <DataSources />
       </div>
+
+      {/* Data Sources */}
+      <DataSources />
     </div>
   )
 }

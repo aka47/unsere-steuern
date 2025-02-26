@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { PersonaList } from "@/components/life-income/persona-list"
+import { PersonaList } from "@/components/personas/persona-list"
 import type { PersonaCollection } from "@/types/personaCollection"
 import type { Persona } from "@/types/persona"
 

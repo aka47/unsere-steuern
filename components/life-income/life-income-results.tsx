@@ -3,44 +3,26 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { type LifeIncomeYearlyResult, type LifeIncomeResults } from "@/types/life-income"
+import { type Persona } from "@/types/persona"
+import { TypographyH3, TypographyP, TypographySmall, TypographyLarge, TypographyMuted } from "@/components/ui/typography"
 
 interface LifeIncomeResultsProps {
-  results: {
-    age: number
-    income: number
-    incomeTax: number
-    wealth: number
-    wealthCreatedThisYear: number
-    inheritance: number
-    inheritanceTax: number
-    vat: number
-    spending: number
-  }[]
-  setResults: React.Dispatch<
-    React.SetStateAction<
-      | {
-          age: number
-          income: number
-          incomeTax: number
-          wealth: number
-          wealthCreatedThisYear: number
-          inheritance: number
-          inheritanceTax: number
-          vat: number
-          spending: number
-        }[]
-      | null
-    >
-  >
+  results: LifeIncomeYearlyResult[]
+  setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
+  selectedPersona?: Persona | null
 }
 
-export function LifeIncomeResults({ results: initialResults, setResults }: LifeIncomeResultsProps) {
+export function LifeIncomeResults({ results: initialResults, setResults, selectedPersona }: LifeIncomeResultsProps) {
   const [localResults, setLocalResults] = useState(initialResults)
+  const [showDetailedTable, setShowDetailedTable] = useState(false)
 
   useEffect(() => {
     setLocalResults(initialResults)
@@ -52,6 +34,7 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
   const totalVAT = localResults.reduce((sum, result) => sum + result.vat, 0)
   const totalSpending = localResults.reduce((sum, result) => sum + result.spending, 0)
   const finalWealth = localResults[localResults.length - 1].wealth
+  const totalTaxes = totalIncomeTax + totalInheritanceTax + totalVAT
 
   const handleValueChange = (
     age: number,
@@ -77,7 +60,7 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value)
 
-  const createChartData = (results: LifeIncomeResultsProps["results"]) => {
+  const createChartData = (results: LifeIncomeYearlyResult[]) => {
     let totalIncomeSoFar = 0
     let totalTaxSoFar = 0
 
@@ -99,36 +82,88 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Lebenseinkommen Übersicht</CardTitle>
+      <Card className="shadow-md border-primary/20">
+        <CardHeader className="bg-muted/30 pb-4">
+          <CardTitle>Zusammenfassung</CardTitle>
+          <CardDescription>
+            {selectedPersona ? `Übersicht für ${selectedPersona.name}` : "Übersicht Ihrer finanziellen Lebensbilanz"}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold mb-2">Geschätztes Lebenseinkommen: {formatCurrency(totalIncome)}</p>
-          <p className="text-2xl font-bold mb-2">Geschätztes Endvermögen: {formatCurrency(finalWealth)}</p>
-          <p className="text-xl font-semibold mb-2">
-            Gesamte Steuern: {formatCurrency(totalIncomeTax + totalInheritanceTax + totalVAT)}
-          </p>
-          <p className="text-xl font-semibold mb-2">Gesamte Ausgaben: {formatCurrency(totalSpending)}</p>
+        <CardContent className="pt-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {selectedPersona && (
+              <div className="md:col-span-2 mb-2 pb-2 border-b">
+                <TypographyLarge>{selectedPersona.name}</TypographyLarge>
+                {selectedPersona.description && (
+                  <TypographyMuted className="mt-1">{selectedPersona.description}</TypographyMuted>
+                )}
+              </div>
+            )}
+            <div className="space-y-2">
+              <TypographySmall className="text-muted-foreground">Lebenseinkommen</TypographySmall>
+              <TypographyLarge>{formatCurrency(totalIncome)}</TypographyLarge>
+            </div>
+            <div className="space-y-2">
+              <TypographySmall className="text-muted-foreground">Endvermögen</TypographySmall>
+              <TypographyLarge>{formatCurrency(finalWealth)}</TypographyLarge>
+            </div>
+            <div className="space-y-2">
+              <TypographySmall className="text-muted-foreground">Gesamte Steuern</TypographySmall>
+              <TypographyLarge>{formatCurrency(totalTaxes)}</TypographyLarge>
+            </div>
+            <div className="space-y-2">
+              <TypographySmall className="text-muted-foreground">Gesamte Ausgaben</TypographySmall>
+              <TypographyLarge>{formatCurrency(totalSpending)}</TypographyLarge>
+            </div>
+          </div>
+
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Vermögen, Einkommen und Einkommensteuer pro Jahr</CardTitle>
+      <Card className="shadow-md">
+        <CardHeader className="bg-muted/30 pb-4">
+          <CardTitle>Vermögen und Einkommen</CardTitle>
+          <CardDescription>Entwicklung über die Lebensjahre</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={createChartData(localResults)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="age" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="age" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <RechartsTooltip
+                  formatter={(value) => formatCurrency(value as number)}
+                  contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                />
                 <Legend />
-                <Line type="monotone" dataKey="wealth" name="Vermögen" stroke="#8884d8" />
-                <Line type="monotone" dataKey="income" name="Einkommen" stroke="#82ca9d" />
-                <Line type="monotone" dataKey="incomeTax" name="Einkommensteuer" stroke="#ffc658" />
+                <Line
+                  type="monotone"
+                  dataKey="wealth"
+                  name="Vermögen"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                  dot={{ r: 0 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="income"
+                  name="Einkommen"
+                  stroke="#82ca9d"
+                  strokeWidth={2}
+                  dot={{ r: 0 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="incomeTax"
+                  name="Einkommensteuer"
+                  stroke="#ffc658"
+                  strokeWidth={2}
+                  dot={{ r: 0 }}
+                  activeDot={{ r: 6 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -136,31 +171,50 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
       </Card>
 
       <Tabs defaultValue="income" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full grid grid-cols-4">
           <TabsTrigger value="income">Einkommensteuer</TabsTrigger>
           <TabsTrigger value="inheritance">Erbschaftssteuer</TabsTrigger>
           <TabsTrigger value="vat">Mehrwertsteuer</TabsTrigger>
           <TabsTrigger value="spending">Ausgaben</TabsTrigger>
         </TabsList>
         <TabsContent value="income">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-md">
+            <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Einkommensteuer</CardTitle>
+              <CardDescription>Gesamte Einkommensteuer: {formatCurrency(totalIncomeTax)}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold mb-4">Gesamte Einkommensteuer: {formatCurrency(totalIncomeTax)}</p>
+            <CardContent className="pt-6">
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="age" />
-                    <YAxis yAxisId="left" />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="age" stroke="#6b7280" />
+                    <YAxis yAxisId="left" stroke="#6b7280" />
+                    <RechartsTooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                    />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="income" name="Einkommen" stroke="#8884d8" />
-                    <Line yAxisId="left" type="monotone" dataKey="incomeTax" name="Einkommensteuer" stroke="#82ca9d" />
-                    <Line yAxisId="left" type="monotone" dataKey="totalIncome" name="Gesamteinkommen" stroke="#ffc658" />
-                    <Line yAxisId="left" type="monotone" dataKey="yearlyTotalTax" name="Jahressteuer" stroke="#ffc658" />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="income"
+                      name="Einkommen"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="incomeTax"
+                      name="Einkommensteuer"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -168,29 +222,42 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
           </Card>
         </TabsContent>
         <TabsContent value="inheritance">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-md">
+            <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Erbschaftssteuer</CardTitle>
+              <CardDescription>Gesamte Erbschaftssteuer: {formatCurrency(totalInheritanceTax)}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold mb-4">
-                Gesamte Erbschaftssteuer: {formatCurrency(totalInheritanceTax)}
-              </p>
+            <CardContent className="pt-6">
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="age" />
-                    <YAxis yAxisId="left" />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="age" stroke="#6b7280" />
+                    <YAxis yAxisId="left" stroke="#6b7280" />
+                    <RechartsTooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                    />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="inheritance" name="Erbschaft" stroke="#8884d8" />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="inheritance"
+                      name="Erbschaft"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
                     <Line
                       yAxisId="left"
                       type="monotone"
                       dataKey="inheritanceTax"
                       name="Erbschaftssteuer"
                       stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -199,22 +266,43 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
           </Card>
         </TabsContent>
         <TabsContent value="vat">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-md">
+            <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Mehrwertsteuer</CardTitle>
+              <CardDescription>Gesamte Mehrwertsteuer: {formatCurrency(totalVAT)}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold mb-4">Gesamte Mehrwertsteuer: {formatCurrency(totalVAT)}</p>
+            <CardContent className="pt-6">
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="age" />
-                    <YAxis yAxisId="left" />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="age" stroke="#6b7280" />
+                    <YAxis yAxisId="left" stroke="#6b7280" />
+                    <RechartsTooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                    />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="income" name="Einkommen" stroke="#8884d8" />
-                    <Line yAxisId="left" type="monotone" dataKey="vat" name="Mehrwertsteuer" stroke="#82ca9d" />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="income"
+                      name="Einkommen"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="vat"
+                      name="Mehrwertsteuer"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -222,22 +310,43 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
           </Card>
         </TabsContent>
         <TabsContent value="spending">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-md">
+            <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Ausgaben</CardTitle>
+              <CardDescription>Gesamte Ausgaben: {formatCurrency(totalSpending)}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold mb-4">Gesamte Ausgaben: {formatCurrency(totalSpending)}</p>
+            <CardContent className="pt-6">
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="age" />
-                    <YAxis yAxisId="left" />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="age" stroke="#6b7280" />
+                    <YAxis yAxisId="left" stroke="#6b7280" />
+                    <RechartsTooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                    />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="income" name="Einkommen" stroke="#8884d8" />
-                    <Line yAxisId="left" type="monotone" dataKey="spending" name="Ausgaben" stroke="#82ca9d" />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="income"
+                      name="Einkommen"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="spending"
+                      name="Ausgaben"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -246,99 +355,126 @@ export function LifeIncomeResults({ results: initialResults, setResults }: LifeI
         </TabsContent>
       </Tabs>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Detaillierte Einkommens- und Vermögensübersicht</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Alter</TableHead>
-                <TableHead>Einkommen (€)</TableHead>
-                <TableHead>Einkommensteuer (€)</TableHead>
-                <TableHead>Vermögen (€)</TableHead>
-                <TableHead>Vermögenszuwachs (€)</TableHead>
-                <TableHead>Erbschaft (€)</TableHead>
-                <TableHead>Erbschaftssteuer (€)</TableHead>
-                <TableHead>Mehrwertsteuer (€)</TableHead>
-                <TableHead>Ausgaben (€)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {localResults.map((result) => (
-                <TableRow key={result.age}>
-                  <TableCell>{result.age}</TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.income}
-                      onChange={(e) => handleValueChange(result.age, "income", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.incomeTax}
-                      onChange={(e) => handleValueChange(result.age, "incomeTax", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.wealth}
-                      onChange={(e) => handleValueChange(result.age, "wealth", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.wealthCreatedThisYear}
-                      onChange={(e) => handleValueChange(result.age, "wealthCreatedThisYear", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.inheritance}
-                      onChange={(e) => handleValueChange(result.age, "inheritance", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.inheritanceTax}
-                      onChange={(e) => handleValueChange(result.age, "inheritanceTax", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.vat}
-                      onChange={(e) => handleValueChange(result.age, "vat", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={result.spending}
-                      onChange={(e) => handleValueChange(result.age, "spending", e.target.value)}
-                      className="w-full"
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between items-center mb-4">
+        <TypographyH3>Detaillierte Daten</TypographyH3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDetailedTable(!showDetailedTable)}
+          className="flex items-center gap-2"
+        >
+          {showDetailedTable ? (
+            <>
+              <EyeOffIcon className="h-4 w-4" />
+              <span>Tabelle ausblenden</span>
+            </>
+          ) : (
+            <>
+              <EyeIcon className="h-4 w-4" />
+              <span>Tabelle anzeigen</span>
+            </>
+          )}
+        </Button>
+      </div>
+
+      {showDetailedTable && (
+        <Card className="shadow-md">
+          <CardHeader className="bg-muted/30 pb-4">
+            <CardTitle>Detaillierte Einkommens- und Vermögensübersicht</CardTitle>
+            <CardDescription>Bearbeiten Sie die Werte, um verschiedene Szenarien zu simulieren</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="font-medium">Alter</TableHead>
+                    <TableHead className="font-medium">Einkommen (€)</TableHead>
+                    <TableHead className="font-medium">Einkommensteuer (€)</TableHead>
+                    <TableHead className="font-medium">Vermögen (€)</TableHead>
+                    <TableHead className="font-medium">Vermögenszuwachs (€)</TableHead>
+                    <TableHead className="font-medium">Erbschaft (€)</TableHead>
+                    <TableHead className="font-medium">Erbschaftssteuer (€)</TableHead>
+                    <TableHead className="font-medium">Mehrwertsteuer (€)</TableHead>
+                    <TableHead className="font-medium">Ausgaben (€)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {localResults.map((result) => (
+                    <TableRow key={result.age}>
+                      <TableCell className="font-medium">{result.age}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.income}
+                          onChange={(e) => handleValueChange(result.age, "income", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.incomeTax}
+                          onChange={(e) => handleValueChange(result.age, "incomeTax", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.wealth}
+                          onChange={(e) => handleValueChange(result.age, "wealth", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.wealthCreatedThisYear}
+                          onChange={(e) => handleValueChange(result.age, "wealthCreatedThisYear", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.inheritance}
+                          onChange={(e) => handleValueChange(result.age, "inheritance", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.inheritanceTax}
+                          onChange={(e) => handleValueChange(result.age, "inheritanceTax", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.vat}
+                          onChange={(e) => handleValueChange(result.age, "vat", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={result.spending}
+                          onChange={(e) => handleValueChange(result.age, "spending", e.target.value)}
+                          className="w-full"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
