@@ -7,23 +7,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Persona, initialPersonas } from "@/types/persona"
+import { type Persona, initialPersonas as _initialPersonas, defaultPersona } from "@/types/persona"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { InfoIcon } from "lucide-react"
 import { type LifeIncomeResults, type TaxScenario } from "@/types/life-income"
-import { TypographyH3, TypographyH4, TypographyP } from "@/components/ui/typography"
+import { TypographyH4, TypographyP } from "@/components/ui/typography"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
-import { TaxScenarioSelector } from "@/components/life-income/tax-scenario-selector"
-import { TaxScenarioComparison } from "@/components/life-income/tax-scenario-comparison"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
+import { YearlyBreakdown } from "@/components/life-income/yearly-breakdown"
 
 interface LifeIncomeCalculatorProps {
   setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
-  selectedPersona: Persona | null
-  setSelectedPersona: (persona: Persona | null) => void
+  currentPersona: Persona | null
+  setCurrentPersona: (persona: Persona | null) => void
 }
 
 const validateInheritanceTaxClass = (value: string): keyof typeof INHERITANCE_TAX_CLASSES => {
@@ -32,7 +31,7 @@ const validateInheritanceTaxClass = (value: string): keyof typeof INHERITANCE_TA
   return taxClass as unknown as keyof typeof INHERITANCE_TAX_CLASSES
 }
 
-export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedPersona }: LifeIncomeCalculatorProps) {
+export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPersona }: LifeIncomeCalculatorProps) {
   const [currentIncome, setCurrentIncome] = useState("")
   const [currentAge, setCurrentAge] = useState("")
   const [savingsRate, setSavingsRate] = useState("")
@@ -41,34 +40,52 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   const [inheritanceTaxClass, setInheritanceTaxClass] = useState<"1" | "2" | "3">("1")
   const [spending, setSpending] = useState("")
   const [wealth, setWealth] = useState("")
-  const [personas, setPersonas] = useState(initialPersonas)
-  const [selectedTaxScenario, setSelectedTaxScenario] = useState<TaxScenario>(defaultTaxScenario)
-  const [showScenarioComparison, setShowScenarioComparison] = useState(false)
+  const [selectedTaxScenario] = useState<TaxScenario>(defaultTaxScenario)
+  const [yearlyResults, setYearlyResults] = useState<LifeIncomeResults>(null)
+  const [showYearlyBreakdown, setShowYearlyBreakdown] = useState(false)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
   const { persona: sessionPersona, setPersona } = useSessionPersona()
 
   useEffect(() => {
-    if (!selectedPersona && sessionPersona) {
-      setSelectedPersona(sessionPersona)
+    if (!currentPersona && sessionPersona) {
+      setCurrentPersona(sessionPersona)
     }
-  }, [sessionPersona, selectedPersona, setSelectedPersona])
+  }, [sessionPersona, currentPersona, setCurrentPersona])
 
   useEffect(() => {
-    if (selectedPersona) {
-      setCurrentIncome(selectedPersona.currentIncome.toString())
-      setCurrentAge(selectedPersona.currentAge.toString())
-      setSavingsRate((selectedPersona.savingsRate * 100).toString())
-      setInheritanceAge(selectedPersona.inheritanceAge?.toString() ?? "")
-      setInheritanceAmount(selectedPersona.inheritanceAmount.toString())
-      setSpending(selectedPersona.yearlySpendingFromWealth.toString())
-      setWealth(selectedPersona.currentWealth?.toString() ?? "0")
+    if (currentPersona) {
+      setCurrentIncome(currentPersona.currentIncome.toString())
+      setCurrentAge(currentPersona.currentAge.toString())
+      setSavingsRate((currentPersona.savingsRate * 100).toString())
+      setInheritanceAge(currentPersona.inheritanceAge?.toString() ?? "")
+      setInheritanceAmount(currentPersona.inheritanceAmount?.toString())
+      setSpending(currentPersona.yearlySpendingFromWealth?.toString())
+      setWealth(currentPersona.currentWealth?.toString() ?? "0")
     }
-  }, [selectedPersona])
+  }, [currentPersona])
 
   const handleCalculation = () => {
-    if (!selectedPersona) {
-      alert("Bitte wählen Sie eine Persona aus oder geben Sie Ihre Daten ein.")
-      return
+    if (!currentPersona) {
+      // Create a new persona from current form values, using defaultPersona as base
+      const newPersona: Persona = {
+        ...defaultPersona,
+        name: "You",
+        icon: "👤",
+        description: "Your personal profile",
+        currentAge: Number.parseInt(currentAge, 10),
+        currentIncome: Number.parseFloat(currentIncome),
+        savingsRate: Number.parseFloat(savingsRate) / 100,
+        inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
+        inheritanceAmount: Number.parseFloat(inheritanceAmount),
+        inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass),
+        yearlySpendingFromWealth: Number.parseFloat(spending),
+        currentWealth: Number.parseFloat(wealth),
+        yearlyOverrides: []
+      }
+
+      // Save to session and update local state
+      setPersona(newPersona)
+      setCurrentPersona(newPersona)
     }
 
     const parsedValues = {
@@ -77,28 +94,46 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       savingsRate: Number.parseFloat(savingsRate) / 100,
       inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
+      inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass),
       yearlySpendingFromWealth: Number.parseFloat(spending),
       currentWealth: Number.parseFloat(wealth),
-      inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass)
+    }
+    // Check each validation rule separately and log failures
+    const validationErrors = []
+
+    if (Number.isNaN(parsedValues.currentIncome)) {
+      validationErrors.push('Current income is invalid')
+    }
+    if (Number.isNaN(parsedValues.currentAge)) {
+      validationErrors.push('Current age is invalid')
+    }
+    if (Number.isNaN(parsedValues.savingsRate)) {
+      validationErrors.push('Savings rate is invalid')
+    }
+    if (inheritanceAge && Number.isNaN(parsedValues.inheritanceAge)) {
+      validationErrors.push('Inheritance age is invalid')
+    }
+    if (Number.isNaN(parsedValues.inheritanceAmount)) {
+      validationErrors.push('Inheritance amount is invalid')
+    }
+    if (Number.isNaN(parsedValues.yearlySpendingFromWealth)) {
+      validationErrors.push('Yearly spending is invalid')
+    }
+    if (Number.isNaN(parsedValues.currentWealth)) {
+      validationErrors.push('Current wealth is invalid')
     }
 
-    if (
-      Number.isNaN(parsedValues.currentIncome) ||
-      Number.isNaN(parsedValues.currentAge) ||
-      Number.isNaN(parsedValues.savingsRate) ||
-      (inheritanceAge && Number.isNaN(parsedValues.inheritanceAge)) ||
-      Number.isNaN(parsedValues.inheritanceAmount) ||
-      Number.isNaN(parsedValues.yearlySpendingFromWealth) ||
-      Number.isNaN(parsedValues.currentWealth)
-    ) {
-      alert("Bitte geben Sie gültige Zahlen ein.")
+    if (validationErrors.length > 0) {
+      alert("Bitte geben Sie gültige Zahlen ein." + parsedValues)
+      console.log(validationErrors)
       return
     }
 
     const results = calculateLifeIncome({
-      ...selectedPersona,
+      ...defaultPersona,
+      ...currentPersona,
       ...parsedValues,
-      selectedPersona,
+      currentPersona,
       taxScenario: selectedTaxScenario
     })
 
@@ -109,6 +144,8 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
 
     const { details, totals } = results
     setResults(details)
+    setYearlyResults(details)
+    setShowYearlyBreakdown(true)
     localStorage.setItem("lifeIncomeResults", JSON.stringify(details))
 
     if (totals) {
@@ -123,21 +160,17 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
     }
   }
 
-  const handleCompareScenarios = () => {
-    setShowScenarioComparison(true)
-    handleCalculation()
-  }
-
-  const handlePersonaChange = (personaId: string) => {
-    const persona = personas.find((p) => p.id === personaId) ?? null
-    setSelectedPersona(persona)
+  const handleYearlyResultsUpdate = (updatedResults: LifeIncomeResults) => {
+    setYearlyResults(updatedResults)
+    setResults(updatedResults)
+    localStorage.setItem("lifeIncomeResults", JSON.stringify(updatedResults))
   }
 
   const savePersona = () => {
-    if (!selectedPersona) return
+    if (!currentPersona) return
 
     const updatedPersona: Persona = {
-      ...selectedPersona,
+      ...currentPersona,
       currentIncome: Number.parseFloat(currentIncome),
       currentAge: Number.parseInt(currentAge, 10),
       savingsRate: Number.parseFloat(savingsRate) / 100,
@@ -147,9 +180,9 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
       currentWealth: Number.parseFloat(wealth)
     }
 
-    const updatedPersonas = personas.map((p) => (p.id === updatedPersona.id ? updatedPersona : p))
-    setPersonas(updatedPersonas)
-    localStorage.setItem("personas", JSON.stringify(updatedPersonas))
+    // const updatedPersonas = personas.map((p) => (p.id === updatedPersona.id ? updatedPersona : p))
+    // setPersonas(updatedPersonas)
+    // localStorage.setItem("personas", JSON.stringify(updatedPersonas))
 
     setPersona(updatedPersona)
 
@@ -157,303 +190,317 @@ export function LifeIncomeCalculator({ setResults, selectedPersona, setSelectedP
   }
 
   return (
-    <div className="grid w-full items-center gap-6">
-      {/* <div className="flex flex-col space-y-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="persona" className="text-base font-medium">Persona</Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Wählen Sie eine vordefinierte Persona oder erstellen Sie Ihre eigene</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Select value={selectedPersona?.id ?? ""} onValueChange={handlePersonaChange}>
-          <SelectTrigger id="persona" className="w-full">
-            <SelectValue placeholder="Wählen Sie eine Persona" />
-          </SelectTrigger>
-          <SelectContent>
-            {personas.map((persona) => (
-              <SelectItem key={persona.id} value={persona.id}>
-                {persona.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="relative my-2 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-        <span className="relative z-10 bg-background px-2 text-muted-foreground">
-          oder geben Sie Ihre Daten ein
-        </span>
-      </div> */}
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TypographyH4>Einkommen</TypographyH4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Geben Sie Ihr aktuelles Einkommen und Alter ein</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Separator />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="currentIncome">Aktuelles Jahreseinkommen (€)</Label>
-            <Input
-              id="currentIncome"
-              placeholder="z.B. 50000"
-              value={currentIncome}
-              onChange={(e) => setCurrentIncome(e.target.value)}
-              type="number"
-              min={0}
-              className="w-full"
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="currentAge">Aktuelles Alter</Label>
-            <Input
-              id="currentAge"
-              placeholder="z.B. 30"
-              value={currentAge}
-              onChange={(e) => setCurrentAge(e.target.value)}
-              type="number"
-              min={0}
-              max={120}
-              className="w-full"
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5 md:col-span-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="savingsRate">Sparrate (%)</Label>
-              <TypographyP className="text-muted-foreground">
-                Der monatliche Betrag, den Sie vom Einkommen sparen
-              </TypographyP>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <TypographyP>Der monatliche Betrag, den Sie vom Einkommen sparen</TypographyP>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Select value={savingsRate} onValueChange={setSavingsRate}>
-              <SelectTrigger id="savingsRate" className="w-full">
-                <SelectValue placeholder="Wählen Sie eine Sparrate" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1%</SelectItem>
-                <SelectItem value="5">5%</SelectItem>
-                <SelectItem value="10">10%</SelectItem>
-                <SelectItem value="15">15%</SelectItem>
-                <SelectItem value="20">20%</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TypographyH4>Vermögen heute</TypographyH4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Geben Sie Ihr aktuelles Vermögen ein</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Separator />
-        <div className="grid grid-cols-1 gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="currentWealth">Wie hoch ist Ihr Vermögen heute (€)</Label>
-            <Input
-              id="currentWealth"
-              placeholder="z.B. 50000"
-              value={wealth}
-              onChange={(e) => setWealth(e.target.value)}
-              type="number"
-              min={0}
-              className="w-full"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TypographyH4>(zukünftiges) Erbe</TypographyH4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Geben Sie Details zu erwarteten Erbschaften ein</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Separator />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="inheritanceAge">Alter bei Erbschaft</Label>
-            <Input
-              id="inheritanceAge"
-              placeholder="z.B. 40"
-              value={inheritanceAge}
-              onChange={(e) => setInheritanceAge(e.target.value)}
-              type="number"
-              min={0}
-              max={120}
-              className="w-full"
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="inheritanceAmount">Erbschaftsbetrag (€)</Label>
-            <Input
-              id="inheritanceAmount"
-              placeholder="z.B. 100000"
-              value={inheritanceAmount}
-              onChange={(e) => setInheritanceAmount(e.target.value)}
-              type="number"
-              min={0}
-              className="w-full"
-            />
-          </div>
-          <div className="flex flex-col space-y-1.5 md:col-span-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="inheritanceTaxClass">Erbschaftssteuerklasse</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <TypographyP>Die Steuerklasse bestimmt den Steuersatz für Ihre Erbschaft</TypographyP>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Select
-              value={inheritanceTaxClass}
-              onValueChange={(value: "1" | "2" | "3") => setInheritanceTaxClass(value)}
-            >
-              <SelectTrigger id="inheritanceTaxClass" className="w-full">
-                <SelectValue placeholder="Wählen Sie eine Steuerklasse" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Klasse I</SelectItem>
-                <SelectItem value="2">Klasse II</SelectItem>
-                <SelectItem value="3">Klasse III</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TypographyH4>Ausgaben</TypographyH4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Jährliche Ausgaben aus dem Vermögen</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Separator />
-        <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="spending">Jährliche Ausgaben (€)</Label>
-          <Input
-            id="spending"
-            placeholder="z.B. 30000"
-            value={spending}
-            onChange={(e) => setSpending(e.target.value || "0")}
-            type="number"
-            min={0}
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      {/* <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TypographyH4>Steuerszenario</TypographyH4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <TypographyP>Wählen Sie ein Steuerszenario für die Berechnung</TypographyP>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Separator />
-        <TaxScenarioSelector
-          selectedScenario={selectedTaxScenario}
-          onScenarioChange={setSelectedTaxScenario}
-          onCompareScenarios={handleCompareScenarios}
-        />
-      </div> */}
-
-      {/* {showScenarioComparison && selectedPersona && (
-        <div className="space-y-4">
+    <>
+      <div className="grid w-full items-center gap-6">
+        {/* <div className="flex flex-col space-y-2">
           <div className="flex items-center gap-2">
-            <TypographyH4>Szenario-Vergleich</TypographyH4>
+            <Label htmlFor="persona" className="text-base font-medium">Persona</Label>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <InfoIcon className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <TypographyP>Vergleich verschiedener Steuerszenarien</TypographyP>
+                  <TypographyP>Wählen Sie eine vordefinierte Persona oder erstellen Sie Ihre eigene</TypographyP>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          <TaxScenarioComparison
-            persona={selectedPersona}
-            currentWealth={Number.parseFloat(wealth) || 0}
-            yearlySpendingFromWealth={Number.parseFloat(spending) || 0}
+          <Select value={currentPersona?.id ?? ""} onValueChange={_handlePersonaChange}>
+            <SelectTrigger id="persona" className="w-full">
+              <SelectValue placeholder="Wählen Sie eine Persona" />
+            </SelectTrigger>
+            <SelectContent>
+              {personas.map((persona) => (
+                <SelectItem key={persona.id} value={persona.id}>
+                  {persona.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="relative my-2 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+          <span className="relative z-10 bg-background px-2 text-muted-foreground">
+            oder geben Sie Ihre Daten ein
+          </span>
+        </div> */}
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>Einkommen</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Geben Sie Ihr aktuelles Einkommen und Alter ein</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="currentIncome">Aktuelles Jahreseinkommen (€)</Label>
+              <Input
+                id="currentIncome"
+                placeholder="z.B. 50000"
+                value={currentIncome}
+                onChange={(e) => setCurrentIncome(e.target.value)}
+                type="number"
+                min={0}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="currentAge">Aktuelles Alter</Label>
+              <Input
+                id="currentAge"
+                placeholder="z.B. 30"
+                value={currentAge}
+                onChange={(e) => setCurrentAge(e.target.value)}
+                type="number"
+                min={0}
+                max={120}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5 md:col-span-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="savingsRate">Sparrate (%)</Label>
+                <TypographyP className="text-muted-foreground">
+                  Der monatliche Betrag, den Sie vom Einkommen sparen
+                </TypographyP>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <TypographyP>Der monatliche Betrag, den Sie vom Einkommen sparen</TypographyP>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Select value={savingsRate} onValueChange={setSavingsRate}>
+                <SelectTrigger id="savingsRate" className="w-full">
+                  <SelectValue placeholder="Wählen Sie eine Sparrate" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1%</SelectItem>
+                  <SelectItem value="5">5%</SelectItem>
+                  <SelectItem value="10">10%</SelectItem>
+                  <SelectItem value="15">15%</SelectItem>
+                  <SelectItem value="20">20%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>Vermögen heute</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Geben Sie Ihr aktuelles Vermögen ein</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="currentWealth">Wie hoch ist Ihr Vermögen heute (€)</Label>
+              <Input
+                id="currentWealth"
+                placeholder="z.B. 50000"
+                value={wealth}
+                onChange={(e) => setWealth(e.target.value)}
+                type="number"
+                min={0}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>(zukünftiges) Erbe</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Geben Sie Details zu erwarteten Erbschaften ein</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="inheritanceAge">Alter bei Erbschaft</Label>
+              <Input
+                id="inheritanceAge"
+                placeholder="z.B. 40"
+                value={inheritanceAge}
+                onChange={(e) => setInheritanceAge(e.target.value)}
+                type="number"
+                min={0}
+                max={120}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="inheritanceAmount">Erbschaftsbetrag (€)</Label>
+              <Input
+                id="inheritanceAmount"
+                placeholder="z.B. 100000"
+                value={inheritanceAmount}
+                onChange={(e) => setInheritanceAmount(e.target.value)}
+                type="number"
+                min={0}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5 md:col-span-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="inheritanceTaxClass">Erbschaftssteuerklasse</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <TypographyP>Die Steuerklasse bestimmt den Steuersatz für Ihre Erbschaft</TypographyP>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Select
+                value={inheritanceTaxClass}
+                onValueChange={(value: "1" | "2" | "3") => setInheritanceTaxClass(value)}
+              >
+                <SelectTrigger id="inheritanceTaxClass" className="w-full">
+                  <SelectValue placeholder="Wählen Sie eine Steuerklasse" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Klasse I</SelectItem>
+                  <SelectItem value="2">Klasse II</SelectItem>
+                  <SelectItem value="3">Klasse III</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>Ausgaben</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Jährliche Ausgaben aus dem Vermögen</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Separator />
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="spending">Jährliche Ausgaben (€)</Label>
+            <Input
+              id="spending"
+              placeholder="z.B. 30000"
+              value={spending}
+              onChange={(e) => setSpending(e.target.value || "0")}
+              type="number"
+              min={0}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        {/* <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TypographyH4>Steuerszenario</TypographyH4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <TypographyP>Wählen Sie ein Steuerszenario für die Berechnung</TypographyP>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Separator />
+          <TaxScenarioSelector
+            selectedScenario={selectedTaxScenario}
+            onScenarioChange={setSelectedTaxScenario}
+            onCompareScenarios={_handleCompareScenarios}
+          />
+        </div> */}
+
+        {/* {showScenarioComparison && currentPersona && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <TypographyH4>Szenario-Vergleich</TypographyH4>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <TypographyP>Vergleich verschiedener Steuerszenarien</TypographyP>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <TaxScenarioComparison
+              persona={currentPersona}
+              currentWealth={Number.parseFloat(wealth) || 0}
+              yearlySpendingFromWealth={Number.parseFloat(spending) || 0}
+            />
+          </div>
+        )} */}
+
+        <div className="flex flex-wrap gap-4 mt-4">
+          <Button onClick={handleCalculation} className="bg-primary hover:bg-primary/90">
+            Lebenseinkommen - Übersicht erstellen
+          </Button>
+          {currentPersona && (
+            <Button onClick={savePersona} variant="outline" className="border-primary text-primary hover:bg-primary/10">
+              Persona Speichern
+            </Button>
+          )}
+        </div>
+
+
+      </div>
+
+      {showYearlyBreakdown && (
+        <div className="mt-8">
+          <YearlyBreakdown
+            results={yearlyResults}
+            onResultsUpdate={handleYearlyResultsUpdate}
+            editable={true}
           />
         </div>
-      )} */}
-
-      <div className="flex flex-wrap gap-4 mt-4">
-        <Button onClick={handleCalculation} className="bg-primary hover:bg-primary/90">
-          Lebenseinkommen - Übersicht erstellen
-        </Button>
-        {selectedPersona && (
-          <Button onClick={savePersona} variant="outline" className="border-primary text-primary hover:bg-primary/10">
-            Persona Speichern
-          </Button>
-        )}
-      </div>
-    </div>
+      )}
+    </>
   )
 }
 

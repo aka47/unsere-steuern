@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
           <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">

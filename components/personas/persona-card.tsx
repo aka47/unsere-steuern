@@ -1,36 +1,64 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import type { Persona } from "@/types/persona"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
+import { TaxScenario } from "@/types/life-income"
+import { defaultTaxScenario } from "@/constants/tax-scenarios"
+import { useTaxScenario } from "@/hooks/useTaxScenario"
 
 interface PersonaCardProps {
   persona: Persona
+  taxScenario?: TaxScenario
   onClick: () => void
 }
 
-export function PersonaCard({ persona, onClick }: PersonaCardProps) {
+export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }: PersonaCardProps) {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
+  // Always call the hook, regardless of whether we use its value
+  const { selectedTaxScenario } = useTaxScenario()
 
-  const results = calculateLifeIncome({
+  // Use the tax scenario from props if provided, otherwise use the one from context
+  const activeTaxScenario = propsTaxScenario || selectedTaxScenario
+
+  // Calculate results with the selected tax scenario
+  const selectedScenarioResults = calculateLifeIncome({
     ...persona,
-    currentAge: persona.initialAge,
-    selectedPersona: persona,
+    currentPersona: persona,
+    taxScenario: activeTaxScenario
   })
 
-  const lifetimeData = results ? [
+  // Always calculate results with the default tax scenario for comparison
+  const defaultScenarioResults = calculateLifeIncome({
+    ...persona,
+    currentPersona: persona,
+    taxScenario: defaultTaxScenario
+  })
+
+  // Prepare data for comparison chart
+  const comparisonData = [
     {
       name: "Income",
-      value: results.totals.totalIncome
+      current: defaultScenarioResults?.totals.totalIncome || 0,
+      proposed: selectedScenarioResults?.totals.totalIncome || 0
     },
     {
       name: "Final Wealth",
-      value: results.totals.totalWealth
+      current: defaultScenarioResults?.totals.totalWealth || 0,
+      proposed: selectedScenarioResults?.totals.totalWealth || 0
     },
     {
       name: "Taxes",
-      value: results.totals.totalIncomeTax + results.totals.totalVAT + results.totals.totalInheritanceTax
+      current: (defaultScenarioResults?.totals.totalIncomeTax || 0) +
+               (defaultScenarioResults?.totals.totalVAT || 0) +
+               (defaultScenarioResults?.totals.totalInheritanceTax || 0),
+      proposed: (selectedScenarioResults?.totals.totalIncomeTax || 0) +
+                (selectedScenarioResults?.totals.totalVAT || 0) +
+                (selectedScenarioResults?.totals.totalInheritanceTax || 0)
     },
-  ] : []
+  ]
+
+  // Only show comparison if the selected scenario is different from default
+  const showComparison = activeTaxScenario.id !== defaultTaxScenario.id
 
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
@@ -42,11 +70,16 @@ export function PersonaCard({ persona, onClick }: PersonaCardProps) {
         <p className="text-sm text-muted-foreground mt-2">
           {persona.description}
         </p>
+        {showComparison && (
+          <p className="text-xs text-primary mt-1">
+            Vergleich: {defaultTaxScenario.name} vs. {activeTaxScenario.name}
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={lifetimeData}>
+            <BarChart data={comparisonData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis
@@ -60,24 +93,38 @@ export function PersonaCard({ persona, onClick }: PersonaCardProps) {
                 }}
               />
               <Tooltip
-                content={({ active, payload }) => {
+                content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
                     return (
                       <div className="bg-white p-4 border rounded shadow">
-                        <p>{payload[0].payload.name}</p>
-                        <p className="font-bold">
-                          {new Intl.NumberFormat("de-DE", {
-                            style: "currency",
-                            currency: "EUR"
-                          }).format(payload[0].value as number)}
-                        </p>
+                        <p className="font-medium">{label}</p>
+                        {payload.map((entry, index) => (
+                          <p key={index} style={{ color: entry.color }}>
+                            {entry.name === defaultTaxScenario.name ? `${defaultTaxScenario.name}: ` : `${activeTaxScenario.name}: `}
+                            {new Intl.NumberFormat("de-DE", {
+                              style: "currency",
+                              currency: "EUR"
+                            }).format(entry.value as number)}
+                          </p>
+                        ))}
+                        {showComparison && payload.length > 1 && (
+                          <p className="mt-2 pt-2 border-t">
+                            Difference: {new Intl.NumberFormat("de-DE", {
+                              style: "currency",
+                              currency: "EUR",
+                              signDisplay: "always"
+                            }).format((payload[1].value as number) - (payload[0].value as number))}
+                          </p>
+                        )}
                       </div>
                     );
                   }
                   return null;
                 }}
               />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Legend />
+              <Bar dataKey="current" name={defaultTaxScenario.name} fill="#8884d8" />
+              {showComparison && <Bar dataKey="proposed" name={activeTaxScenario.name} fill="#82ca9d" />}
             </BarChart>
           </ResponsiveContainer>
         </div>

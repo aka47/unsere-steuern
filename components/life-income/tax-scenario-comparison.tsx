@@ -4,11 +4,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { type TaxScenario } from "@/types/life-income"
 import { type Persona } from "@/types/persona"
 import { taxScenarios } from "@/constants/tax-scenarios"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
-import { TypographyH3, TypographyP, TypographyMuted } from "@/components/ui/typography"
+import { TypographyH3, TypographyMuted } from "@/components/ui/typography"
 
 interface TaxScenarioComparisonProps {
   persona: Persona

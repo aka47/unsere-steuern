@@ -18,17 +18,17 @@ const data = [
 const metrics = [
   {
     title: "Gesamtes Lohneinkommen",
-    value: "1.100 Mrd. €",
+    value: "1.678 Mrd. €",
     description: "Jährliches Bruttoeinkommen",
   },
   {
     title: "Lohnsteueraufkommen",
-    value: "231 Mrd. €",
+    value: "241.6 Mrd. €",
     description: "Jährliches Steueraufkommen",
   },
   {
     title: "Effektiver Steuersatz",
-    value: "21%",
+    value: "15%",
     description: "Durchschnittliche Steuerbelastung",
   },
 ]

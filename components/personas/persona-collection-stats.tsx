@@ -16,7 +16,7 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
     const results = calculateLifeIncome({
       ...persona,
       currentAge: persona.initialAge,
-      selectedPersona: persona,
+      currentPersona: persona,
     })
 
     if (!results) {

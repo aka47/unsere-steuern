@@ -4,7 +4,8 @@ import { Info } from "lucide-react"
 import { WealthOverview } from "@/components/wealth/wealth-overview"
 import { WealthDistribution } from "@/components/wealth/wealth-distribution"
 import { InequalityMetrics } from "@/components/wealth/inequality-metrics"
-import { WealthTypeBreakdown } from "@/components/wealth/wealth-type-breakdown"
+import { WealthDevelopment } from "@/components/wealth/wealth-development"
+import { WealthTaxDisparity } from "@/components/wealth/wealth-tax-disparity"
 import { DataSources } from "@/components/wealth/data-sources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -27,6 +28,13 @@ export default function WealthDashboard() {
 
         <Suspense fallback={<WealthOverviewSkeleton />}>
           <WealthOverview />
+        </Suspense>
+
+        {/* Wealth Tax Disparity */}
+
+
+        <Suspense fallback={<div>Lade Daten...</div>}>
+          <WealthTaxDisparity />
         </Suspense>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -76,7 +84,7 @@ export default function WealthDashboard() {
             </CardHeader>
             <CardContent>
               <Suspense fallback={<Skeleton className="h-[350px] w-full" />}>
-                <WealthTypeBreakdown />
+                <WealthDevelopment />
               </Suspense>
             </CardContent>
           </Card>

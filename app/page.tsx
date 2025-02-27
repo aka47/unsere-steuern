@@ -1,7 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BarChart3, Building, Calculator, PieChartIcon as ChartPieIcon, Users } from "lucide-react"
-
+import { ArrowRight, BarChart3, Building, Calculator, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -10,10 +9,10 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
-          <Link href="/" className="flex items-center space-x-2">
+          {/* <Link href="/" className="flex items-center space-x-2">
             <ChartPieIcon className="h-6 w-6" />
             <span className="font-bold">Unsere Steuern</span>
-          </Link>
+          </Link> */}
           <nav className="flex flex-1 items-center justify-end space-x-4">
             <Link href="/home" className="text-sm font-medium hover:underline">
               Dashboard
@@ -175,21 +174,21 @@ export default function LandingPage() {
                     <Building className="h-8 w-8" />
                     <div className="space-y-1">
                       <h3 className="text-xl font-bold">Transparenz</h3>
-                      <p className="text-zinc-500">Klare Visualisierung der Steuerverwendung</p>
+                      <p className="text-zinc-500">Klare Visualisierung der Einnahmen, Vermögen und Steuern</p>
                     </div>
                   </li>
                   <li className="flex items-center gap-4">
                     <Calculator className="h-8 w-8" />
                     <div className="space-y-1">
                       <h3 className="text-xl font-bold">Personalisierte Analyse</h3>
-                      <p className="text-zinc-500">Berechnen Sie Ihre individuelle Steuersituation</p>
+                      <p className="text-zinc-500">Berechnen Sie Ihre individuelle Steuerbelastung</p>
                     </div>
                   </li>
                   <li className="flex items-center gap-4">
                     <Users className="h-8 w-8" />
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold">Gemeinschaft</h3>
-                      <p className="text-zinc-500">Diskutieren Sie mit anderen über Steuerreformen</p>
+                      <h3 className="text-xl font-bold">Gerechte Steuerpolitik</h3>
+                      <p className="text-zinc-500">Verstehen sie wer wie viel Steuern zahlt. Verstehen sie was unsere Steuerausnahmen für eine Gruppe, für andere Gruppen an kosten bedeuten.</p>
                     </div>
                   </li>
                 </ul>
@@ -200,18 +199,7 @@ export default function LandingPage() {
       </main>
       <footer className="w-full border-t py-6">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-          <p className="text-sm text-zinc-500">© 2024 Unsere Steuern. Alle Rechte vorbehalten.</p>
-          <nav className="flex gap-4">
-            <Link href="#" className="text-sm font-medium hover:underline">
-              Impressum
-            </Link>
-            <Link href="#" className="text-sm font-medium hover:underline">
-              Datenschutz
-            </Link>
-            <Link href="#" className="text-sm font-medium hover:underline">
-              Kontakt
-            </Link>
-          </nav>
+          <p className="text-sm text-zinc-500">© 2025 Unsere Steuern. Alle Rechte vorbehalten.</p>
         </div>
       </footer>
     </div>

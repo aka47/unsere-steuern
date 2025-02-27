@@ -18,6 +18,7 @@ export type TaxScenario = {
   id: string
   name: string
   description: string
+  detailedDescription?: string  // Detailed explanation of tax rates and rules
   // Tax calculation functions
   calculateIncomeTax: (income: number) => number
   calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => number

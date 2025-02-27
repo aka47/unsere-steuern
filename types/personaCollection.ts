@@ -1,4 +1,4 @@
-import { Persona, initialPersonas, avgPersonas, highIncomePersonas } from "./persona"
+import { Persona, defaultPersona, initialPersonas, avgPersonas, highIncomePersonas } from "./persona"
 
 export interface PersonaCollection {
   id: string
@@ -37,6 +37,7 @@ const generate100Personas = (): Persona[] => {
     const inheritance = generateInheritance(percentile)
 
     personas.push({
+      ...defaultPersona,
       id: `persona_${i}`,
       name: `Persona ${i}`,
       description: `Repräsentiert das ${i}%-Percentil`,
@@ -49,8 +50,6 @@ const generate100Personas = (): Persona[] => {
       savingsRate: 0.1 + percentile * 0.4, // Von 10% bis 50% Sparrate
       inheritanceAge: inheritance > 0 ? Math.floor(40 + Math.random() * 20) : undefined,
       inheritanceAmount: inheritance,
-      inheritanceTaxClass: 1,
-      vatRate: 19,
       vatApplicableRate: Math.round(50 + percentile * 50), // 50%-100%
       incomeGrowth: (age) => (age <= 60 ? 1.02 + percentile * 0.03 : 1.01),
       yearlySpendingFromWealth: Math.round(wealth * (0.01 + percentile * 0.04)) // 1%-5% Ausgabequote

@@ -87,7 +87,6 @@ const calculatedPersonas = personas.map((persona) => {
     ...persona,
     currentIncome: persona.annualIncome,
     yearlySpendingFromWealth: persona.annualIncome * (1 - persona.savingsRate),
-    selectedPersona: null,
     currentAge: 20,
     initialAge: 20,
     inheritanceAge: persona.inheritanceChance > 0 ? 40 : undefined,
@@ -96,7 +95,8 @@ const calculatedPersonas = personas.map((persona) => {
     vatRate: 19,
     vatApplicableRate: 80,
     currentIncomeFromWealth: 0,
-    incomeGrowth: (age: number) => (age <= 45 ? 1.02 : 1.0),
+    currentWealth: 0,
+    // incomeGrowth: (age: number) => (age <= 45 ? 1.02 : 1.0),
   })
 
   if (!results) return null

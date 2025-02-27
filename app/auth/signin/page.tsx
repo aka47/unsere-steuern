@@ -1,43 +1,63 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PageHeader } from "@/components/ui/page-header"
 
-export default function SignIn() {
+export default function SignInPage() {
   const router = useRouter()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    // Check if user just registered
+    const registered = searchParams.get("registered")
+    if (registered) {
+      setSuccess("Account created successfully! Please sign in.")
+    }
+  }, [searchParams])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError("")
+    setLoading(true)
 
     try {
       const result = await signIn("credentials", {
-        username,
-        password,
         redirect: false,
+        email: formData.email,
+        password: formData.password,
       })
 
       if (result?.error) {
-        setError("Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.")
+        setError("Invalid email or password")
       } else {
-        router.push("/lebenseinkommen")
+        // Redirect to dashboard or home page
+        router.push("/")
         router.refresh()
       }
-    } catch (error) {
-      setError("Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.")
+    } catch (err) {
+      setError("An error occurred during sign in")
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
@@ -55,39 +75,58 @@ export default function SignIn() {
               Geben Sie Ihre Anmeldedaten ein, um fortzufahren.
               <br />
               <span className="text-sm font-medium mt-2 block">
-                Demo-Zugang: Benutzername "demo", Passwort "demo"
+                Demo-Zugang: Benutzername &ldquo;demo&rdquo;, Passwort &ldquo;demo&rdquo;
               </span>
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Benutzername</Label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
+          {success && (
+            <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                  Forgot password?
+                </Link>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Passwort</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Wird angemeldet..." : "Anmelden"}
-              </Button>
-            </CardFooter>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
           </form>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link href="/auth/signup" className="text-primary hover:underline">
+                Sign Up
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
       </div>
     </div>

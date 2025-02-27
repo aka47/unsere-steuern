@@ -17,10 +17,10 @@ import { TypographyH3, TypographySmall, TypographyLarge, TypographyMuted } from 
 interface LifeIncomeResultsProps {
   results: LifeIncomeYearlyResult[]
   setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
-  selectedPersona?: Persona | null
+  currentPersona?: Persona | null
 }
 
-export function LifeIncomeResults({ results: initialResults, setResults, selectedPersona }: LifeIncomeResultsProps) {
+export function LifeIncomeResults({ results: initialResults, setResults, currentPersona }: LifeIncomeResultsProps) {
   const [localResults, setLocalResults] = useState(initialResults)
   const [showDetailedTable, setShowDetailedTable] = useState(false)
 
@@ -86,16 +86,16 @@ export function LifeIncomeResults({ results: initialResults, setResults, selecte
         <CardHeader className="bg-muted/30 pb-4">
           <CardTitle>Zusammenfassung</CardTitle>
           <CardDescription>
-            {selectedPersona ? `Übersicht für ${selectedPersona.name}` : "Übersicht Ihrer finanziellen Lebensbilanz"}
+            {currentPersona ? `Übersicht für ${currentPersona.name}` : "Übersicht Ihrer finanziellen Lebensbilanz"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-2">
-            {selectedPersona && (
+            {currentPersona && (
               <div className="md:col-span-2 mb-2 pb-2 border-b">
-                <TypographyLarge>{selectedPersona.name}</TypographyLarge>
-                {selectedPersona.description && (
-                  <TypographyMuted className="mt-1">{selectedPersona.description}</TypographyMuted>
+                <TypographyLarge>{currentPersona.name}</TypographyLarge>
+                {currentPersona.description && (
+                  <TypographyMuted className="mt-1">{currentPersona.description}</TypographyMuted>
                 )}
               </div>
             )}
@@ -171,22 +171,26 @@ export function LifeIncomeResults({ results: initialResults, setResults, selecte
       </Card>
 
       <Tabs defaultValue="income" className="space-y-4">
-        <TabsList className="w-full grid grid-cols-4">
-          <TabsTrigger value="income">Einkommensteuer</TabsTrigger>
-          <TabsTrigger value="inheritance">Erbschaftssteuer</TabsTrigger>
-          <TabsTrigger value="vat">Mehrwertsteuer</TabsTrigger>
-          <TabsTrigger value="spending">Ausgaben</TabsTrigger>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="combined">Steuern</TabsTrigger>
+          <TabsTrigger value="percentage">Steueranteil in %</TabsTrigger>
         </TabsList>
-        <TabsContent value="income">
+
+        <TabsContent value="combined">
           <Card className="shadow-md">
             <CardHeader className="bg-muted/30 pb-4">
-              <CardTitle>Einkommensteuer</CardTitle>
-              <CardDescription>Gesamte Einkommensteuer: {formatCurrency(totalIncomeTax)}</CardDescription>
+              <CardTitle>Kombinierte Übersicht</CardTitle>
+              <CardDescription>Vergleich aller Steuerarten und Ausgaben</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={localResults}>
+                  <LineChart
+                    data={localResults.map(item => ({
+                      ...item,
+                      totalTax: (item.incomeTax || 0) + (item.inheritanceTax || 0) + (item.vat || 0)
+                    }))}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="age" stroke="#6b7280" />
                     <YAxis yAxisId="left" stroke="#6b7280" />
@@ -195,55 +199,11 @@ export function LifeIncomeResults({ results: initialResults, setResults, selecte
                       contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
                     />
                     <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="income"
-                      name="Einkommen"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                      dot={{ r: 0 }}
-                      activeDot={{ r: 6 }}
-                    />
                     <Line
                       yAxisId="left"
                       type="monotone"
                       dataKey="incomeTax"
                       name="Einkommensteuer"
-                      stroke="#82ca9d"
-                      strokeWidth={2}
-                      dot={{ r: 0 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="inheritance">
-          <Card className="shadow-md">
-            <CardHeader className="bg-muted/30 pb-4">
-              <CardTitle>Erbschaftssteuer</CardTitle>
-              <CardDescription>Gesamte Erbschaftssteuer: {formatCurrency(totalInheritanceTax)}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="age" stroke="#6b7280" />
-                    <YAxis yAxisId="left" stroke="#6b7280" />
-                    <RechartsTooltip
-                      formatter={(value) => formatCurrency(value as number)}
-                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
-                    />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="inheritance"
-                      name="Erbschaft"
                       stroke="#8884d8"
                       strokeWidth={2}
                       dot={{ r: 0 }}
@@ -259,80 +219,12 @@ export function LifeIncomeResults({ results: initialResults, setResults, selecte
                       dot={{ r: 0 }}
                       activeDot={{ r: 6 }}
                     />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="vat">
-          <Card className="shadow-md">
-            <CardHeader className="bg-muted/30 pb-4">
-              <CardTitle>Mehrwertsteuer</CardTitle>
-              <CardDescription>Gesamte Mehrwertsteuer: {formatCurrency(totalVAT)}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="age" stroke="#6b7280" />
-                    <YAxis yAxisId="left" stroke="#6b7280" />
-                    <RechartsTooltip
-                      formatter={(value) => formatCurrency(value as number)}
-                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
-                    />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="income"
-                      name="Einkommen"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                      dot={{ r: 0 }}
-                      activeDot={{ r: 6 }}
-                    />
                     <Line
                       yAxisId="left"
                       type="monotone"
                       dataKey="vat"
                       name="Mehrwertsteuer"
-                      stroke="#82ca9d"
-                      strokeWidth={2}
-                      dot={{ r: 0 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="spending">
-          <Card className="shadow-md">
-            <CardHeader className="bg-muted/30 pb-4">
-              <CardTitle>Ausgaben</CardTitle>
-              <CardDescription>Gesamte Ausgaben: {formatCurrency(totalSpending)}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={localResults}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="age" stroke="#6b7280" />
-                    <YAxis yAxisId="left" stroke="#6b7280" />
-                    <RechartsTooltip
-                      formatter={(value) => formatCurrency(value as number)}
-                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
-                    />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="income"
-                      name="Einkommen"
-                      stroke="#8884d8"
+                      stroke="#ff7300"
                       strokeWidth={2}
                       dot={{ r: 0 }}
                       activeDot={{ r: 6 }}
@@ -342,13 +234,110 @@ export function LifeIncomeResults({ results: initialResults, setResults, selecte
                       type="monotone"
                       dataKey="spending"
                       name="Ausgaben"
-                      stroke="#82ca9d"
+                      stroke="#0088fe"
                       strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="totalTax"
+                      name="Gesamtsteuer"
+                      stroke="#ff0000"
+                      strokeWidth={3}
                       dot={{ r: 0 }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                <p>Die Grafik zeigt den Verlauf aller Steuerarten und Ausgaben über die Lebensspanne. Die rote Linie stellt die Summe aller Steuern dar.</p>
+                <p>Gesamte Steuerlast: {formatCurrency(totalIncomeTax + totalInheritanceTax + totalVAT)}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="percentage">
+          <Card className="shadow-md">
+            <CardHeader className="bg-muted/30 pb-4">
+              <CardTitle>Steueranteil am Einkommen</CardTitle>
+              <CardDescription>Steuern als Prozentsatz des Einkommens über die Zeit</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={localResults.map(item => {
+                      const income = item.income || 1; // Prevent division by zero
+                      return {
+                        ...item,
+                        incomeTaxPercentage: ((item.incomeTax || 0) / income) * 100,
+                        inheritanceTaxPercentage: ((item.inheritanceTax || 0) / income) * 100,
+                        vatPercentage: ((item.vat || 0) / income) * 100,
+                        totalTaxPercentage: ((item.incomeTax || 0) + (item.inheritanceTax || 0) + (item.vat || 0)) / income * 100
+                      };
+                    })}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="age" stroke="#6b7280" />
+                    <YAxis
+                      yAxisId="left"
+                      stroke="#6b7280"
+                      tickFormatter={(value) => `${value.toFixed(0)}%`}
+                    />
+                    <RechartsTooltip
+                      formatter={(value: number) => `${value.toFixed(2)}%`}
+                      contentStyle={{ backgroundColor: "rgba(255, 255, 255, 0.95)", borderRadius: "6px", border: "1px solid #e5e7eb" }}
+                    />
+                    <Legend />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="incomeTaxPercentage"
+                      name="Einkommensteuer %"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="inheritanceTaxPercentage"
+                      name="Erbschaftssteuer %"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="vatPercentage"
+                      name="Mehrwertsteuer %"
+                      stroke="#ff7300"
+                      strokeWidth={2}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="totalTaxPercentage"
+                      name="Gesamtsteuer %"
+                      stroke="#ff0000"
+                      strokeWidth={3}
+                      dot={{ r: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                <p>Die Grafik zeigt den Anteil der verschiedenen Steuerarten am Einkommen über die Lebensspanne.</p>
+                <p>Durchschnittlicher Steueranteil: {((totalIncomeTax + totalInheritanceTax + totalVAT) / totalIncome * 100).toFixed(2)}%</p>
               </div>
             </CardContent>
           </Card>

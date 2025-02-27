@@ -1,11 +1,18 @@
 import { INHERITANCE_TAX_CLASSES } from "./tax"
 import { type TaxScenario } from "@/types/life-income"
+import {
+  statusQuoDescription,
+  progressiveWealthTaxDescription,
+  flatTaxDescription,
+  fiftysTaxDescription
+} from "./tax-scenario-descriptions"
 
 // Status Quo (current tax system)
 export const statusQuoScenario: TaxScenario = {
   id: "status-quo",
   name: "Status Quo",
   description: "Das aktuelle Steuersystem in Deutschland",
+  detailedDescription: statusQuoDescription,
 
   calculateIncomeTax: (income: number) => {
     let tax = 0
@@ -30,6 +37,8 @@ export const statusQuoScenario: TaxScenario = {
 
     return Math.max(0, tax); // Steuer darf nicht negativ sein
   },
+
+
 
   calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
     let tax = 0
@@ -56,7 +65,7 @@ export const statusQuoScenario: TaxScenario = {
   },
 
   calculateWealthIncomeTax: (wealthIncome: number) => {
-    // Flat tax rate of 25% (Abgeltungssteuer) + 5.5% solidarity surcharge
+    // Flat tax rate of 25% (Abgeltungssteuer) + 5,5% solidarity surcharge
     return wealthIncome * 0.26375
   },
 
@@ -69,11 +78,29 @@ export const statusQuoScenario: TaxScenario = {
 // Progressive Wealth Tax Scenario
 export const progressiveWealthTaxScenario: TaxScenario = {
   id: "progressive-wealth-tax",
-  name: "Progressive Vermögenssteuer",
-  description: "Ein progressives Steuersystem mit Vermögenssteuer",
+  name: "Progressive Einheitssteuer",
+  description: "Ein progressives Einheitssteuer. Alle Einkommen aus Arbeit, Kaptial und Erbschaften werden progressiv besteuert, bestehende Freibeträge bleiben bestehen.",
+  detailedDescription: progressiveWealthTaxDescription,
 
-  calculateIncomeTax: statusQuoScenario.calculateIncomeTax,
+  calculateIncomeTax: (income: number) => {
+    let tax = 0
 
+    if (income <= 12096) {
+      tax = 0; // a) Steuerfrei
+    } else if (income <= 17443) {
+      const y = (income - 12096) / 10000;
+      tax = (559.38 * y + 840) * y; // b) 40% reduction
+    } else if (income <= 68480) {
+      const z = (income - 17443) / 10000;
+      tax = (114.82 * z + 1558.05) * z + 659.83; // c) 35% reduction
+    } else if (income <= 277825) {
+      tax = 0.294 * income - 7638.34; // d) 30% reduction
+    } else {
+      tax = 0.3375 * income - 14435; // e) 25% reduction
+    }
+
+    return Math.max(0, tax); // Steuer darf nicht negativ sein
+  },
   calculateInheritanceTax: statusQuoScenario.calculateInheritanceTax,
 
   calculateWealthTax: (wealth: number) => {
@@ -105,17 +132,18 @@ export const flatTaxScenario: TaxScenario = {
   id: "flat-tax",
   name: "Flat Tax",
   description: "Ein Flat-Tax-System mit einheitlichem Steuersatz",
+  detailedDescription: flatTaxDescription,
 
   calculateIncomeTax: (income: number) => {
-    const exemption = 12000 // Basic exemption
+    const exemption = 0 // Basic exemption
     const taxableIncome = Math.max(0, income - exemption)
-    return taxableIncome * 0.25 // 25% flat rate
+    return taxableIncome * 0.1034 //
   },
 
   calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
-    const exemption = 500000 // Higher exemption
+    const exemption = 0 // Higher exemption
     const taxableAmount = Math.max(0, amount - exemption)
-    return taxableAmount * 0.20 // 20% flat rate
+    return taxableAmount * 0.1034 // 20% flat rate
   },
 
   calculateWealthTax: (wealth: number) => {
@@ -125,7 +153,7 @@ export const flatTaxScenario: TaxScenario = {
 
   calculateWealthIncomeTax: (wealthIncome: number) => {
     // Same flat rate as income
-    return wealthIncome * 0.25
+    return wealthIncome * 0.1034
   },
 
   calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
@@ -135,11 +163,80 @@ export const flatTaxScenario: TaxScenario = {
   }
 }
 
+// 1950s-60s Tax Scenario (Wirtschaftswunder era)
+export const fiftysTaxScenario: TaxScenario = {
+  id: "fiftys-tax",
+  name: "Wirtschaftswunder",
+  description: "Das Steuersystem der 50er und 60er Jahre, als Deutschland sein Wirtschaftswunder erlebte",
+  detailedDescription: fiftysTaxDescription,
+
+  calculateIncomeTax: (income: number) => {
+    // Higher progressive rates in the 1950s-60s
+    // Top marginal rate was around 53% in this era
+    let tax = 0
+
+    if (income <= 8000) {
+      tax = 0; // Basic exemption (adjusted for the era)
+    } else if (income <= 16000) {
+      tax = (income - 8000) * 0.20; // 20% on first bracket
+    } else if (income <= 32000) {
+      tax = 1600 + (income - 16000) * 0.30; // 30% on second bracket
+    } else if (income <= 64000) {
+      tax = 6400 + (income - 32000) * 0.40; // 40% on third bracket
+    } else if (income <= 120000) {
+      tax = 19200 + (income - 64000) * 0.48; // 48% on fourth bracket
+    } else {
+      tax = 46080 + (income - 120000) * 0.53; // 53% on highest bracket
+    }
+
+    return Math.max(0, tax);
+  },
+
+  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
+    // Inheritance tax was generally higher in the 1950s-60s
+    let exemption = 200000; // Lower exemption than today
+    let taxableAmount = Math.max(0, amount - exemption);
+
+    if (taxableAmount <= 0) return 0;
+
+    // Higher rates based on tax class
+    const rates = {
+      1: 0.15, // 15% for close family
+      2: 0.25, // 25% for extended family
+      3: 0.40  // 40% for non-family
+    };
+
+    return taxableAmount * rates[taxClass];
+  },
+
+  calculateWealthTax: (wealth: number) => {
+    // Wealth tax existed in the 1950s-60s
+    const exemption = 200000; // Lower exemption
+    const taxableWealth = Math.max(0, wealth - exemption);
+
+    if (taxableWealth <= 0) return 0;
+
+    return taxableWealth * 0.01; // 1% wealth tax
+  },
+
+  calculateWealthIncomeTax: (wealthIncome: number) => {
+    // Capital gains were taxed as regular income
+    return fiftysTaxScenario.calculateIncomeTax(wealthIncome);
+  },
+
+  calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
+    // VAT was lower in the 1950s-60s (around 4% initially)
+    const grossSpending = income * (vatApplicableRate / 100);
+    return grossSpending * (4 / 104); // 4% VAT rate
+  }
+};
+
 // All available tax scenarios
 export const taxScenarios: TaxScenario[] = [
   statusQuoScenario,
   progressiveWealthTaxScenario,
-  flatTaxScenario
+  flatTaxScenario,
+  fiftysTaxScenario
 ]
 
 // Default scenario

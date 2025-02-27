@@ -1,69 +1,99 @@
+"use client"
+
+import { PageHeader } from "@/components/ui/page-header"
+
 export default function ImpressumPage() {
   return (
-    <div className="container mx-auto py-8 prose">
-      <h1>Impressum</h1>
+    <div className="flex flex-col">
+      <PageHeader
+        title="Impressum"
+        subtitle="Gesetzliche Angaben gemäß § 5 TMG"
+      />
+      <div className="flex-1 space-y-6 p-8 pt-6 max-w-4xl">
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold">Impressum</h2>
 
-      <h2>Angaben gemäß § 5 TMG</h2>
-      <p>
-      Tim Assmann<br />
-        Glogauer Straße 10a<br />
-        10999 Berlin
-      </p>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Angaben gemäß § 5 TMG</h3>
+            <p className="font-medium">
+              Tim Assmann<br />
+              Glogauer Strasse 11a<br />
+              10999 Berlin<br />
+              Deutschland
+            </p>
 
-      <h2>Kontakt</h2>
-      <p>
-        E-Mail: info@unsere-steuern.de
-      </p>
+            {/* <p>
+              <strong>Vereinsregistereintrag:</strong><br />
+              Eingetragen im Vereinsregister des Amtsgerichts Berlin-Charlottenburg<br />
+              Registernummer: VR XXXXX B
+            </p> */}
 
-      <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-      <p>
-        Tim Assmann<br />
-        Glogauer Straße 10a<br />
-        10999 Berlin
-      </p>
+            {/* <p>
+              <strong>Vertreten durch den Vorstand:</strong><br />
+              [Name des Vorstandsvorsitzenden]<br />
+              [Name weiterer Vorstandsmitglieder]
+            </p> */}
+          </div>
 
-      <h2>Haftung für Inhalte</h2>
-      <p>
-        Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den
-        allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht
-        verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu
-        forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
-      </p>
-      <p>
-        Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen
-        Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der
-        Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
-        Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
-      </p>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Kontakt</h3>
+            <p>
+              E-Mail: <a href="mailto:info@kapitalismusfueralle.de" className="text-primary hover:underline">info@kapitalismusfueralle.de</a><br />
+              Website: <a href="https://www.kapitalismusfueralle.de" className="text-primary hover:underline">www.kapitalismusfueralle.de</a>
+            </p>
+          </div>
 
-      <h2>Haftung für Links</h2>
-      <p>
-        Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben.
-        Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der
-        verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die
-        verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft.
-        Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar.
-      </p>
-      <p>
-        Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer
-        Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links
-        umgehend entfernen.
-      </p>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h3>
+            <p>
+              <br />
+              Tim Assmann<br />
+              Glogauer Strasse 11a<br />
+              10999 Berlin<br />
+              Deutschland
+            </p>
+          </div>
 
-      <h2>Urheberrecht</h2>
-      <p>
-        Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
-        Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der
-        Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw.
-        Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch
-        gestattet.
-      </p>
-      <p>
-        Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte
-        Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem
-        auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei
-        Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
-      </p>
+          {/* <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Gemeinnützigkeit</h3>
+            <p>
+              Kapitalismus für alle e.V. ist als gemeinnützige Organisation anerkannt.<br />
+              Steuernummer: [Steuernummer]<br />
+              Finanzamt: [zuständiges Finanzamt]
+            </p>
+          </div> */}
+
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Haftungsausschluss</h3>
+
+            <h4 className="text-lg font-medium">Haftung für Inhalte</h4>
+            <p>
+              Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+            </p>
+
+            <h4 className="text-lg font-medium">Haftung für Links</h4>
+            <p>
+              Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.
+            </p>
+
+            <h4 className="text-lg font-medium">Urheberrecht</h4>
+            <p>
+              Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Streitschlichtung</h3>
+            <p>
+              Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" className="text-primary hover:underline">https://ec.europa.eu/consumers/odr/</a>.<br />
+              Unsere E-Mail-Adresse finden Sie oben im Impressum.
+            </p>
+            <p>
+              Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+            </p>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

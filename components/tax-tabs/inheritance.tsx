@@ -1,14 +1,20 @@
 import React from 'react';
-import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { totalWealth } from '@/data/wealth';
+
+interface WealthDataItem {
+  name: string;
+  value: number;
+}
 
 export default function Inheritance() {
   const inheritedWealthPerYear = 400000000000;
 
-  const totalWealth = 38 * inheritedWealthPerYear; // in billion euros
+  // Convert TOTAL_WEALTH from billions to full euros
   const totalWealthInherited = totalWealth * 0.7;
   const totalWealthSelfCreated = totalWealth * 0.3;
 
-  const wealthData = [
+  const wealthData: WealthDataItem[] = [
     { name: 'Inherited Wealth', value: totalWealthInherited },
     { name: 'Self-Created Wealth', value: totalWealthSelfCreated },
   ];
@@ -30,27 +36,14 @@ export default function Inheritance() {
     };
   });
 
-  const totalWealthDistribution = [
-    { decile: '1. Zehntel', value: totalWealth * -0.012 },
-    { decile: '2. Zehntel', value: totalWealth * 0.0 },
-    { decile: '3. Zehntel', value: totalWealth * 0.002 },
-    { decile: '4. Zehntel', value: totalWealth * 0.007 },
-    { decile: '5. Zehntel', value: totalWealth * 0.017 },
-    { decile: '6. Zehntel', value: totalWealth * 0.038 },
-    { decile: '7. Zehntel', value: totalWealth * 0.072 },
-    { decile: '8. Zehntel', value: totalWealth * 0.12 },
-    { decile: '9. Zehntel', value: totalWealth * 0.195 },
-    { decile: '10. Zehntel', value: totalWealth * 0.561 },
-  ];
-
   return (
     <div className="">
       <div className="flex flex-wrap">
         <div className="p-2">
-          <h3 className="text-lg font-semibold">Gesamtes Privatvermögen in Deutschland 2025</h3>
-          <p>Gesamt: {totalWealth} Euro</p>
-          <p>Geerbtes Vermögen: {totalWealthInherited} Euro (70%)</p>
-          <p>selbst erschaffenes Vermögen : {totalWealthSelfCreated} Euro (30%)</p>
+          <h3 className="text-lg font-semibold">Geschaffenes vs geerbtes Vermögen</h3>
+          <p>Gesamt: {(totalWealth).toFixed(0)} Billion. Euro</p>
+          <p>Geerbtes Vermögen: {(totalWealthInherited).toFixed(0)} Billion. Euro (70%)</p>
+          <p>selbst erschaffenes Vermögen: {(totalWealthSelfCreated).toFixed(0)} Billion. Euro (30%)</p>
         </div>
         <div className="fflex justify-end">
           <div className="p-2 rounded shadow mt-4 w-full md:w-auto">
@@ -74,19 +67,6 @@ export default function Inheritance() {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-
-      <div className="w-full mt-8">
-        <h3 className="text-lg font-semibold">Vermögensverteilung in Deutschland nach Dezilen</h3>
-        <ResponsiveContainer width={900} height={400} maxWidth='900px'>
-          <BarChart data={totalWealthDistribution}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="decile" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
 
       <div className="w-full mt-8">

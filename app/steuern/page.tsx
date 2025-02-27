@@ -5,6 +5,7 @@ import { IncomeTaxTab } from "@/components/tax-tabs/income-tax-tab"
 import IncomeVsInheritance from "@/components/tax-tabs/income-vs-inheritance"
 import { InheritanceTaxTab } from "@/components/tax-tabs/inheritance-tax-tab"
 import { PageHeader } from "@/components/ui/page-header"
+import { TaxRevenueChart } from "@/components/tax/tax-revenue-chart"
 
 export default function SteuernPage() {
   return (
@@ -14,6 +15,8 @@ export default function SteuernPage() {
         subtitle="Vergleichen Sie verschiedene Steuerarten und ihre Auswirkungen"
       />
       <div className="flex-1 space-y-4 p-8 pt-6">
+        <TaxRevenueChart />
+
         <Tabs defaultValue="income" className="space-y-4">
           <TabsList>
             <TabsTrigger value="income">Einkommenssteuern</TabsTrigger>

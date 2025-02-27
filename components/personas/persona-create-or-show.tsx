@@ -15,7 +15,7 @@ interface PersonaCreateOrShowProps {
 export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
   const router = useRouter()
   const { persona: sessionPersona, setPersona, clearPersona } = useSessionPersona()
-  const [isEditing, setIsEditing] = useState(false)
+  const [_isEditing, setIsEditing] = useState(false)
 
   // Use session persona if available, otherwise use the prop
   const currentPersona = sessionPersona || userPersona
@@ -35,9 +35,9 @@ export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
     return (
       <Card className="shadow-sm">
         <CardHeader className="bg-muted/30 pb-4">
-          <CardTitle>Keine Persona ausgewählt</CardTitle>
+          <CardTitle>Erstellen Sie ihr Lebenseinkommen</CardTitle>
           <CardDescription>
-            Wählen Sie eine Persona aus der Liste unten oder erstellen Sie eine neue
+            Sobald Sie ihr Lebenseinkommen erstellt haben, können Sie sehen, wie sich die Steuern auf dieses auswirkt.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -45,7 +45,7 @@ export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
             onClick={() => router.push("/lebenseinkommen/rechner")}
             className="w-full"
           >
-            Zum Rechner
+            Lebenseinkommen erstellen
           </Button>
         </CardContent>
       </Card>

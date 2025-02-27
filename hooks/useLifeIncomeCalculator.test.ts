@@ -23,7 +23,7 @@ describe("useLifeIncomeCalculator", () => {
     vatRate: 19,
     vatApplicableRate: 70,
     yearlySpendingFromWealth: 0,
-    selectedPersona: null,
+    currentPersona: null,
   }
 
   describe("Input validation", () => {
@@ -55,7 +55,7 @@ describe("useLifeIncomeCalculator", () => {
     test("should use default growth rate when persona has no incomeGrowth", () => {
       const results = calculateLifeIncome({
         ...defaultParams,
-        selectedPersona: {} as Persona,
+        currentPersona: {} as Persona,
       })
       const year1Income = results?.details[0].income
       const year2Income = results?.details[1].income
@@ -66,7 +66,7 @@ describe("useLifeIncomeCalculator", () => {
     test("should use persona growth rate when provided", () => {
       const results = calculateLifeIncome({
         ...defaultParams,
-        selectedPersona: mockPersona as Persona,
+        currentPersona: mockPersona as Persona,
       })
       const year1Income = results?.details[0].income
       const year2Income = results?.details[1].income
@@ -169,7 +169,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...ceoPersona,
         inheritanceAge: ceoPersona.inheritanceAge ?? 0,
-        selectedPersona: ceoPersona,
+        currentPersona: ceoPersona,
       })
 
       expect(ceoPersona.initialAge).toBe(20)
@@ -205,7 +205,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...singleMotherPersona,
         inheritanceAge: singleMotherPersona.inheritanceAge ?? 0,
-        selectedPersona: singleMotherPersona,
+        currentPersona: singleMotherPersona,
       })
 
       expect(singleMotherPersona.initialAge).toBe(20)
@@ -241,7 +241,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...avgWorkerPersona,
         inheritanceAge: avgWorkerPersona.inheritanceAge ?? 0,
-        selectedPersona: avgWorkerPersona,
+        currentPersona: avgWorkerPersona,
       })
 
       expect(avgWorkerPersona.initialAge).toBe(20)
@@ -277,7 +277,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...managerPersona,
         inheritanceAge: managerPersona.inheritanceAge ?? 0,
-        selectedPersona: managerPersona,
+        currentPersona: managerPersona,
       })
 
       expect(managerPersona.initialAge).toBe(25)
@@ -309,7 +309,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...millionairePersona,
         inheritanceAge: millionairePersona.inheritanceAge ?? 0,
-        selectedPersona: millionairePersona,
+        currentPersona: millionairePersona,
       })
 
       expect(results?.details[0].income).toBe(27172)
@@ -340,7 +340,7 @@ describe("useLifeIncomeCalculator", () => {
         ...defaultParams,
         ...trustFundPersona,
         inheritanceAge: trustFundPersona.inheritanceAge ?? 0,
-        selectedPersona: trustFundPersona,
+        currentPersona: trustFundPersona,
       })
 
       expect(results?.totals).toMatchObject({

@@ -16,13 +16,15 @@ type CalculateLifeIncomeParams = {
   inheritanceAge: number | undefined
   inheritanceAmount: number
   inheritanceTaxClass: 1 | 2 | 3
-  vatRate: number
-  vatApplicableRate: number
+  vatRate: number | 19
+  vatApplicableRate: number | 70
   yearlySpendingFromWealth: number
   currentWealth: number
-  selectedPersona?: Persona
+  currentPersona?: Persona | null
   initialAge?: number
+  currentIncomeFromWealth?: number
   taxScenario?: TaxScenario
+  yearlyOverrides?: {age: number; income: number; wealth: number }[]
 }
 
 type LifeIncomeTotals = {
@@ -47,66 +49,66 @@ type LifeIncomeCalculatorResult = {
 }
 
 export function useLifeIncomeCalculator() {
-  const calculateIncomeTax = (income: number) => {
-    let tax = 0
-    // let remainingIncome = income
+  // const calculateIncomeTax = (income: number) => {
+  //   let tax = 0
+  //   // let remainingIncome = income
 
-    // for (const bracket of TAX_BRACKETS) {
-    //   if (remainingIncome > bracket.limit) {
-    //     const taxableAmount = Math.min(remainingIncome - bracket.limit, bracket.limit)
-    //     tax += taxableAmount * bracket.rate
-    //     remainingIncome -= taxableAmount
-    //   } else {
-    //     break
-    //   }
-    // }
-    // };
+  //   // for (const bracket of TAX_BRACKETS) {
+  //   //   if (remainingIncome > bracket.limit) {
+  //   //     const taxableAmount = Math.min(remainingIncome - bracket.limit, bracket.limit)
+  //   //     tax += taxableAmount * bracket.rate
+  //   //     remainingIncome -= taxableAmount
+  //   //   } else {
+  //   //     break
+  //   //   }
+  //   // }
+  //   // };
 
-    if (income <= 12096) {
-      tax = 0; // a) Steuerfrei
-    } else if (income <= 17443) {
-      // b) (932,3 * y + 1.400) * y
-      const y = (income - 12096) / 10000;
-      tax = (932.3 * y + 1400) * y;
-    } else if (income <= 68480) {
-      // c) (176,64 * z + 2.397) * z + 1.015,13
-      const z = (income - 17443) / 10000;
-      tax = (176.64 * z + 2397) * z + 1015.13;
-    } else if (income <= 277825) {
-      // d) 0,42 * zvE - 10.911,92
-      tax = 0.42 * income - 10911.92;
-    } else {
-      // e) 0,45 * zvE - 19.246,67
-      tax = 0.45 * income - 19246.67;
-    }
+  //   if (income <= 12096) {
+  //     tax = 0; // a) Steuerfrei
+  //   } else if (income <= 17443) {
+  //     // b) (932,3 * y + 1.400) * y
+  //     const y = (income - 12096) / 10000;
+  //     tax = (932.3 * y + 1400) * y;
+  //   } else if (income <= 68480) {
+  //     // c) (176,64 * z + 2.397) * z + 1.015,13
+  //     const z = (income - 17443) / 10000;
+  //     tax = (176.64 * z + 2397) * z + 1015.13;
+  //   } else if (income <= 277825) {
+  //     // d) 0,42 * zvE - 10.911,92
+  //     tax = 0.42 * income - 10911.92;
+  //   } else {
+  //     // e) 0,45 * zvE - 19.246,67
+  //     tax = 0.45 * income - 19246.67;
+  //   }
 
-    return Math.max(0, tax); // Steuer darf nicht negativ sein
+  //   return Math.max(0, tax); // Steuer darf nicht negativ sein
 
 
-    // return tax
-  }
+  //   // return tax
+  // }
 
-  const calculateInheritanceTax = (amount: number, taxClass: keyof typeof INHERITANCE_TAX_CLASSES) => {
-    let tax = 0
-    let exemption = 400000 // freibetrag
-    let taxableAmount = amount - exemption
+  // const calculateInheritanceTax = (amount: number, taxClass: keyof typeof INHERITANCE_TAX_CLASSES) => {
+  //   let tax = 0
+  //   let exemption = 400000 // freibetrag
+  //   let taxableAmount = amount - exemption
 
-    for (const bracket of INHERITANCE_TAX_CLASSES[taxClass]) {
-      if (taxableAmount > bracket.limit) {
-        continue
-      }
+  //   for (const bracket of INHERITANCE_TAX_CLASSES[taxClass]) {
+  //     if (taxableAmount > bracket.limit) {
+  //       continue
+  //     }
 
-      tax = Math.max(0, (taxableAmount) * bracket.rate)
-      break
-    }
+  //     tax = Math.max(0, (taxableAmount) * bracket.rate)
+  //     break
+  //   }
 
-    return tax
-  }
+  //   return tax
+  // }
 
-  const calculateVAT = (income: number, vatRate: number, vatApplicableRate: number) => {
-    const grossSpending = income * (vatApplicableRate / 100)
-    return grossSpending * (vatRate / (100 + vatRate))
-  }
+  // const calculateVAT = (income: number, vatRate: number, vatApplicableRate: number) => {
+  //   const grossSpending = income * (vatApplicableRate / 100)
+  //   return grossSpending * (vatRate / (100 + vatRate))
+  // }
 
   const calculateLifeIncome = ({
     currentIncome,
@@ -115,34 +117,66 @@ export function useLifeIncomeCalculator() {
     inheritanceAge,
     inheritanceAmount,
     inheritanceTaxClass,
-    vatRate,
-    vatApplicableRate,
+    vatRate = 19,
+    vatApplicableRate = 70,
     yearlySpendingFromWealth,
     currentWealth,
-    selectedPersona,
+    currentPersona,
     initialAge = 20,
-    taxScenario = defaultTaxScenario
+    taxScenario = defaultTaxScenario,
+    yearlyOverrides = []
   }: CalculateLifeIncomeParams): LifeIncomeCalculatorResult | null => {
-    if (
-      isNaN(currentIncome) ||
-      isNaN(currentAge) ||
-      currentAge < initialAge ||
-      currentAge > 65 ||
-      isNaN(savingsRate) ||
-      savingsRate < 0 ||
-      savingsRate > 1 ||
-      isNaN(vatRate) ||
-      isNaN(vatApplicableRate) ||
-      isNaN(yearlySpendingFromWealth) ||
-      isNaN(currentWealth) ||
-      initialAge < 18 ||
-      initialAge > 65
-    ) {
+    // Validate all required numeric inputs
+    const validationErrors = []
+
+    if (isNaN(currentIncome)) {
+      validationErrors.push('Current income must be a valid number')
+    }
+
+    if (isNaN(currentAge)) {
+      validationErrors.push('Current age must be a valid number')
+    } else if (currentAge < initialAge) {
+      validationErrors.push(`Current age (${currentAge}) cannot be less than initial age (${initialAge})`)
+    } else if (currentAge > 65) {
+      validationErrors.push('Current age cannot be greater than 65')
+    }
+
+    if (isNaN(savingsRate)) {
+      validationErrors.push('Savings rate must be a valid number')
+    } else if (savingsRate < 0 || savingsRate > 1) {
+      validationErrors.push('Savings rate must be between 0 and 1')
+    }
+
+    if (isNaN(vatRate)) {
+      validationErrors.push('VAT rate must be a valid number')
+    }
+
+    if (isNaN(vatApplicableRate)) {
+      validationErrors.push('VAT applicable rate must be a valid number')
+    }
+
+    if (isNaN(yearlySpendingFromWealth)) {
+      validationErrors.push('Yearly spending from wealth must be a valid number')
+    }
+
+    if (isNaN(currentWealth)) {
+      validationErrors.push('Current wealth must be a valid number')
+    }
+
+    if (initialAge < 18) {
+      validationErrors.push('Initial age cannot be less than 18')
+    } else if (initialAge > 65) {
+      validationErrors.push('Initial age cannot be greater than 65')
+    }
+
+    if (validationErrors.length > 0) {
+      console.error('Validation errors:', validationErrors)
       return null
     }
 
+
     const defaultGrowthRate = () => 1.02
-    const growthRate = selectedPersona?.incomeGrowth || defaultGrowthRate
+    const growthRate = currentPersona?.incomeGrowth || defaultGrowthRate
     const wealthGrowthRate = 0.05 // Base growth rate for wealth
     const wealthIncomeRate = 0.03 // Income generated from wealth (e.g., dividends, interest)
     const results: LifeIncomeResult[] = []
@@ -172,12 +206,31 @@ export function useLifeIncomeCalculator() {
       totalSpendingFromIncome: 0,
     }
 
+    // Create a map of yearly overrides for quick lookup
+    const overridesMap = new Map<number, { income?: number; wealth?: number }>()
+    yearlyOverrides.forEach(override => {
+      overridesMap.set(override.age, { income: override.income, wealth: override.wealth })
+    })
+
     // Calculate from initial age (20) to retirement
     for (let i = initialAge; i <= 65; i++) {
-      // Calculate work income
-      const yearIncome = i === initialAge
+      // Check if there's an override for this year
+      const override = overridesMap.get(i)
+
+      // Calculate work income (use override if available)
+      let yearIncome = i === initialAge
         ? initialIncome
         : results[results.length - 1].income * (typeof growthRate === 'function' ? growthRate(i) : defaultGrowthRate())
+
+      // Apply income override if available
+      if (override && override.income !== undefined) {
+        yearIncome += override.income
+      }
+
+      // Apply wealth override if available
+      if (override && override.wealth !== undefined) {
+        totalWealth += override.wealth
+      }
 
       // Calculate wealth income (from investments)
       const wealthIncome = totalWealth * wealthIncomeRate

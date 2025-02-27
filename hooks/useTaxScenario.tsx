@@ -1,8 +1,10 @@
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react"
+import { taxScenarios, defaultTaxScenario } from "@/constants/tax-scenarios"
+import { TaxScenario } from "@/types/life-income"
 
-const scenarios = {
+const scenarioStats = {
   flat: {
     name: "Einheitssteuer",
     description: "Ein einfaches Modell: Jeder zahlt den gleichen Steuersatz von 16,13% auf Einkommen und Erbschaften.",
@@ -45,22 +47,39 @@ const scenarios = {
   },
 } as const
 
-type ScenarioId = keyof typeof scenarios
+type ScenarioId = keyof typeof scenarioStats
 type ScenarioContextType = {
-  selectedScenario: ScenarioId
-  setSelectedScenario: (scenario: ScenarioId) => void
-  scenarioDetails: typeof scenarios[ScenarioId]
+  selectedScenarioId: ScenarioId
+  setSelectedScenarioId: (scenarioId: ScenarioId) => void
+  scenarioDetails: typeof scenarioStats[ScenarioId]
+  selectedTaxScenario: TaxScenario
+}
+
+// Map scenario IDs from scenarioStats to tax scenario IDs
+const scenarioIdMap: Record<ScenarioId, string> = {
+  "flat": "flat-tax",
+  "progressive-flat": "progressive-wealth-tax",
+  "50es-tax-levels": "fiftys-tax",
+  "no-exceptions": "status-quo", // Placeholder - update with actual ID
+  "loophole-removal": "status-quo", // Placeholder - update with actual ID
 }
 
 const TaxScenarioContext = createContext<ScenarioContextType | undefined>(undefined)
 
 export function TaxScenarioProvider({ children }: { children: ReactNode }) {
-  const [selectedScenario, setSelectedScenario] = useState<ScenarioId>("flat")
+  const [selectedScenarioId, setSelectedScenarioId] = useState<ScenarioId>("flat")
+
+  // Find the corresponding tax scenario object
+  const getTaxScenario = (scenarioId: ScenarioId): TaxScenario => {
+    const taxScenarioId = scenarioIdMap[scenarioId]
+    return taxScenarios.find(scenario => scenario.id === taxScenarioId) || defaultTaxScenario
+  }
 
   const value = {
-    selectedScenario,
-    setSelectedScenario,
-    scenarioDetails: scenarios[selectedScenario],
+    selectedScenarioId,
+    setSelectedScenarioId,
+    scenarioDetails: scenarioStats[selectedScenarioId],
+    selectedTaxScenario: getTaxScenario(selectedScenarioId)
   }
 
   return (

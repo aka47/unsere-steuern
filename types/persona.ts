@@ -16,6 +16,11 @@ export interface Persona {
   incomeGrowth: (age: number) => number
   yearlySpendingFromWealth: number
   currentWealth: number
+  yearlyOverrides?: {
+    age: number
+    income: number
+    wealth: number
+  }[]
 }
 
 export const defaultPersona: Persona = {
@@ -35,7 +40,7 @@ export const defaultPersona: Persona = {
   vatApplicableRate: 70,
   incomeGrowth: (age) => (age <= 45 ? 1.02 : 1.0),
   yearlySpendingFromWealth: 0,
-  currentWealth: 0
+  currentWealth: 0,
 }
 
 export const initialPersonas: Persona[] = [
@@ -307,3 +312,197 @@ export const highIncomePersonas: Persona[] = [
     currentWealth: 5000000
   }
 ]
+
+
+const grokPersonas: Persona[] = [
+  {
+    id: "p1",
+    name: "Low-Income Retiree",
+    description: "Bottom 10% wealth, minimal savings, low income mostly from work.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 20000,
+    currentIncomeFromWealth: 1000,  // 5% of total income
+    savingsRate: 0.05,
+    inheritanceAge: 55,
+    inheritanceAmount: 50000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 400,  // ~5% of €7,932
+    currentWealth: 7932,
+  },
+  {
+    id: "p2",
+    name: "Modest Earner",
+    description: "10-20% wealth, modest income with small wealth contribution.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 28000,
+    currentIncomeFromWealth: 1400,  // 5% of total income
+    savingsRate: 0.07,
+    inheritanceAge: 55,
+    inheritanceAmount: 75000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 550,  // ~5% of €11,058
+    currentWealth: 11058,
+  },
+  {
+    id: "p3",
+    name: "Middle-Low Earner",
+    description: "20-30% wealth, moderate income with growing savings.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 36000,
+    currentIncomeFromWealth: 1800,  // 5% of total income
+    savingsRate: 0.08,
+    inheritanceAge: 55,
+    inheritanceAmount: 100000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 870,  // ~5% of €17,428
+    currentWealth: 17428,
+  },
+  {
+    id: "p4",
+    name: "Median Earner",
+    description: "30-40% wealth, stable income with moderate wealth.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 44000,
+    currentIncomeFromWealth: 2200,  // 5% of total income
+    savingsRate: 0.09,
+    inheritanceAge: 55,
+    inheritanceAmount: 150000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 1268,  // ~5% of €25,361
+    currentWealth: 25361,
+  },
+  {
+    id: "p5",
+    name: "Upper-Middle Earner",
+    description: "40-50% wealth, above-average income with solid savings.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 52000,
+    currentIncomeFromWealth: 2600,  // 5% of total income
+    savingsRate: 0.10,
+    inheritanceAge: 55,
+    inheritanceAmount: 200000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 1905,  // ~5% of €38,101
+    currentWealth: 38101,
+  },
+  {
+    id: "p6",
+    name: "High Earner",
+    description: "50-60% wealth, high income with notable wealth income.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 64000,
+    currentIncomeFromWealth: 6400,  // 10% of total income
+    savingsRate: 0.12,
+    inheritanceAge: 50,
+    inheritanceAmount: 250000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 2855,  // ~5% of €57,091
+    currentWealth: 57091,
+  },
+  {
+    id: "p7",
+    name: "Upper-High Earner",
+    description: "60-70% wealth, very high income with substantial wealth.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 80000,
+    currentIncomeFromWealth: 8000,  // 10% of total income
+    savingsRate: 0.13,
+    inheritanceAge: 50,
+    inheritanceAmount: 300000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 4123,  // ~5% of €82,452
+    currentWealth: 82452,
+  },
+  {
+    id: "p8",
+    name: "Wealthy Professional",
+    description: "70-80% wealth, top income with significant wealth income.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 100000,
+    currentIncomeFromWealth: 10000,  // 10% of total income
+    savingsRate: 0.14,
+    inheritanceAge: 50,
+    inheritanceAmount: 400000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 6184,  // ~5% of €123,678
+    currentWealth: 123678,
+  },
+  {
+    id: "p9",
+    name: "Affluent Investor",
+    description: "80-90% wealth, very high income with large wealth income.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 140000,
+    currentIncomeFromWealth: 14000,  // 10% of total income
+    savingsRate: 0.15,
+    inheritanceAge: 45,
+    inheritanceAmount: 450000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 13095,  // ~5% of €261,899
+    currentWealth: 261899,
+  },
+  {
+    id: "p10",
+    name: "Top Wealth Holder",
+    description: "Top 10% wealth, extremely high income with significant wealth income.",
+    icon: "👤",
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 200000,
+    currentIncomeFromWealth: 40000,  // 20% of total income
+    savingsRate: 0.15,
+    inheritanceAge: 45,
+    inheritanceAmount: 500000,
+    inheritanceTaxClass: 1,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: (age: number) => (age === 60 ? 1 : 1.02),
+    yearlySpendingFromWealth: 44389,  // ~5% of €887,788
+    currentWealth: 887788,
+  },
+];

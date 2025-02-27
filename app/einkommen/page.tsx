@@ -1,21 +1,19 @@
 import { Suspense } from "react"
-import { Info } from "lucide-react"
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { PageHeader } from "@/components/ui/page-header"
 import { IncomeOverview } from "@/components/income/income-overview"
 import { IncomeDistribution } from "@/components/income/income-distribution"
 import { TaxBrackets } from "@/components/income/tax-brackets"
 import { AdditionalInsights } from "@/components/income/additional-insights"
 import { DataSources } from "@/components/income/data-sources"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { PageHeader } from "@/components/ui/page-header"
+
 export default function IncomeDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Einkommen aus Löhnen in Deutschland"
-        subtitle="Das Einkommen aus Löhnen (Arbeitseinkommen) ist die Haupteinnahmequelle für die meisten Menschen und ein wichtiger Faktor für die Wirtschaft und öffentlichen Finanzen. Diese Übersicht zeigt die Verteilung und steuerliche Auswirkung von Lohneinkommen in Deutschland."
+        title="Einkommen in Deutschland"
+        subtitle="In diesem Dashboard können Sie die aktuelle Einkommensverteilung in Deutschland sehen."
       />
 
 
@@ -26,32 +24,7 @@ export default function IncomeDashboard() {
 
         {/* Main Grid Layout */}
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Income Distribution */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle>Einkommensverteilung</CardTitle>
-                  <CardDescription>Monatliches Bruttoäquivalenzeinkommen nach Perzentilen</CardDescription>
-                </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Bruttoäquivalenzeinkommen berücksichtigt die Haushaltsgröße und -zusammensetzung
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-                <IncomeDistribution />
-              </Suspense>
-            </CardContent>
-          </Card>
+          <IncomeDistribution />
 
           {/* Tax Brackets */}
           <Card className="md:col-span-2">
