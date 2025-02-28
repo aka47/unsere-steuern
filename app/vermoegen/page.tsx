@@ -79,8 +79,8 @@ export default function WealthDashboard() {
           {/* Wealth Type Breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle>Vermögensarten</CardTitle>
-              <CardDescription>Verteilung nach Vermögenstypen</CardDescription>
+              <CardTitle>Gesamtvermögens</CardTitle>
+              <CardDescription>Die jährlichen Zugewinne des Vermögens werden nur zu 10% versteuert, 90% bleiben als unrealisierte Gewinnen steuerfrei.</CardDescription>
             </CardHeader>
             <CardContent>
               <Suspense fallback={<Skeleton className="h-[350px] w-full" />}>

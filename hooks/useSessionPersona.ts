@@ -23,9 +23,9 @@ export function useSessionPersona() {
   }, [update])
 
   return {
-    persona: session?.currentPersona,
-    setPersona,
-    clearPersona,
+    currentPersona: session?.user?.personas?.active || session?.currentPersona,
+    setCurrentPersona: setPersona,
+    clearCurrentPersona: clearPersona,
     isLoading: session === undefined
   }
 }

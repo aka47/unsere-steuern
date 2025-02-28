@@ -47,7 +47,8 @@ export function TaxScenarioComparison({
         ...persona,
         currentWealth,
         yearlySpendingFromWealth,
-        taxScenario: scenario
+        taxScenario: scenario,
+        inheritanceAge: persona.inheritanceAge ?? 0
       })
 
       if (calculationResult) {

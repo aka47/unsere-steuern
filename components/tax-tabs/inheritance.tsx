@@ -21,13 +21,13 @@ export default function Inheritance() {
 
   const COLORS = ['#0088FE', '#00C49F'];
 
-  const growthRate = 0.04;
+  const growthRate = 1.04;
   const taxRate = 0.07;
   const years = 38;
 
   const yearlyData = Array.from({ length: years }, (_, i) => {
-    const year = i + 2025;
-    const wealth = Math.round(inheritedWealthPerYear * Math.pow(1 + growthRate, year));
+    const year = i + 0;
+    const wealth = Math.round(inheritedWealthPerYear * Math.pow(growthRate, year));
     const taxedPart = Math.round(wealth * taxRate);
     return {
       year,
@@ -75,7 +75,7 @@ export default function Inheritance() {
           {yearlyData.map((data, index) => (
             <div key={index} className="p-1">
               <div className="bg-white p-1 rounded shadow">
-                <h4 className="text-sm font-semibold">Jahr {data.year}</h4>
+                <h4 className="text-sm font-semibold">Jahr {new Date().getFullYear() + data.year}</h4>
                 <ResponsiveContainer width={80} height={80}>
                   <PieChart>
                     <Pie

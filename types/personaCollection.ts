@@ -1,4 +1,4 @@
-import { Persona, defaultPersona, initialPersonas, avgPersonas, highIncomePersonas } from "./persona"
+import { Persona, defaultPersona, initialPersonas, avgPersonas, highIncomePersonas, grokPersonas } from "./persona"
 
 export interface PersonaCollection {
   id: string
@@ -48,7 +48,7 @@ const generate100Personas = (): Persona[] => {
       currentIncome: Math.round(30000 * Math.pow(1.05, i)),
       currentIncomeFromWealth: Math.round(5000 * Math.pow(1.08, i)),
       savingsRate: 0.1 + percentile * 0.4, // Von 10% bis 50% Sparrate
-      inheritanceAge: inheritance > 0 ? Math.floor(40 + Math.random() * 20) : undefined,
+      inheritanceAge: inheritance > 0 ? Math.floor(40 + Math.random() * 20) : null,
       inheritanceAmount: inheritance,
       vatApplicableRate: Math.round(50 + percentile * 50), // 50%-100%
       incomeGrowth: (age) => (age <= 60 ? 1.02 + percentile * 0.03 : 1.01),
@@ -70,6 +70,13 @@ export const avgPersonasCollection: PersonaCollection = {
   title: "Einkommensverteilung",
   description: "Repräsentative Personas für verschiedene Einkommensschichten, von Geringverdienern bis zur vermögenden Elite.",
   personas: avgPersonas
+}
+
+export const grokPersonasCollection: PersonaCollection = {
+  id: "grok-personas",
+  title: "Grok Einkommensverteilung",
+  description: "Repräsentative Personas für verschiedene Einkommensschichten, von Geringverdienern bis zur vermögenden Elite.",
+  personas: grokPersonas
 }
 
 export const highIncomePersonasCollection: PersonaCollection = {

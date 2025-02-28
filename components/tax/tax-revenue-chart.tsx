@@ -47,7 +47,7 @@ export function TaxRevenueChart() {
           </TabsList>
 
           <TabsContent value="chart" className="mt-4">
-            <div className="h-[400px] flex flex-col">
+            <div className="h-[450px] flex flex-col">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -66,14 +66,14 @@ export function TaxRevenueChart() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [formatCurrency(value), "Steuereinnahmen"]}
+                    formatter={(value: number, _entry) => [formatCurrency(value), "Steuereinnahmen"]}
                     labelFormatter={(name) => `Kategorie: ${name}`}
                   />
                   <Legend
                     layout="vertical"
                     verticalAlign="middle"
                     align="right"
-                    formatter={(value, entry) => {
+                    formatter={(value, _entry) => {
                       // Find the corresponding data entry
                       const dataEntry = taxRevenueBreakdown.find(item => item.category === value);
                       return dataEntry ? `${value} (${formatPercentage(dataEntry.percentage)})` : value;

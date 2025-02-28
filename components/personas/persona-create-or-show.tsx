@@ -14,7 +14,7 @@ interface PersonaCreateOrShowProps {
 
 export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
   const router = useRouter()
-  const { persona: sessionPersona, setPersona, clearPersona } = useSessionPersona()
+  const { currentPersona: sessionPersona, setCurrentPersona, clearCurrentPersona } = useSessionPersona()
   const [_isEditing, setIsEditing] = useState(false)
 
   // Use session persona if available, otherwise use the prop
@@ -22,7 +22,7 @@ export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
 
   const handleSaveToSession = () => {
     if (userPersona) {
-      setPersona(userPersona)
+      setCurrentPersona(userPersona)
     }
   }
 
@@ -70,7 +70,7 @@ export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
               <Button
                 variant="outline"
                 className="ml-2"
-                onClick={() => clearPersona()}
+                onClick={() => clearCurrentPersona()}
               >
                 <LogOutIcon className="h-4 w-4 mr-2" />
                 Daten entfernen

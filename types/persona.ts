@@ -5,10 +5,10 @@ export interface Persona {
   icon: string
   initialAge: number
   currentAge: number
-  currentIncome: number
-  currentIncomeFromWealth: number
+  currentIncome: number | 0
+  currentIncomeFromWealth: number | 0
   savingsRate: number
-  inheritanceAge: number | undefined
+  inheritanceAge: number | null
   inheritanceAmount: number
   inheritanceTaxClass: 1 | 2 | 3
   vatRate: number
@@ -33,7 +33,7 @@ export const defaultPersona: Persona = {
   currentIncome: 30000,
   currentIncomeFromWealth: 0,
   savingsRate: 0,
-  inheritanceAge: undefined,
+  inheritanceAge: null,
   inheritanceAmount: 0,
   inheritanceTaxClass: 1,
   vatRate: 19,
@@ -314,11 +314,11 @@ export const highIncomePersonas: Persona[] = [
 ]
 
 
-const grokPersonas: Persona[] = [
+export const grokPersonas: Persona[] = [
   {
     id: "p1",
-    name: "Low-Income Retiree",
-    description: "Bottom 10% wealth, minimal savings, low income mostly from work.",
+    name: "Geringverdiener im Ruhestand",
+    description: "Untere 10% Vermögen, minimale Ersparnisse, niedriges Einkommen hauptsächlich aus Arbeit.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -336,8 +336,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p2",
-    name: "Modest Earner",
-    description: "10-20% wealth, modest income with small wealth contribution.",
+    name: "Bescheidener Verdiener",
+    description: "10-20% Vermögen, bescheidenes Einkommen mit kleinem Vermögensbeitrag.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -355,8 +355,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p3",
-    name: "Middle-Low Earner",
-    description: "20-30% wealth, moderate income with growing savings.",
+    name: "Untere Mittelschicht",
+    description: "20-30% Vermögen, moderates Einkommen mit wachsenden Ersparnissen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -374,8 +374,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p4",
-    name: "Median Earner",
-    description: "30-40% wealth, stable income with moderate wealth.",
+    name: "Durchschnittsverdiener",
+    description: "30-40% Vermögen, stabiles Einkommen mit moderatem Vermögen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -393,8 +393,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p5",
-    name: "Upper-Middle Earner",
-    description: "40-50% wealth, above-average income with solid savings.",
+    name: "Gehobene Mittelschicht",
+    description: "40-50% Vermögen, überdurchschnittliches Einkommen mit soliden Ersparnissen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -412,8 +412,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p6",
-    name: "High Earner",
-    description: "50-60% wealth, high income with notable wealth income.",
+    name: "Gutverdiener",
+    description: "50-60% Vermögen, hohes Einkommen mit bemerkenswertem Vermögenseinkommen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -431,8 +431,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p7",
-    name: "Upper-High Earner",
-    description: "60-70% wealth, very high income with substantial wealth.",
+    name: "Besserverdiener",
+    description: "60-70% Vermögen, sehr hohes Einkommen mit beträchtlichem Vermögen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -450,8 +450,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p8",
-    name: "Wealthy Professional",
-    description: "70-80% wealth, top income with significant wealth income.",
+    name: "Wohlhabender Berufstätiger",
+    description: "70-80% Vermögen, Spitzeneinkommen mit signifikantem Vermögenseinkommen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -469,8 +469,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p9",
-    name: "Affluent Investor",
-    description: "80-90% wealth, very high income with large wealth income.",
+    name: "Vermögender Investor",
+    description: "80-90% Vermögen, sehr hohes Einkommen mit großem Vermögenseinkommen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,
@@ -488,8 +488,8 @@ const grokPersonas: Persona[] = [
   },
   {
     id: "p10",
-    name: "Top Wealth Holder",
-    description: "Top 10% wealth, extremely high income with significant wealth income.",
+    name: "Spitzenvermögensinhaber",
+    description: "Top 10% Vermögen, extrem hohes Einkommen mit bedeutendem Vermögenseinkommen.",
     icon: "👤",
     initialAge: 25,
     currentAge: 60,

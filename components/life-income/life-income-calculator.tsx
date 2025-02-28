@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Persona, initialPersonas as _initialPersonas, defaultPersona } from "@/types/persona"
+import { type Persona, defaultPersona } from "@/types/persona"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 import { Separator } from "@/components/ui/separator"
@@ -21,8 +21,8 @@ import { YearlyBreakdown } from "@/components/life-income/yearly-breakdown"
 
 interface LifeIncomeCalculatorProps {
   setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
-  currentPersona: Persona | null
-  setCurrentPersona: (persona: Persona | null) => void
+  persona: Persona | null
+  setPersona: (persona: Persona | null) => void
 }
 
 const validateInheritanceTaxClass = (value: string): keyof typeof INHERITANCE_TAX_CLASSES => {
@@ -31,7 +31,7 @@ const validateInheritanceTaxClass = (value: string): keyof typeof INHERITANCE_TA
   return taxClass as unknown as keyof typeof INHERITANCE_TAX_CLASSES
 }
 
-export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPersona }: LifeIncomeCalculatorProps) {
+export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIncomeCalculatorProps) {
   const [currentIncome, setCurrentIncome] = useState("")
   const [currentAge, setCurrentAge] = useState("")
   const [savingsRate, setSavingsRate] = useState("")
@@ -44,28 +44,28 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
   const [yearlyResults, setYearlyResults] = useState<LifeIncomeResults>(null)
   const [showYearlyBreakdown, setShowYearlyBreakdown] = useState(false)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
-  const { persona: sessionPersona, setPersona } = useSessionPersona()
+  const { currentPersona, setCurrentPersona } = useSessionPersona()
 
   useEffect(() => {
-    if (!currentPersona && sessionPersona) {
-      setCurrentPersona(sessionPersona)
+    if (!persona && currentPersona) {
+      setPersona(currentPersona)
     }
-  }, [sessionPersona, currentPersona, setCurrentPersona])
+  }, [currentPersona, persona, setPersona])
 
   useEffect(() => {
-    if (currentPersona) {
-      setCurrentIncome(currentPersona.currentIncome.toString())
-      setCurrentAge(currentPersona.currentAge.toString())
-      setSavingsRate((currentPersona.savingsRate * 100).toString())
-      setInheritanceAge(currentPersona.inheritanceAge?.toString() ?? "")
-      setInheritanceAmount(currentPersona.inheritanceAmount?.toString())
-      setSpending(currentPersona.yearlySpendingFromWealth?.toString())
-      setWealth(currentPersona.currentWealth?.toString() ?? "0")
+    if (persona) {
+      setCurrentIncome(persona.currentIncome.toString())
+      setCurrentAge(persona.currentAge.toString())
+      setSavingsRate((persona.savingsRate * 100).toString())
+      setInheritanceAge(persona.inheritanceAge?.toString() ?? "")
+      setInheritanceAmount(persona.inheritanceAmount?.toString())
+      setSpending(persona.yearlySpendingFromWealth?.toString())
+      setWealth(persona.currentWealth?.toString() ?? "0")
     }
-  }, [currentPersona])
+  }, [persona])
 
   const handleCalculation = () => {
-    if (!currentPersona) {
+    if (!persona) {
       // Create a new persona from current form values, using defaultPersona as base
       const newPersona: Persona = {
         ...defaultPersona,
@@ -75,7 +75,7 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
         currentAge: Number.parseInt(currentAge, 10),
         currentIncome: Number.parseFloat(currentIncome),
         savingsRate: Number.parseFloat(savingsRate) / 100,
-        inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
+        inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : null,
         inheritanceAmount: Number.parseFloat(inheritanceAmount),
         inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass),
         yearlySpendingFromWealth: Number.parseFloat(spending),
@@ -92,7 +92,7 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
       currentIncome: Number.parseFloat(currentIncome),
       currentAge: Number.parseInt(currentAge, 10),
       savingsRate: Number.parseFloat(savingsRate) / 100,
-      inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
+      inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : 20,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
       inheritanceTaxClass: validateInheritanceTaxClass(inheritanceTaxClass),
       yearlySpendingFromWealth: Number.parseFloat(spending),
@@ -124,7 +124,7 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
     }
 
     if (validationErrors.length > 0) {
-      alert("Bitte geben Sie gültige Zahlen ein." + parsedValues)
+      alert("Bitte geben Sie gültige Zahlen ein." + validationErrors.join("\n"))
       console.log(validationErrors)
       return
     }
@@ -167,24 +167,21 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
   }
 
   const savePersona = () => {
-    if (!currentPersona) return
+    if (!persona) return
 
     const updatedPersona: Persona = {
-      ...currentPersona,
+      ...persona,
       currentIncome: Number.parseFloat(currentIncome),
       currentAge: Number.parseInt(currentAge, 10),
       savingsRate: Number.parseFloat(savingsRate) / 100,
-      inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : undefined,
+      inheritanceAge: inheritanceAge ? Number.parseInt(inheritanceAge, 10) : 0,
       inheritanceAmount: Number.parseFloat(inheritanceAmount),
       yearlySpendingFromWealth: Number.parseFloat(spending),
       currentWealth: Number.parseFloat(wealth)
     }
 
-    // const updatedPersonas = personas.map((p) => (p.id === updatedPersona.id ? updatedPersona : p))
-    // setPersonas(updatedPersonas)
-    // localStorage.setItem("personas", JSON.stringify(updatedPersonas))
-
     setPersona(updatedPersona)
+    setCurrentPersona(updatedPersona)
 
     alert("Persona erfolgreich gespeichert!")
   }
@@ -419,7 +416,7 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
           </div>
           <Separator />
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="spending">Jährliche Ausgaben (€)</Label>
+            <Label htmlFor="spending">Jährliche Ausgaben aus dem Vermögen (€) (falls sie aus ihrem Vermögen leben)</Label>
             <Input
               id="spending"
               placeholder="z.B. 30000"
@@ -481,9 +478,9 @@ export function LifeIncomeCalculator({ setResults, currentPersona, setCurrentPer
           <Button onClick={handleCalculation} className="bg-primary hover:bg-primary/90">
             Lebenseinkommen - Übersicht erstellen
           </Button>
-          {currentPersona && (
+          {persona && (
             <Button onClick={savePersona} variant="outline" className="border-primary text-primary hover:bg-primary/10">
-              Persona Speichern
+              Speichern
             </Button>
           )}
         </div>

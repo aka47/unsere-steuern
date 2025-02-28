@@ -10,10 +10,10 @@ export type LifeIncomeResult = LifeIncomeYearlyResult & {
 }
 
 type CalculateLifeIncomeParams = {
-  currentIncome: number
+  currentIncome: number | 0
   currentAge: number
   savingsRate: number
-  inheritanceAge: number | undefined
+  inheritanceAge: number | 20
   inheritanceAmount: number
   inheritanceTaxClass: 1 | 2 | 3
   vatRate: number | 19

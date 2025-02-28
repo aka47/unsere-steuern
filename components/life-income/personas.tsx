@@ -89,7 +89,7 @@ const calculatedPersonas = personas.map((persona) => {
     yearlySpendingFromWealth: persona.annualIncome * (1 - persona.savingsRate),
     currentAge: 20,
     initialAge: 20,
-    inheritanceAge: persona.inheritanceChance > 0 ? 40 : undefined,
+    inheritanceAge: persona.inheritanceChance > 0 ? 40 : 0,
     inheritanceAmount: persona.typicalInheritance,
     inheritanceTaxClass: 1 as const,
     vatRate: 19,

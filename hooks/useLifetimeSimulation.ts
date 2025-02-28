@@ -26,7 +26,7 @@ export function useLifetimeSimulation(persona: Persona, scenario: string) {
     let totalIncome = 0
     let totalWealth = 0
     let totalTaxesPaid = 0
-
+    let totalSpending = 0
     for (let age = persona.initialAge; age <= retirementAge; age++) {
       const yearIncome = persona.currentIncome * Math.pow(persona.incomeGrowth(age), age - persona.initialAge)
       let yearTax = 0
@@ -68,6 +68,13 @@ export function useLifetimeSimulation(persona: Persona, scenario: string) {
       totalIncome += yearIncome
       totalTaxesPaid += yearTax
       totalWealth += yearSavings
+
+      if (persona.yearlySpendingFromWealth) {
+        totalSpending += persona.yearlySpendingFromWealth
+      } else {
+        totalSpending += (yearIncome - yearTax) - yearSavings
+      }
+
 
       if (age === persona.inheritanceAge) {
         let inheritanceTax = 0
@@ -114,6 +121,7 @@ export function useLifetimeSimulation(persona: Persona, scenario: string) {
     return {
       yearlyData,
       totalIncome,
+      totalSpending,
       totalWealth,
       totalTaxesPaid,
       effectiveTaxRate: totalTaxesPaid / totalIncome,

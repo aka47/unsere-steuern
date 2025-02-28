@@ -5,7 +5,8 @@ import { LifeIncomeCalculator } from "@/components/life-income/life-income-calcu
 import { type Persona } from "@/types/persona"
 import { type LifeIncomeResults as _LifeIncomeResultsType } from "@/types/life-income"
 import { PageHeader } from "@/components/ui/page-header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { TypographyP } from "@/components/ui/typography"
 
 export default function LifeIncomeCalculatorPage() {
   const [currentPersona, setCurrentPersona] = useState<Persona | null>(null)
@@ -23,16 +24,25 @@ export default function LifeIncomeCalculatorPage() {
           <Card className="shadow-sm">
             <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Ihre Daten</CardTitle>
-              <CardDescription>Geben Sie Ihre persönlichen Daten ein</CardDescription>
+              <CardDescription>Wir verpflichten uns, diese Informationen nicht an Dritte weiterzugeben und mit äusserter Sicherheit zu behandeln.</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="">
+              <TypographyP className="text-sm w-2/3">
+                Ihr Einkommen, Vermögen und andere finanzielle Informationen sind sensible in ihrer Natur.
+                Damit Sie verstehen können, wie viel Geld sie mit ihren Steuern für ein gravierend ungleiches Steuersystem zahlen,
+                sind diese Information unerlässlich. Und im gleichen Zug zeigen wir Ihnen, wie viel Geld sie sparen können, wenn wir das Steuersystem ändern.
+              </TypographyP>
+
+              <TypographyP className="text-sm w-2/3 mt-2">
+                Wir freuen uns, wenn Sie eine E-Mail Adresse benutzen für ihren Account auf unsere-steuern.de, die anonymisiert ist und keine Rückschlüsse auf Ihre Person zulässt.
+              </TypographyP>
 
             </CardContent>
           </Card>
           <LifeIncomeCalculator
                 setResults={setResults}
-                currentPersona={currentPersona}
-                setCurrentPersona={setCurrentPersona}
+                persona={currentPersona}
+                setPersona={setCurrentPersona}
               />
 
           {/* {results && (

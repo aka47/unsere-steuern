@@ -1,55 +1,67 @@
-import CredentialsProvider from "next-auth/providers/credentials"
-import type { NextAuthOptions } from "next-auth"
-import type { Persona } from "@/types/persona"
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { prisma } from "@/lib/prisma";
+import { compare } from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/auth",
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // This is a simplified demo auth - in production, you'd validate against a real database
-        if (credentials?.username === "demo" && credentials?.password === "demo") {
-          return {
-            id: "1",
-            name: "Demo User",
-            email: "demo@example.com",
-          }
+        if (!credentials?.email || !credentials?.password) {
+          return null;
         }
-        return null
-      }
-    })
+
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email,
+          },
+        });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const isPasswordValid = await compare(credentials.password, user.password);
+
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
+      },
+    }),
   ],
   callbacks: {
     async session({ session, token }) {
-      // Send properties to the client
-      if (token.currentPersona) {
-        session.currentPersona = token.currentPersona as Persona
+      if (token && session.user) {
+        session.user.id = token.id as string;
       }
-      return session
+      return session;
     },
-    async jwt({ token, user, trigger, session }) {
-      // Initial sign in
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-
-      // Update session
-      if (trigger === "update" && session?.currentPersona) {
-        token.currentPersona = session.currentPersona
-      }
-
-      return token
-    }
+      return token;
+    },
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  pages: {
-    signIn: "/auth/signin",
-  }
-}
+};

@@ -1,7 +1,6 @@
 "use client"
 
 import { TaxScenarioSelector } from "@/components/tax-scenarios/tax-scenario-selector"
-import { ScenarioSummary } from "@/components/tax-scenarios/scenario-summary"
 import { DataSources } from "@/components/tax-scenarios/data-sources"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PersonalTaxImpact } from "@/components/tax-scenarios/personal-tax-impact"
@@ -12,11 +11,11 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { EditIcon, UserIcon } from "lucide-react"
 import { PersonaList } from "@/components/personas/persona-list"
-
+import { grokPersonas } from "@/types/persona"
 
 export default function TaxScenariosPage() {
-  const { persona } = useSessionPersona()
-  const userPersona = persona || null
+  const { currentPersona } = useSessionPersona()
+  const userPersona = currentPersona || null
 
   return (
     <>
@@ -45,7 +44,7 @@ export default function TaxScenariosPage() {
           <PersonalTaxImpact userPersona={userPersona} />
 
           {/* Szenario-Zusammenfassung */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Auswirkungen auf einen Blick</CardTitle>
               <CardDescription>Die wichtigsten Ergebnisse des gewählten Steuermodells übersichtlich zusammengefasst</CardDescription>
@@ -53,9 +52,22 @@ export default function TaxScenariosPage() {
             <CardContent>
               <ScenarioSummary />
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Persona-Simulationen */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lebensrealitäten im Vergleich</CardTitle>
+              <CardDescription>
+                Erkunden Sie, wie sich das gewählte Steuermodell auf verschiedene Lebenswege auswirkt - von der Berufseinsteigerin
+                bis zum Familienvater, von der Facharbeiterin bis zur Selbstständigen
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PersonaList personas={grokPersonas} onPersonaClick={() => { }} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Lebensrealitäten im Vergleich</CardTitle>

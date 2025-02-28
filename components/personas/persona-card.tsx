@@ -5,6 +5,7 @@ import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import { TaxScenario } from "@/types/life-income"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 interface PersonaCardProps {
   persona: Persona
@@ -24,30 +25,37 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
   const selectedScenarioResults = calculateLifeIncome({
     ...persona,
     currentPersona: persona,
-    taxScenario: activeTaxScenario
+    taxScenario: activeTaxScenario,
+    inheritanceAge: persona.inheritanceAge ?? 0
   })
 
   // Always calculate results with the default tax scenario for comparison
   const defaultScenarioResults = calculateLifeIncome({
     ...persona,
     currentPersona: persona,
-    taxScenario: defaultTaxScenario
+    taxScenario: defaultTaxScenario,
+    inheritanceAge: persona.inheritanceAge ?? 0
   })
 
   // Prepare data for comparison chart
   const comparisonData = [
+    // {
+    //   name: "Income",
+    //   current: defaultScenarioResults?.totals.totalIncome || 0,
+    //   proposed: selectedScenarioResults?.totals.totalIncome || 0
+    // },
     {
-      name: "Income",
-      current: defaultScenarioResults?.totals.totalIncome || 0,
-      proposed: selectedScenarioResults?.totals.totalIncome || 0
+      name: "Konsum",
+      current: defaultScenarioResults?.totals.totalSpending || 0,
+      proposed: selectedScenarioResults?.totals.totalSpending || 0
     },
     {
-      name: "Final Wealth",
+      name: "Vermögen",
       current: defaultScenarioResults?.totals.totalWealth || 0,
       proposed: selectedScenarioResults?.totals.totalWealth || 0
     },
     {
-      name: "Taxes",
+      name: "Steuern",
       current: (defaultScenarioResults?.totals.totalIncomeTax || 0) +
                (defaultScenarioResults?.totals.totalVAT || 0) +
                (defaultScenarioResults?.totals.totalInheritanceTax || 0),
@@ -77,6 +85,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
         )}
       </CardHeader>
       <CardContent>
+
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={comparisonData}>
@@ -128,6 +137,78 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {showComparison && (
+          <div className="mt-4 font-mono text-sm border-t pt-4 space-y-3">
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <div className="flex justify-between cursor-help">
+                  <span>Steuerdifferenz:</span>
+                  <span className={((selectedScenarioResults?.totals.totalIncomeTax || 0) + (selectedScenarioResults?.totals.totalVAT || 0) + (selectedScenarioResults?.totals.totalInheritanceTax || 0)) < ((defaultScenarioResults?.totals.totalIncomeTax || 0) + (defaultScenarioResults?.totals.totalVAT || 0) + (defaultScenarioResults?.totals.totalInheritanceTax || 0)) ? "text-green-600" : "text-red-600"}>
+                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", signDisplay: "always" }).format(((selectedScenarioResults?.totals.totalIncomeTax || 0) + (selectedScenarioResults?.totals.totalVAT || 0) + (selectedScenarioResults?.totals.totalInheritanceTax || 0)) - ((defaultScenarioResults?.totals.totalIncomeTax || 0) + (defaultScenarioResults?.totals.totalVAT || 0) + (defaultScenarioResults?.totals.totalInheritanceTax || 0)))}
+                  </span>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Steuern ({activeTaxScenario.name}):</span>
+                    <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format((selectedScenarioResults?.totals.totalIncomeTax || 0) + (selectedScenarioResults?.totals.totalVAT || 0) + (selectedScenarioResults?.totals.totalInheritanceTax || 0))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Steuern ({defaultTaxScenario.name}):</span>
+                    <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format((defaultScenarioResults?.totals.totalIncomeTax || 0) + (defaultScenarioResults?.totals.totalVAT || 0) + (defaultScenarioResults?.totals.totalInheritanceTax || 0))}</span>
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <div className="flex justify-between cursor-help border-t-2 pt-2 font-bold">
+                  <span>Gesamtdifferenz:</span>
+                  <span className={((selectedScenarioResults?.totals.totalSpending || 0) + (selectedScenarioResults?.totals.totalWealth || 0)) > ((defaultScenarioResults?.totals.totalSpending || 0) + (defaultScenarioResults?.totals.totalWealth || 0)) ? "text-green-600" : "text-red-600"}>
+                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", signDisplay: "always" }).format(((selectedScenarioResults?.totals.totalSpending || 0) + (selectedScenarioResults?.totals.totalWealth || 0)) - ((defaultScenarioResults?.totals.totalSpending || 0) + (defaultScenarioResults?.totals.totalWealth || 0)))}
+                  </span>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <div>
+                    <div className="font-medium mb-2">{activeTaxScenario.name}:</div>
+                    <div className="flex justify-between text-sm">
+                      <span>Konsum:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(selectedScenarioResults?.totals.totalSpending || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Vermögen:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(selectedScenarioResults?.totals.totalWealth || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t border-dashed mt-1 pt-1">
+                      <span>Summe:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format((selectedScenarioResults?.totals.totalSpending || 0) + (selectedScenarioResults?.totals.totalWealth || 0))}</span>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="font-medium mb-2">{defaultTaxScenario.name}:</div>
+                    <div className="flex justify-between text-sm">
+                      <span>Konsum:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(defaultScenarioResults?.totals.totalSpending || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Vermögen:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(defaultScenarioResults?.totals.totalWealth || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t border-dashed mt-1 pt-1">
+                      <span>Summe:</span>
+                      <span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format((defaultScenarioResults?.totals.totalSpending || 0) + (defaultScenarioResults?.totals.totalWealth || 0))}</span>
+                    </div>
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

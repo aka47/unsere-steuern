@@ -17,6 +17,7 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
       ...persona,
       currentAge: persona.initialAge,
       currentPersona: persona,
+      inheritanceAge: persona.inheritanceAge ?? 0
     })
 
     if (!results) {

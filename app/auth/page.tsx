@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 
-export default function AuthPage() {
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/profile";
@@ -58,7 +58,7 @@ export default function AuthPage() {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An error occurred during sign in");
     } finally {
       setLoading(false);
@@ -86,17 +86,16 @@ export default function AuthPage() {
       }
 
       // Auto sign in after successful signup
-      const signInResult = await signIn("credentials", {
-        redirect: false,
-        email: signUpData.email,
-        password: signUpData.password,
-      });
-
-      if (signInResult?.error) {
-        setError("Account created but couldn't sign in automatically");
-      } else {
-        router.push(callbackUrl);
-        router.refresh();
+      try {
+        await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: true,
+          callbackUrl: "/",
+        });
+      } catch (_err) {
+        setError("Invalid email or password");
+        setLoading(false);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -109,7 +108,7 @@ export default function AuthPage() {
     <div className="flex justify-center items-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Account</CardTitle>
+          <CardTitle className="text-2xl text-center">Konto</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")}>
@@ -121,7 +120,7 @@ export default function AuthPage() {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">E-Mail</Label>
                   <Input
                     id="signin-email"
                     name="email"
@@ -133,7 +132,7 @@ export default function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password">Passwort</Label>
                   <Input
                     id="signin-password"
                     name="password"
@@ -146,7 +145,7 @@ export default function AuthPage() {
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? "Anmeldung..." : "Anmelden"}
                 </Button>
               </form>
             </TabsContent>
@@ -166,7 +165,7 @@ export default function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">E-Mail</Label>
                   <Input
                     id="signup-email"
                     name="email"
@@ -178,7 +177,7 @@ export default function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">Passwort</Label>
                   <Input
                     id="signup-password"
                     name="password"
@@ -199,5 +198,13 @@ export default function AuthPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthContent />
+    </Suspense>
   );
 }

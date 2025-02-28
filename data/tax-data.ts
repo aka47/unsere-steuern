@@ -13,7 +13,7 @@ export const INCOME_TAX_DATA = {
 
 export const INHERITANCE_TAX_CLASSES = {
   1: {
-    description: "Class I (Spouse, Children, Grandchildren, Parents)",
+    description: "Steuerklasse I (Ehepartner, Kinder, Enkel, Eltern)",
     brackets: [
       { limit: 75000, rate: 0.07 },
       { limit: 300000, rate: 0.11 },
@@ -25,7 +25,7 @@ export const INHERITANCE_TAX_CLASSES = {
     ],
   },
   2: {
-    description: "Class II (Siblings, Nieces, Nephews, Stepchildren, In-Laws, Divorced Spouses)",
+    description: "Steuerklasse II (Geschwister, Nichten, Neffen, Stiefkinder, Schwiegereltern, geschiedene Ehepartner)",
     brackets: [
       { limit: 75000, rate: 0.15 },
       { limit: 300000, rate: 0.2 },
@@ -37,7 +37,7 @@ export const INHERITANCE_TAX_CLASSES = {
     ],
   },
   3: {
-    description: "Class III (Unrelated Persons, Business Partners, Distant Relatives, Friends)",
+    description: "Steuerklasse III (Nicht verwandte Personen, Geschäftspartner, entfernte Verwandte, Freunde)",
     brackets: [
       { limit: 75000, rate: 0.3 },
       { limit: 300000, rate: 0.3 },

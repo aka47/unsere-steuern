@@ -1,15 +1,11 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, Filter, Search, Share2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, Share2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TaxMetrics } from "@/components/tax-metrics"
-import { TaxScenarioChart } from "@/components/tax-scenario-chart"
-import { TaxTable } from "@/components/tax-table"
-import  Lifetime  from "@/components/lifetime"
+import { WarningBox } from "@/components/warning-box"
 
 export function DashboardShell() {
   return (
@@ -47,6 +43,9 @@ export function DashboardShell() {
               Steuern zu erheben ist eines der zentralen Privilegien des Staates. Mithilfe dieser können wir unser Land in eine bessere Zukunft steuern. Dazu laden wir jeden Bürger ein unsere Steuern, damit unser Einkommen und Vermögen besser zu verstehen. Nicht als Erzählung, sondern in Zahlen.
             </p>
           </div>
+
+          <WarningBox />
+
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="border-zinc-200 shadow-sm">
               <CardHeader>
@@ -80,69 +79,6 @@ export function DashboardShell() {
             </Card>
           </div>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">Steuerszenarien-Analyse</h1>
-            <p className="text-sm text-zinc-500">Vergleichen Sie verschiedene Steuermodelle und ihre Auswirkungen</p>
-          </div>
-          <Button variant="outline" size="icon" className="hover:bg-zinc-100">
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-        <TaxMetrics />
-        <Tabs defaultValue="all" className="space-y-4">
-          <div className="border-b">
-            <TabsList className="h-10 w-full justify-start rounded-none bg-transparent p-0">
-              <TabsTrigger
-                value="all"
-                className="relative h-10 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              >
-                Alle Szenarien
-              </TabsTrigger>
-              <TabsTrigger
-                value="flat"
-                className="relative h-10 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              >
-                Flat Tax
-              </TabsTrigger>
-              <TabsTrigger
-                value="progressive"
-                className="relative h-10 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              >
-                Progressive
-              </TabsTrigger>
-              <TabsTrigger
-                value="lifetime"
-                className="relative h-10 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              >
-                Lebenseinkommen
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent value="all" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="lg:col-span-4 border-zinc-200 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">Steueraufkommen im Vergleich</CardTitle>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <TaxScenarioChart />
-                </CardContent>
-              </Card>
-              <Card className="lg:col-span-3 border-zinc-200 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">Verteilungseffekte</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <TaxTable />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="lifetime" className="space-y-4">
-            <Lifetime />
-          </TabsContent>
-        </Tabs>
       </main>
     </div>
   )

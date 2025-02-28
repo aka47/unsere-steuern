@@ -5,10 +5,6 @@ import { usePathname } from "next/navigation"
 import { BarChart3, Home, LayoutDashboard, PieChart, Users, TrendingUp, LogIn, LogOut, User, UserCircle } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { taxScenarios } from "@/constants/tax-scenarios"
-import { useTaxScenario } from "@/hooks/useTaxScenario"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { cn } from "@/lib/utils"
 
@@ -52,15 +48,14 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { data: _session, status } = useSession()
-  const { persona } = useSessionPersona()
-  const { selectedScenarioId, setSelectedScenarioId } = useTaxScenario()
+  const { status } = useSession()
+  const { currentPersona } = useSessionPersona()
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" })
   }
 
   return (
-    <div className="hidden border-r border-zinc-200 bg-white lg:block">
+    <div className="hidden border-r border-zinc-200 bg-white lg:block" id="sidebar">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-[60px] items-center border-b border-zinc-200 px-6">
           <Link className="flex items-center gap-2 font-semibold" href="/">
@@ -91,34 +86,12 @@ export function Sidebar() {
           <div className="">
             {status === "authenticated" ? (
               <div className="space-y-4">
-                {persona && (
+                {currentPersona && (
                   <div className="flex items-center gap-2 px-2">
                     <User className="h-4 w-4 text-zinc-500" />
-                    <span className="text-sm font-medium truncate">{persona.name}</span>
+                    <span className="text-sm font-medium truncate">{currentPersona.name}</span>
                   </div>
                 )}
-                <div className="flex flex-col gap-2 px-2">
-                  <Label htmlFor="scenario-select" className="text-xs text-zinc-500">
-                    Steuermodell
-                  </Label>
-                  <Select
-                    value={selectedScenarioId}
-                    onValueChange={(value) => setSelectedScenarioId(value as "flat" | "progressive-flat" | "50es-tax-levels" | "no-exceptions" | "loophole-removal")}
-                  >
-                    <SelectTrigger id="scenario-select" className="w-full">
-                      <SelectValue placeholder="Wähle ein Steuermodell">
-                        {taxScenarios.find(s => s.id === selectedScenarioId)?.name || "Status Quo"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taxScenarios.map((scenario) => (
-                        <SelectItem key={scenario.id} value={scenario.id}>
-                          {scenario.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <Link href="/profile">
                   <Button
                     variant="outline"
@@ -162,12 +135,6 @@ export function Sidebar() {
               >
                 Datenschutz
               </Link>
-              {/* <Link
-                href="/wir"
-                className="text-zinc-500 hover:text-zinc-900"
-              >
-                Über uns
-              </Link> */}
             </div>
           </div>
         </div>

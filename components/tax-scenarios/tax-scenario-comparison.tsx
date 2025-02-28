@@ -30,7 +30,14 @@ export function TaxScenarioComparison() {
         ...persona,
         taxScenario: scenario,
         yearlySpendingFromWealth: persona.yearlySpendingFromWealth || 0,
-        currentWealth: persona.currentWealth || 0
+        currentWealth: persona.currentWealth || 0,
+        inheritanceAge: persona.inheritanceAge ?? 20,
+        inheritanceAmount: persona.inheritanceAmount || 0,
+        inheritanceTaxClass: persona.inheritanceTaxClass || 1,
+        vatRate: persona.vatRate || 19,
+        vatApplicableRate: persona.vatApplicableRate || 70,
+        currentIncomeFromWealth: persona.currentIncomeFromWealth || 0,
+        yearlyOverrides: persona.yearlyOverrides || []
       })
 
       // Default values if results or totals are undefined

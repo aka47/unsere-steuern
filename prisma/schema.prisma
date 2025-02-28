@@ -47,9 +47,41 @@ model User {
   emailVerified DateTime?
   password      String?
   image         String?
-  personaId     String?   // Store the ID of the selected persona
   accounts      Account[]
   sessions      Session[]
+  personas      Persona[]
+  activePersonaId String?
+}
+
+model Persona {
+  id                    String    @id @default(cuid())
+  userId                String
+  name                  String
+  description           String
+  icon                  String
+  initialAge            Int
+  currentAge            Int
+  currentIncome         Float
+  currentIncomeFromWealth Float
+  savingsRate           Float
+  inheritanceAge        Int?
+  inheritanceAmount     Float
+  inheritanceTaxClass   Int
+  vatRate               Float
+  vatApplicableRate     Float
+  yearlySpendingFromWealth Float
+  currentWealth         Float
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  isActive              Boolean   @default(false)
+
+  // JSON field to store yearly overrides
+  yearlyOverridesJson   String?   @db.Text
+
+  // Income growth function is stored as a reference to a predefined function
+  incomeGrowthType      String    @default("default")
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

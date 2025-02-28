@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
 import { Providers } from "./providers"
+import { SessionInitializer } from "@/components/session-initializer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,9 +22,12 @@ export default function RootLayout({
     <html lang="de" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
+          <SessionInitializer />
           <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
             <Sidebar />
-            <main className="flex flex-col">{children}</main>
+            <div className="flex flex-col">
+              <main className="flex flex-col">{children}</main>
+            </div>
           </div>
         </Providers>
       </body>
