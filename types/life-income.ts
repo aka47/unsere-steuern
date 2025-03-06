@@ -26,3 +26,11 @@ export type TaxScenario = {
   calculateWealthIncomeTax: (wealthIncome: number) => number
   calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => number
 }
+
+export interface TaxDistribution {
+  incomeTax: number;
+  vat: number;
+  wealthTax: number;
+  wealthIncomeTax: number;
+  total: number;
+}
