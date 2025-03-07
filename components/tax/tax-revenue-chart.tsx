@@ -5,7 +5,7 @@ import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recha
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { taxRevenueBreakdown, TOTAL_TAX_REVENUE } from "@/data/tax"
+import { TaxDistribution } from "@/types/life-income"
 
 // Colors for the pie chart
 const COLORS = [
@@ -18,25 +18,57 @@ const COLORS = [
   'hsl(142, 71%, 45%)',
 ];
 
-export function TaxRevenueChart() {
+interface TaxRevenueChartProps {
+  data: TaxDistribution
+}
+
+export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
   const [activeTab, setActiveTab] = useState<"chart" | "table">("chart")
 
   // Format currency for tooltips
   const formatCurrency = (value: number): string => {
-    return `${value.toFixed(1)} Mrd. €`
+    return `${(value / 1e9).toFixed(1)} Mrd. €`
   }
 
   // Format percentage for tooltips
-  const formatPercentage = (value: number): string => {
-    return `${value.toFixed(1)}%`
+  const formatPercentage = (value: number, total: number): string => {
+    return `${((value / total) * 100).toFixed(1)}%`
   }
+
+  // Transform data for the chart
+  const chartData = [
+    {
+      category: "Einkommensteuer",
+      amount: data.incomeTax,
+      percentage: (data.incomeTax / data.total) * 100,
+      description: "Lohn-, Gehalts- und veranlagte Einkommensteuer"
+    },
+    {
+      category: "Mehrwertsteuer",
+      amount: data.vat,
+      percentage: (data.vat / data.total) * 100,
+      description: "Verbrauchsteuer auf Waren und Dienstleistungen"
+    },
+    {
+      category: "Vermögenssteuer",
+      amount: data.wealthTax,
+      percentage: (data.wealthTax / data.total) * 100,
+      description: "Steuer auf Vermögen"
+    },
+    {
+      category: "Kapitalertragssteuer",
+      amount: data.wealthIncomeTax,
+      percentage: (data.wealthIncomeTax / data.total) * 100,
+      description: "Steuer auf Kapitalerträge"
+    }
+  ]
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Steuereinnahmen in Deutschland</CardTitle>
+        <CardTitle>Steuereinnahmen</CardTitle>
         <CardDescription>
-          Verteilung der Steuereinnahmen nach Kategorien (Gesamt: {formatCurrency(TOTAL_TAX_REVENUE)})
+          Verteilung der Steuereinnahmen nach Kategorien (Gesamt: {formatCurrency(data.total)})
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -51,7 +83,7 @@ export function TaxRevenueChart() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={taxRevenueBreakdown}
+                    data={chartData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -75,15 +107,15 @@ export function TaxRevenueChart() {
                     align="right"
                     formatter={(value, _entry) => {
                       // Find the corresponding data entry
-                      const dataEntry = taxRevenueBreakdown.find(item => item.category === value);
-                      return dataEntry ? `${value} (${formatPercentage(dataEntry.percentage)})` : value;
+                      const dataEntry = chartData.find(item => item.category === value);
+                      return dataEntry ? `${value} (${formatPercentage(dataEntry.amount, data.total)})` : value;
                     }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-4 text-sm text-muted-foreground">
-                <p>Die Grafik zeigt die Verteilung der Steuereinnahmen des Bundes und der Länder vor der Umverteilung an Gemeinden und die EU.</p>
-                <p>Die Einkommensteuer macht mit {formatPercentage(taxRevenueBreakdown[0].percentage)} den größten Anteil aus, gefolgt von der Mehrwertsteuer mit {formatPercentage(taxRevenueBreakdown[1].percentage)}.</p>
+                <p>Die Grafik zeigt die Verteilung der Steuereinnahmen nach Kategorien.</p>
+                <p>Die Einkommensteuer macht mit {formatPercentage(data.incomeTax, data.total)} den größten Anteil aus, gefolgt von der Mehrwertsteuer mit {formatPercentage(data.vat, data.total)}.</p>
               </div>
             </div>
           </TabsContent>
@@ -99,19 +131,19 @@ export function TaxRevenueChart() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {taxRevenueBreakdown.map((tax) => (
+                {chartData.map((tax) => (
                   <TableRow key={tax.category}>
                     <TableCell className="font-medium">{tax.category}</TableCell>
-                    <TableCell className="text-right">{tax.amount.toFixed(1)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(tax.amount)}</TableCell>
                     <TableCell className="text-right">{tax.percentage.toFixed(2)}%</TableCell>
                     <TableCell>{tax.description}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="font-bold">
                   <TableCell>Gesamt</TableCell>
-                  <TableCell className="text-right">{TOTAL_TAX_REVENUE.toFixed(1)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(data.total)}</TableCell>
                   <TableCell className="text-right">100.00%</TableCell>
-                  <TableCell>Steuereinnahmen vor Umverteilung</TableCell>
+                  <TableCell>Gesamte Steuereinnahmen</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

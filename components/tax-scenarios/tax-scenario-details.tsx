@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
 import Markdown from "react-markdown"
+import { TaxScenarioBuilder } from "@/components/tax/tax-scenario-builder"
+import { baseline, target, finalResult } from "@/constants/simulation"
 
 export function TaxScenarioDetails() {
   const { selectedTaxScenario } = useTaxScenario()
@@ -32,19 +34,35 @@ export function TaxScenarioDetails() {
           </TabsList>
 
           <TabsContent value="selected">
-            <Card>
-              <CardHeader>
-                <CardTitle>{selectedTaxScenario.name}</CardTitle>
-                <CardDescription>{selectedTaxScenario.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-                {selectedTaxScenario.detailedDescription ? (
-                  <Markdown>{selectedTaxScenario.detailedDescription}</Markdown>
-                ) : (
-                  <p>Keine detaillierten Informationen verfügbar.</p>
-                )}
-              </CardContent>
-            </Card>
+            {selectedTaxScenario.id === "custom" ? (
+              <TaxScenarioBuilder
+                baseline={baseline}
+                target={target}
+                simulation={{
+                  params: {
+                    incomeTaxMultiplier: 1,
+                    vatRate: 0.19,
+                    wealthTaxRate: 0.02,
+                    wealthIncomeTaxRate: 0.26375
+                  },
+                  result: finalResult
+                }}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{selectedTaxScenario.name} {selectedTaxScenario.id}</CardTitle>
+                  <CardDescription>{selectedTaxScenario.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+                  {selectedTaxScenario.detailedDescription ? (
+                    <Markdown>{selectedTaxScenario.detailedDescription}</Markdown>
+                  ) : (
+                    <p>Keine detaillierten Informationen verfügbar.</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {selectedTaxScenario.id !== defaultTaxScenario.id && (

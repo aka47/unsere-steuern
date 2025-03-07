@@ -231,12 +231,46 @@ export const fiftysTaxScenario: TaxScenario = {
   }
 };
 
+// Custom Tax Scenario
+export const customTaxScenario: TaxScenario = {
+  id: "custom",
+  name: "Deine Steuer",
+  description: "Gestalte dein eigenes Steuersystem",
+  detailedDescription: "Passe die Steuerparameter an, um dein eigenes Steuersystem zu erstellen.",
+
+  calculateIncomeTax: (income: number) => {
+    // This will be calculated dynamically based on user input
+    return 0
+  },
+
+  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
+    // This will be calculated dynamically based on user input
+    return 0
+  },
+
+  calculateWealthTax: (wealth: number) => {
+    // This will be calculated dynamically based on user input
+    return 0
+  },
+
+  calculateWealthIncomeTax: (wealthIncome: number) => {
+    // This will be calculated dynamically based on user input
+    return 0
+  },
+
+  calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
+    // This will be calculated dynamically based on user input
+    return 0
+  }
+}
+
 // All available tax scenarios
 export const taxScenarios: TaxScenario[] = [
   statusQuoScenario,
   progressiveWealthTaxScenario,
   flatTaxScenario,
-  fiftysTaxScenario
+  fiftysTaxScenario,
+  customTaxScenario
 ]
 
 // Default scenario

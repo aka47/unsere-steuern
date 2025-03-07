@@ -43,7 +43,7 @@ type LifeIncomeTotals = {
   totalSpendingFromIncome: number
 }
 
-type LifeIncomeCalculatorResult = {
+export type LifeIncomeCalculatorResult = {
   totals: LifeIncomeTotals
   details: LifeIncomeYearlyResult[]
 }
