@@ -7,8 +7,6 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 
 interface TaxScenarioBuilderProps {
-  baseline: TaxDistribution
-  target: TaxDistribution
   simulation: {
     params: {
       incomeTaxMultiplier: number
@@ -38,7 +36,7 @@ interface TaxParams {
 const TAX_FREE_AMOUNTS = [0, 11000, 22000, 33000]
 const WEALTH_TAX_RATES = [0.01, 0.02, 0.03, 0.05]
 
-export const TaxScenarioBuilder = ({ baseline, target, simulation }: TaxScenarioBuilderProps) => {
+export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
   const { results, calculateScenario } = useTaxScenarioCalculator()
   const [taxParams, setTaxParams] = useState<TaxParams>({
     incomeTax: {
@@ -59,7 +57,7 @@ export const TaxScenarioBuilder = ({ baseline, target, simulation }: TaxScenario
     calculateScenario(taxParams)
   }, [calculateScenario, taxParams])
 
-  const handleIncomeTaxChange = useCallback((field: keyof TaxParams["incomeTax"], value: any) => {
+  const handleIncomeTaxChange = useCallback((field: keyof TaxParams["incomeTax"], value: string | number) => {
     setTaxParams(prev => ({
       ...prev,
       incomeTax: {
@@ -69,7 +67,7 @@ export const TaxScenarioBuilder = ({ baseline, target, simulation }: TaxScenario
     }))
   }, [])
 
-  const handleWealthTaxChange = useCallback((field: keyof TaxParams["wealthTax"], value: any) => {
+  const handleWealthTaxChange = useCallback((field: keyof TaxParams["wealthTax"], value: string | number) => {
     setTaxParams(prev => ({
       ...prev,
       wealthTax: {
@@ -79,7 +77,7 @@ export const TaxScenarioBuilder = ({ baseline, target, simulation }: TaxScenario
     }))
   }, [])
 
-  const handleInheritanceTaxChange = useCallback((field: keyof TaxParams["inheritanceTax"], value: any) => {
+  const handleInheritanceTaxChange = useCallback((field: keyof TaxParams["inheritanceTax"], value: string | number) => {
     setTaxParams(prev => ({
       ...prev,
       inheritanceTax: {
@@ -101,14 +99,9 @@ export const TaxScenarioBuilder = ({ baseline, target, simulation }: TaxScenario
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Steueraufkommen</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TaxRevenueChart data={taxDistribution} />
-        </CardContent>
-      </Card>
+
+      <TaxRevenueChart data={taxDistribution} />
+
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Income Tax Configuration */}

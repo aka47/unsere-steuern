@@ -61,17 +61,6 @@ const adjustableScenario: TaxScenario = {
   },
 };
 
-// Simulate one year for a persona
-function simulateYear(persona: Persona, scenario: TaxScenario, params: TaxParams): TaxResult {
-  const incomeTax = scenario.calculateIncomeTax(persona.currentIncome, params.incomeTaxMultiplier);
-  const wealthTax = scenario.calculateWealthTax(persona.currentWealth, params.wealthTaxRate);
-  const wealthIncomeTax = scenario.calculateWealthIncomeTax(persona.currentIncomeFromWealth, params.wealthIncomeTaxRate);
-  const vat = scenario.calculateVAT(persona.currentIncome, params.vatRate, 80); // 80% spending assumption
-  const totalTax = incomeTax + wealthTax + wealthIncomeTax + vat;
-
-  return { incomeTax, vat, wealthTax, wealthIncomeTax, totalTax };
-}
-
 // Aggregate taxes across population
 interface TaxParams {
   incomeTaxMultiplier: number;
@@ -86,6 +75,22 @@ interface TaxResult {
   wealthTax: number;
   wealthIncomeTax: number;
   totalTax: number;
+}
+
+// Simulate one year for a persona
+function simulateYear(persona: Persona, scenario: TaxScenario, params: TaxParams): TaxResult {
+  const incomeTax = scenario.calculateIncomeTax(persona.currentIncome);
+  const wealthTax = scenario.calculateWealthTax(persona.currentWealth);
+  const wealthIncomeTax = scenario.calculateWealthIncomeTax(persona.currentIncomeFromWealth);
+  const vat = scenario.calculateVAT(persona.currentIncome, params.vatRate, 80); // 80% spending assumption
+
+  return {
+    incomeTax,
+    wealthTax,
+    wealthIncomeTax,
+    vat,
+    totalTax: incomeTax + wealthTax + wealthIncomeTax + vat
+  }
 }
 
 function calculateTotalTaxes(personas: Persona[], params: TaxParams): TaxDistribution {

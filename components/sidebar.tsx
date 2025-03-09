@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { BarChart3, Home, LayoutDashboard, PieChart, Users, TrendingUp, LogIn, LogOut, User, UserCircle } from "lucide-react"
+import { BarChart3, LayoutDashboard, PieChart, Users, TrendingUp, LogIn, LogOut, User, UserCircle } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
@@ -58,9 +59,24 @@ export function Sidebar() {
     <div className="hidden border-r border-zinc-200 bg-white lg:block" id="sidebar">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-[60px] items-center border-b border-zinc-200 px-6">
-          <Link className="flex items-center gap-2 font-semibold" href="/">
-            <Home className="h-6 w-6" />
-            <span className="text-zinc-900">Wir Steuern</span>
+          <Link className="flex items-center gap-2 font-semibold w-full" href="/">
+            <Image
+              src="/assets/logo.svg"
+              alt="Unsere Steuern Logo"
+              width={60}
+              height={40}
+              className="text-zinc-900"
+            />
+            <span className="text-lg uppercase font-semibold">unsere Steuern</span>
+            {/* <div className="flex justify-between w-full items-center">
+              <div className=" gap-1 w-1/2">
+                <div className="text-xs line-height-1">Wir</div>
+                <div className="text-lg line-height-1">Unsere</div>
+              </div>
+              <div className="w-1/2">
+                <span className="text-4xl">Steuern</span>
+              </div>
+            </div> */}
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">

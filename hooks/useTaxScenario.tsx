@@ -102,63 +102,15 @@ export function TaxScenarioProvider({ children }: { children: ReactNode }) {
   const { calculateScenario, results } = useTaxScenarioCalculator()
 
   // Find the corresponding tax scenario object
-  const getTaxScenario = useCallback((scenarioId: ScenarioId): TaxScenario => {
-    if (scenarioId === "custom" && results) {
-      // Create a custom tax scenario based on the current results
-      return {
-        id: "custom",
-        name: "Deine Steuer",
-        description: "Gestalte dein eigenes Steuersystem",
-        detailedDescription: "Passe die Steuerparameter an, um dein eigenes Steuersystem zu erstellen.",
-        calculateIncomeTax: (income: number) => {
-          // This will be calculated by the custom scenario
-          return 0
-        },
-        calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
-          // This will be calculated by the custom scenario
-          return 0
-        },
-        calculateWealthTax: (wealth: number) => {
-          // This will be calculated by the custom scenario
-          return 0
-        },
-        calculateWealthIncomeTax: (wealthIncome: number) => {
-          // This will be calculated by the custom scenario
-          return 0
-        },
-        calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
-          // This will be calculated by the custom scenario
-          return 0
-        }
-      }
-    }
+  const getTaxScenario = (scenarioId: ScenarioId): TaxScenario => {
     const taxScenarioId = scenarioIdMap[scenarioId]
     return taxScenarios.find(scenario => scenario.id === taxScenarioId) || defaultTaxScenario
-  }, [results])
-
-  // Update scenario stats when custom scenario is selected and results are available
-  const getScenarioDetails = useCallback((scenarioId: ScenarioId) => {
-    if (scenarioId === "custom" && results) {
-      const totalTax = results.totals.totalIncomeTax + results.totals.totalVAT +
-                      results.totals.totalWealthTax + results.totals.totalWealthIncomeTax
-      const totalIncome = results.totals.totalIncome + results.totals.totalWealthIncome
-      const effectiveTaxRate = totalIncome > 0 ? totalTax / totalIncome : 0
-
-      return {
-        ...scenarioStats.custom,
-        totalTaxRevenue: totalTax,
-        effectiveTaxRate,
-        wageTaxRevenue: results.totals.totalIncomeTax,
-        inheritanceTaxRevenue: results.totals.totalInheritanceTax
-      }
-    }
-    return scenarioStats[scenarioId]
-  }, [results])
+  }
 
   const value = {
     selectedScenarioId,
     setSelectedScenarioId,
-    scenarioDetails: getScenarioDetails(selectedScenarioId),
+    scenarioDetails: scenarioStats[selectedScenarioId],
     selectedTaxScenario: getTaxScenario(selectedScenarioId),
     customTaxParams,
     setCustomTaxParams

@@ -12,7 +12,7 @@ import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { cn } from "@/lib/utils"
 import { TaxScenarioDetails } from "./tax-scenario-details"
 import { TaxScenarioBuilder } from "@/components/tax/tax-scenario-builder"
-import { baseline, finalResult, target } from "@/constants/simulation"
+import { finalResult } from "@/constants/simulation"
 
 type ScenarioId = "flat" | "progressive-flat" | "no-exceptions" | "loophole-removal" | "50es-tax-levels" | "custom"
 
@@ -59,8 +59,6 @@ export function TaxScenarioSelector() {
 
       {selectedScenarioId === "custom" ? (
               <TaxScenarioBuilder
-                baseline={baseline}
-                target={target}
                 simulation={{
                   params: {
                     incomeTaxMultiplier: 1,

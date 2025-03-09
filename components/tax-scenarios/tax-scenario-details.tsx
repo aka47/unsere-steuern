@@ -36,8 +36,6 @@ export function TaxScenarioDetails() {
           <TabsContent value="selected">
             {selectedTaxScenario.id === "custom" ? (
               <TaxScenarioBuilder
-                baseline={baseline}
-                target={target}
                 simulation={{
                   params: {
                     incomeTaxMultiplier: 1,
