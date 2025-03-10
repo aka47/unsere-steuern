@@ -54,10 +54,20 @@ Cypress.Commands.add('login', (email = 'test@example.com', password = 'password1
       }).then((loginResponse) => {
         // If login successful, visit the home page
         if (loginResponse.status === 200) {
-          // Check the user's active persona
-          cy.request('/api/persona/active').then(personaResponse => {
-            cy.log('Active Persona:', personaResponse.body);
-          });
+          // Verify session is established with retries
+          // cy.request({
+          //   url: '/api/auth/session',
+          //   failOnStatusCode: false,
+          //   timeout: 10000
+          // }).should((sessionResponse) => {
+          //   expect(sessionResponse.body).to.have.property('user');
+          //   expect(sessionResponse.body.user).to.not.be.null;
+          // });
+
+          // // Now check the user's active persona
+          // cy.request('/api/persona/active').then(personaResponse => {
+          //   cy.log('Active Persona:', personaResponse.body);
+          // });
 
           cy.visit('/');
         } else {

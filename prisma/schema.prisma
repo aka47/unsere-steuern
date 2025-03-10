@@ -78,8 +78,7 @@ model Persona {
   // JSON field to store yearly overrides
   yearlyOverridesJson   String?   @db.Text
 
-  // Income growth function is stored as a reference to a predefined function
-  incomeGrowthType      String    @default("default")
+  incomeGrowth          Float
 
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

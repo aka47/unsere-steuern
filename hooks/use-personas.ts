@@ -5,25 +5,6 @@ import { SessionStorage } from "@/lib/session-storage";
 import { prisma } from "@/lib/prisma";
 import { PersonaRepository } from "@/lib/repositories/persona-repository";
 
-// Shared utility functions
-const mapIncomeGrowthTypeToFunction = (type: string): ((age: number) => number) => {
-  switch (type) {
-    case "fast":
-      return (age: number) => (age <= 45 ? 1.05 : 1.02);
-    case "moderate":
-      return (age: number) => (age <= 45 ? 1.03 : 1.01);
-    case "slow":
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-    case "ceo":
-      return (age: number) => {
-        if (age <= 50) return 1.05;
-        if (age <= 60) return 1.2;
-        return 1;
-      };
-    default:
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-  }
-};
 
 /**
  * Hook for managing personas
@@ -61,30 +42,22 @@ export function usePersonas() {
       return await PersonaRepository.getActiveForUser(userId);
     },
 
-    createPersona: async (personaData: Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType: string }) => {
+    createPersona: async (personaData: Omit<Persona, "id">) => {
       if (!userId) return null;
-      // Convert incomeGrowthType to function
-      const incomeGrowth = mapIncomeGrowthTypeToFunction(personaData.incomeGrowthType);
 
       // Create persona with repository
       return await PersonaRepository.create(
-        { ...personaData, incomeGrowth, id: "" },
+        { ...personaData, id: "" },
         userId
       );
     },
 
-    updatePersona: async (id: string, updateData: Partial<Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType?: string }>) => {
+    updatePersona: async (id: string, updateData: Partial<Omit<Persona, "id">>) => {
       if (!userId) return null;
-      // Handle income growth function if provided
-      let incomeGrowth;
-      if (updateData.incomeGrowthType) {
-        incomeGrowth = mapIncomeGrowthTypeToFunction(updateData.incomeGrowthType);
-      }
 
       // Update persona with repository
       return await PersonaRepository.update(id, {
         ...updateData,
-        ...(incomeGrowth ? { incomeGrowth } : {}),
       });
     },
 
@@ -111,31 +84,20 @@ export function usePersonas() {
       return SessionStorage.getActivePersona();
     },
 
-    createPersona: (personaData: Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType: string }) => {
-      // Convert incomeGrowthType to function
-      const incomeGrowth = mapIncomeGrowthTypeToFunction(personaData.incomeGrowthType);
-
+    createPersona: (personaData: Omit<Persona, "id">) => {
       // Create persona in session
       const newPersona: Persona = {
         ...personaData,
         id: `temp_${Date.now()}`,
-        incomeGrowth,
       };
 
       return SessionStorage.addPersona(newPersona);
     },
 
-    updatePersona: (id: string, updateData: Partial<Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType?: string }>) => {
-      // Handle income growth function if provided
-      let incomeGrowth;
-      if (updateData.incomeGrowthType) {
-        incomeGrowth = mapIncomeGrowthTypeToFunction(updateData.incomeGrowthType);
-      }
-
+    updatePersona: (id: string, updateData: Partial<Omit<Persona, "id">>) => {
       // Update persona in session
       return SessionStorage.updatePersona(id, {
         ...updateData,
-        ...(incomeGrowth ? { incomeGrowth } : {}),
       });
     },
 
@@ -183,7 +145,7 @@ export function usePersonas() {
   }, [operations]);
 
   // Create a new persona
-  const createPersona = useCallback(async (personaData: Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType: string }) => {
+  const createPersona = useCallback(async (personaData: Omit<Persona, "id">) => {
     try {
       setLoading(true);
       const newPersona = await operations.createPersona(personaData);
@@ -210,7 +172,7 @@ export function usePersonas() {
   }, [operations, personas.length]);
 
   // Update an existing persona
-  const updatePersona = useCallback(async (id: string, updateData: Partial<Omit<Persona, "id" | "incomeGrowth"> & { incomeGrowthType?: string }>) => {
+  const updatePersona = useCallback(async (id: string, updateData: Partial<Omit<Persona, "id">>) => {
     try {
       setLoading(true);
       const updatedPersona = await operations.updatePersona(id, updateData);
@@ -302,8 +264,7 @@ export function usePersonas() {
 
         // Create the persona in the database
         await dbOperations.createPersona({
-          ...persona,
-          incomeGrowthType: persona.id === sessionActivePersona?.id ? 'default' : 'default',
+          ...persona
         });
       }
 

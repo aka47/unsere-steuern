@@ -12,10 +12,18 @@ import Link from "next/link"
 import { EditIcon, UserIcon } from "lucide-react"
 import { PersonaList } from "@/components/personas/persona-list"
 import { grokPersonas } from "@/types/persona"
+import { PersonaCollection } from "@/components/personas/persona-collection"
 
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
   const userPersona = currentPersona || null
+
+  const personaCollection = {
+    id: "grok",
+    title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
+    description: "Eine Auswahl repräsentativer Lebensrealitäten",
+    personas: grokPersonas
+  }
 
   return (
     <>
@@ -55,6 +63,9 @@ export default function TaxScenariosPage() {
           </Card> */}
 
           {/* Persona-Simulationen */}
+          <PersonaCollection collection={personaCollection} />
+
+{/*
           <Card>
             <CardHeader>
               <CardTitle>Lebensrealitäten im Vergleich</CardTitle>
@@ -66,9 +77,9 @@ export default function TaxScenariosPage() {
             <CardContent>
               <PersonaList personas={grokPersonas} onPersonaClick={() => { }} />
             </CardContent>
-          </Card>
+          </Card> */}
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Lebensrealitäten im Vergleich</CardTitle>
               <CardDescription>
@@ -81,7 +92,6 @@ export default function TaxScenariosPage() {
             </CardContent>
           </Card>
 
-          {/* Datenquellen */}
           <Card>
             <CardHeader>
               <CardTitle>Transparenz & Quellen</CardTitle>
@@ -93,7 +103,7 @@ export default function TaxScenariosPage() {
             <CardContent>
               <DataSources />
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </>

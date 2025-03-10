@@ -1,7 +1,10 @@
+"use server"
+
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PersonaRepository } from "@/lib/repositories/persona-repository";
+import { z } from "zod";
 
 // GET /api/persona - Get all personas for the current user
 export async function GET(
@@ -28,47 +31,48 @@ export async function GET(
   }
 }
 
+// Validation schema for persona data
+const personaSchema = z.object({
+  id: z.string().optional(),
+  currentIncome: z.number(),
+  currentAge: z.number(),
+  savingsRate: z.number(),
+  inheritanceAge: z.number().nullable(),
+  inheritanceAmount: z.number(),
+  yearlySpendingFromWealth: z.number(),
+  currentWealth: z.number()
+});
+
 // POST /api/persona - Create a new persona
-export async function POST(
-  request: NextRequest
-) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
+export async function POST(req: Request) {
   try {
-    const personaData = await request.json();
+    const session = await getServerSession();
 
-    // Map income growth type to function
-    const incomeGrowthMap: Record<string, (age: number) => number> = {
-      fast: (age: number) => (age <= 45 ? 1.05 : 1.02),
-      moderate: (age: number) => (age <= 45 ? 1.03 : 1.01),
-      slow: (age: number) => (age <= 45 ? 1.02 : 1.0),
-      ceo: (age: number) => {
-        if (age <= 50) return 1.05;
-        if (age <= 60) return 1.2;
-        return 1;
-      },
-      default: (age: number) => (age <= 45 ? 1.02 : 1.0)
-    };
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-    const incomeGrowth = incomeGrowthMap[personaData.incomeGrowthType] || incomeGrowthMap.default;
+    const body = await req.json();
+    const validatedData = personaSchema.parse(body);
 
-    const persona = await PersonaRepository.create(
-      { ...personaData, incomeGrowth, id: "" },
-      session.user.id
-    );
+    const persona = validatedData.id
+      ? await PersonaRepository.update(validatedData.id, validatedData)
+      : await PersonaRepository.create(validatedData, session.user.id);
 
     return NextResponse.json(persona);
   } catch (error) {
-    console.error("Error creating persona:", error);
+    console.error("Error saving persona:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid data", details: error.errors },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to create persona" },
+      { error: "Failed to save persona" },
       { status: 500 }
     );
   }
@@ -97,27 +101,8 @@ export async function PUT(
       );
     }
 
-    // Handle income growth function if provided
-    let incomeGrowth;
-    if (updateData.incomeGrowthType) {
-      const incomeGrowthMap: Record<string, (age: number) => number> = {
-        fast: (age: number) => (age <= 45 ? 1.05 : 1.02),
-        moderate: (age: number) => (age <= 45 ? 1.03 : 1.01),
-        slow: (age: number) => (age <= 45 ? 1.02 : 1.0),
-        ceo: (age: number) => {
-          if (age <= 50) return 1.05;
-          if (age <= 60) return 1.2;
-          return 1;
-        },
-        default: (age: number) => (age <= 45 ? 1.02 : 1.0)
-      };
-
-      incomeGrowth = incomeGrowthMap[updateData.incomeGrowthType] || incomeGrowthMap.default;
-    }
-
     const persona = await PersonaRepository.update(id, {
       ...updateData,
-      ...(incomeGrowth ? { incomeGrowth } : {})
     });
 
     return NextResponse.json(persona);

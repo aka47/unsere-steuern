@@ -18,6 +18,10 @@ import { TypographyH4, TypographyP } from "@/components/ui/typography"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
 import { YearlyBreakdown } from "@/components/life-income/yearly-breakdown"
+import { PersonaRepository } from "@/lib/repositories/persona-repository"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "sonner"
+
 
 interface LifeIncomeCalculatorProps {
   setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
@@ -32,19 +36,37 @@ const validateInheritanceTaxClass = (value: string): keyof typeof INHERITANCE_TA
 }
 
 export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIncomeCalculatorProps) {
-  const [currentIncome, setCurrentIncome] = useState("")
-  const [currentAge, setCurrentAge] = useState("")
-  const [savingsRate, setSavingsRate] = useState("")
-  const [inheritanceAge, setInheritanceAge] = useState("")
-  const [inheritanceAmount, setInheritanceAmount] = useState("")
-  const [inheritanceTaxClass, setInheritanceTaxClass] = useState<"1" | "2" | "3">("1")
-  const [spending, setSpending] = useState("")
-  const [wealth, setWealth] = useState("")
+  const [currentIncome, setCurrentIncome] = useState(persona?.currentIncome.toString() ?? defaultPersona.currentIncome.toString())
+  const [currentAge, setCurrentAge] = useState(persona?.currentAge.toString() ?? defaultPersona.currentAge.toString())
+  const [savingsRate, setSavingsRate] = useState(((persona?.savingsRate ?? defaultPersona.savingsRate) * 100).toString())
+  const [inheritanceAge, setInheritanceAge] = useState(persona?.inheritanceAge?.toString() ?? defaultPersona.inheritanceAge?.toString() ?? "")
+  const [inheritanceAmount, setInheritanceAmount] = useState(persona?.inheritanceAmount?.toString() ?? defaultPersona.inheritanceAmount?.toString() ?? "0")
+  const [inheritanceTaxClass, setInheritanceTaxClass] = useState<"1" | "2" | "3">((persona?.inheritanceTaxClass ?? defaultPersona.inheritanceTaxClass).toString() as "1" | "2" | "3")
+  const [spending, setSpending] = useState(persona?.yearlySpendingFromWealth?.toString() ?? defaultPersona.yearlySpendingFromWealth?.toString() ?? "0")
+  const [wealth, setWealth] = useState(persona?.currentWealth?.toString() ?? defaultPersona.currentWealth?.toString() ?? "0")
   const [selectedTaxScenario] = useState<TaxScenario>(defaultTaxScenario)
   const [yearlyResults, setYearlyResults] = useState<LifeIncomeResults>(null)
   const [showYearlyBreakdown, setShowYearlyBreakdown] = useState(false)
+  const { session, isAuthenticated } = useAuth()
   const { calculateLifeIncome } = useLifeIncomeCalculator()
   const { currentPersona, setCurrentPersona } = useSessionPersona()
+
+  useEffect(() => {
+    if (persona) {
+      const results = calculateLifeIncome({
+        ...persona,
+        inheritanceAge: persona.inheritanceAge ?? 0,
+        currentPersona,
+        taxScenario: selectedTaxScenario
+      })
+      if (results) {
+        const { details } = results
+        setResults(details)
+        setYearlyResults(details)
+        setShowYearlyBreakdown(true)
+      }
+    }
+  }, [persona, currentPersona, calculateLifeIncome, setResults, selectedTaxScenario])
 
   useEffect(() => {
     if (!persona && currentPersona) {
@@ -166,10 +188,9 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
     localStorage.setItem("lifeIncomeResults", JSON.stringify(updatedResults))
   }
 
-  const savePersona = () => {
-    if (!persona) return
-
+  const savePersona = async () => {
     const updatedPersona: Persona = {
+      ...defaultPersona, // This ensures all required fields have defaults
       ...persona,
       currentIncome: Number.parseFloat(currentIncome),
       currentAge: Number.parseInt(currentAge, 10),
@@ -180,10 +201,15 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
       currentWealth: Number.parseFloat(wealth)
     }
 
+    // save to db in the future
+    localStorage.setItem("currentPersona", JSON.stringify(updatedPersona))
+
     setPersona(updatedPersona)
     setCurrentPersona(updatedPersona)
 
-    alert("Persona erfolgreich gespeichert!")
+    toast("Success", {
+      description: "Persona erfolgreich gespeichert!"
+    })
   }
 
   return (

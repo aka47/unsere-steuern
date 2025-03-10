@@ -5,6 +5,7 @@ import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
 import { Providers } from "./providers"
 import { SessionInitializer } from "@/components/session-initializer"
+import { Toaster } from "@/components/ui/sonner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <SessionInitializer />
+          <Toaster />
           <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
             <Sidebar />
             <div className="flex flex-col">

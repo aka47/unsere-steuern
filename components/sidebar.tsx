@@ -9,12 +9,15 @@ import { Button } from "@/components/ui/button"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { cn } from "@/lib/utils"
 
-const navigation = [
+const mainNav = [
   {
     name: "Dashboard",
     href: "/home",
     icon: LayoutDashboard,
   },
+]
+
+const backgroundNav = [
   {
     name: "Steuern",
     href: "/steuern",
@@ -30,10 +33,14 @@ const navigation = [
     href: "/vermoegen",
     icon: BarChart3,
   },
+
+]
+
+const ourTaxNav = [
   {
-    name: "Lebenseinkommen",
-    href: "/lebenseinkommen",
-    icon: TrendingUp,
+    name: "Steuerszenarien",
+    href: "/steuerszenarien",
+    icon: BarChart3,
   },
   {
     name: "Bevölkerungsgruppen",
@@ -41,10 +48,10 @@ const navigation = [
     icon: Users,
   },
   {
-    name: "Steuerszenarien",
-    href: "/steuerszenarien",
-    icon: BarChart3,
-  },
+    name: "Lebenseinkommen",
+    href: "/lebenseinkommen",
+    icon: TrendingUp,
+  }
 ]
 
 export function Sidebar() {
@@ -58,7 +65,7 @@ export function Sidebar() {
   return (
     <div className="hidden border-r border-zinc-200 bg-white lg:block" id="sidebar">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-[60px] items-center border-b border-zinc-200 px-6">
+        <div className="flex h-[80px] items-center border-b border-zinc-200 px-6">
           <Link className="flex items-center gap-2 font-semibold w-full" href="/">
             <Image
               src="/assets/logo.svg"
@@ -68,32 +75,61 @@ export function Sidebar() {
               className="text-zinc-900"
             />
             <span className="text-lg uppercase font-semibold">unsere Steuern</span>
-            {/* <div className="flex justify-between w-full items-center">
-              <div className=" gap-1 w-1/2">
-                <div className="text-xs line-height-1">Wir</div>
-                <div className="text-lg line-height-1">Unsere</div>
-              </div>
-              <div className="w-1/2">
-                <span className="text-4xl">Steuern</span>
-              </div>
-            </div> */}
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-4 text-sm font-medium">
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-500 transition-all hover:text-zinc-900",
-                  pathname === item.href && "bg-zinc-100 text-zinc-900",
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.name}
-              </Link>
-            ))}
+            {/* Main Navigation */}
+            <div className="mb-4">
+              {mainNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-500 transition-all hover:text-zinc-900",
+                    pathname === item.href && "bg-zinc-100 text-zinc-900",
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            {/* Our Taxes Navigation */}
+            <div className="mb-4">
+              <h2 className="px-3 mb-2 text-xs font-semibold text-zinc-500 uppercase">Unsere Steuern</h2>
+              {ourTaxNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-500 transition-all hover:text-zinc-900",
+                    pathname === item.href && "bg-zinc-100 text-zinc-900",
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Background Navigation */}
+            <div className="mb-4">
+              <h2 className="px-3 mb-2 text-xs font-semibold text-zinc-500 uppercase">Hintergrund</h2>
+              {backgroundNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-500 transition-all hover:text-zinc-900",
+                    pathname === item.href && "bg-zinc-100 text-zinc-900",
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
           </nav>
         </div>
 
@@ -137,7 +173,7 @@ export function Sidebar() {
               </Link>
             )}
           </div>
-          <div className=" p-4">
+          <div className="p-4">
             <div className="flex flex-row gap-4 justify-center text-xs">
               <Link
                 href="/impressum"
@@ -151,6 +187,7 @@ export function Sidebar() {
               >
                 Datenschutz
               </Link>
+
             </div>
           </div>
         </div>

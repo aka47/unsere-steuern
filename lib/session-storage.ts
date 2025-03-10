@@ -20,13 +20,7 @@ export const SessionStorage = {
       const storedPersonas = localStorage.getItem(SESSION_PERSONAS_KEY);
       if (!storedPersonas) return [];
 
-      const personas = JSON.parse(storedPersonas);
-
-      // Restore the income growth functions
-      return personas.map((persona: Record<string, unknown>) => ({
-        ...persona,
-        incomeGrowth: getIncomeGrowthFunction(persona.incomeGrowthType as string || "default"),
-      }));
+      return JSON.parse(storedPersonas);
     } catch (error) {
       console.error("Error retrieving personas from session:", error);
       return [];
@@ -40,12 +34,9 @@ export const SessionStorage = {
     if (typeof window === "undefined") return;
 
     try {
-      // Convert income growth functions to types for storage
       const storedPersonas = personas.map(persona => ({
         ...persona,
-        incomeGrowthType: getIncomeGrowthType(persona.incomeGrowth),
-        // Remove the function as it can't be serialized
-        incomeGrowth: undefined,
+        // Directly store incomeGrowth as it is
       }));
 
       localStorage.setItem(SESSION_PERSONAS_KEY, JSON.stringify(storedPersonas));
@@ -66,11 +57,7 @@ export const SessionStorage = {
 
       const activePersona = JSON.parse(storedActivePersona);
 
-      // Restore the income growth function
-      return {
-        ...activePersona,
-        incomeGrowth: getIncomeGrowthFunction(activePersona.incomeGrowthType as string || "default"),
-      };
+      return activePersona;
     } catch (error) {
       console.error("Error retrieving active persona from session:", error);
       return null;
@@ -89,12 +76,9 @@ export const SessionStorage = {
         return;
       }
 
-      // Convert income growth function to type for storage
       const storedPersona = {
         ...persona,
-        incomeGrowthType: getIncomeGrowthType(persona.incomeGrowth),
-        // Remove the function as it can't be serialized
-        incomeGrowth: undefined,
+        // Directly store incomeGrowth as it is
       };
 
       localStorage.setItem(SESSION_ACTIVE_PERSONA_KEY, JSON.stringify(storedPersona));
@@ -218,45 +202,3 @@ export const SessionStorage = {
     }
   },
 };
-
-// Helper function to map income growth function to type
-function getIncomeGrowthType(growthFn: ((age: number) => number) | undefined): string {
-  if (!growthFn) return "default";
-
-  // Test the function at different ages to determine its type
-  const growth25 = growthFn(25);
-  const growth50 = growthFn(50);
-  const growth60 = growthFn(60);
-
-  if (growth25 === 1.05 && growth50 === 1.05 && growth60 === 1.2) {
-    return "ceo";
-  } else if (growth25 === 1.05 && growth50 === 1.02) {
-    return "fast";
-  } else if (growth25 === 1.03 && growth50 === 1.01) {
-    return "moderate";
-  } else if (growth25 === 1.02 && growth50 === 1.0) {
-    return "slow";
-  }
-
-  return "default";
-}
-
-// Helper function to get income growth function from type
-function getIncomeGrowthFunction(type: string): (age: number) => number {
-  switch (type) {
-    case "fast":
-      return (age: number) => (age <= 45 ? 1.05 : 1.02);
-    case "moderate":
-      return (age: number) => (age <= 45 ? 1.03 : 1.01);
-    case "slow":
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-    case "ceo":
-      return (age: number) => {
-        if (age <= 50) return 1.05;
-        if (age <= 60) return 1.2;
-        return 1;
-      };
-    default:
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-  }
-}

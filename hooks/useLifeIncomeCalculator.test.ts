@@ -7,13 +7,14 @@ describe("useLifeIncomeCalculator", () => {
   const { calculateLifeIncome } = result.current
 
   const mockPersona: Partial<Persona> = {
-    incomeGrowth: (age: number) => 1.05,
+    incomeGrowth: 1.05,
     currentIncome: 50000,
     savingsRate: 0.2,
     inheritanceAmount: 100000,
   }
 
   const defaultParams = {
+    currentWealth: 0,
     currentIncome: 50000,
     currentAge: 25,
     savingsRate: 0.2,

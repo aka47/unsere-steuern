@@ -10,6 +10,7 @@ export async function GET(
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
+    console.log("Unauthorized - session:", session);
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }
@@ -17,7 +18,8 @@ export async function GET(
   }
 
   try {
-    const persona = await PersonaRepository.getActiveForUser(session.user.id);
+    // const persona = await PersonaRepository.getActiveForUser(session.user.id);
+    const persona = await PersonaRepository.getAllForUser(session.user.id);
 
     if (!persona) {
       return NextResponse.json(
@@ -28,7 +30,12 @@ export async function GET(
 
     return NextResponse.json(persona);
   } catch (error) {
-    console.error("Error getting active persona:", error);
+
+    // console.error("Session:", session);
+    // console.error("Request:", _req);
+    // console.error("Auth Options:", authOptions);
+    console.error("session-id:", session.user.id);
+
     return NextResponse.json(
       { error: "Failed to get active persona" },
       { status: 500 }

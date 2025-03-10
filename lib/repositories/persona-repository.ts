@@ -18,26 +18,6 @@ const parseYearlyOverrides = (json: string | null) => {
   }
 };
 
-// Helper function to map income growth type to function
-const getIncomeGrowthFunction = (type: string) => {
-  switch (type) {
-    case "fast":
-      return (age: number) => (age <= 45 ? 1.05 : 1.02);
-    case "moderate":
-      return (age: number) => (age <= 45 ? 1.03 : 1.01);
-    case "slow":
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-    case "ceo":
-      return (age: number) => {
-        if (age <= 50) return 1.05;
-        if (age <= 60) return 1.2;
-        return 1;
-      };
-    default:
-      return (age: number) => (age <= 45 ? 1.02 : 1.0);
-  }
-};
-
 // Convert DB Persona to application Persona
 const mapToPersona = (dbPersona: Record<string, unknown>): PersonaType => {
   return {
@@ -55,7 +35,7 @@ const mapToPersona = (dbPersona: Record<string, unknown>): PersonaType => {
     inheritanceTaxClass: dbPersona.inheritanceTaxClass as 1 | 2 | 3,
     vatRate: dbPersona.vatRate as number,
     vatApplicableRate: dbPersona.vatApplicableRate as number,
-    incomeGrowth: getIncomeGrowthFunction(dbPersona.incomeGrowthType as string),
+    incomeGrowth: dbPersona.incomeGrowth as number,
     yearlySpendingFromWealth: dbPersona.yearlySpendingFromWealth as number,
     currentWealth: dbPersona.currentWealth as number,
     yearlyOverrides: parseYearlyOverrides(dbPersona.yearlyOverridesJson as string | null),
@@ -65,22 +45,6 @@ const mapToPersona = (dbPersona: Record<string, unknown>): PersonaType => {
 // Convert application Persona to DB Persona
 const mapToDbPersona = (persona: PersonaType, userId: string) => {
   // Determine income growth type based on the function
-  let incomeGrowthType = "default";
-
-  // This is a simplistic approach - in a real app, you might want a more robust way to identify functions
-  const growth25 = persona.incomeGrowth(25);
-  const growth50 = persona.incomeGrowth(50);
-  const growth60 = persona.incomeGrowth(60);
-
-  if (growth25 === 1.05 && growth50 === 1.05 && growth60 === 1.2) {
-    incomeGrowthType = "ceo";
-  } else if (growth25 === 1.05 && growth50 === 1.02) {
-    incomeGrowthType = "fast";
-  } else if (growth25 === 1.03 && growth50 === 1.01) {
-    incomeGrowthType = "moderate";
-  } else if (growth25 === 1.02 && growth50 === 1.0) {
-    incomeGrowthType = "slow";
-  }
 
   return {
     userId,
@@ -100,7 +64,6 @@ const mapToDbPersona = (persona: PersonaType, userId: string) => {
     yearlySpendingFromWealth: persona.yearlySpendingFromWealth,
     currentWealth: persona.currentWealth,
     yearlyOverridesJson: yearlyOverridesToJson(persona.yearlyOverrides),
-    incomeGrowthType,
   };
 };
 
@@ -128,17 +91,20 @@ export const PersonaRepository = {
   // Get the active persona for a user
   async getActiveForUser(userId: string): Promise<PersonaType | null> {
     // First check if user has an activePersonaId
-    const _user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    // const _user = await prisma.user.findUnique({
+    //   where: { id: userId },
+    // });
 
+    console.log("userId", userId);
     // If no active persona ID or persona not found, get the first persona marked as active
     const activePersona = await prisma.persona.findFirst({
       where: {
         userId,
-        isActive: true,
+        // isActive: true,
       },
     });
+
+    console.log("activePersona", activePersona);
 
     if (activePersona) return mapToPersona(activePersona);
 
@@ -213,27 +179,6 @@ export const PersonaRepository = {
     if (persona.currentWealth !== undefined) updateData.currentWealth = persona.currentWealth;
     if (persona.yearlyOverrides !== undefined) updateData.yearlyOverridesJson = yearlyOverridesToJson(persona.yearlyOverrides);
 
-    // Handle income growth function
-    if (persona.incomeGrowth) {
-      // Determine income growth type based on the function
-      const growth25 = persona.incomeGrowth(25);
-      const growth50 = persona.incomeGrowth(50);
-      const growth60 = persona.incomeGrowth(60);
-
-      let incomeGrowthType = "default";
-
-      if (growth25 === 1.05 && growth50 === 1.05 && growth60 === 1.2) {
-        incomeGrowthType = "ceo";
-      } else if (growth25 === 1.05 && growth50 === 1.02) {
-        incomeGrowthType = "fast";
-      } else if (growth25 === 1.03 && growth50 === 1.01) {
-        incomeGrowthType = "moderate";
-      } else if (growth25 === 1.02 && growth50 === 1.0) {
-        incomeGrowthType = "slow";
-      }
-
-      updateData.incomeGrowthType = incomeGrowthType;
-    }
 
     const updatedPersona = await prisma.persona.update({
       where: { id },

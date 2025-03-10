@@ -7,6 +7,10 @@ import type { Persona } from "@/types/persona"
 export function useSessionPersona() {
   const { data: session, update } = useSession()
 
+  const currentPersona = typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem("currentPersona") || "null")
+    : null
+
   const setPersona = useCallback(async (persona: Persona) => {
     await update({
       currentPersona: {
@@ -23,7 +27,7 @@ export function useSessionPersona() {
   }, [update])
 
   return {
-    currentPersona: session?.user?.personas?.active || session?.currentPersona,
+    currentPersona: currentPersona || session?.user?.personas?.active || session?.currentPersona,
     setCurrentPersona: setPersona,
     clearCurrentPersona: clearPersona,
     isLoading: session === undefined

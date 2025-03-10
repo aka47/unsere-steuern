@@ -51,7 +51,7 @@ const generate100Personas = (): Persona[] => {
       inheritanceAge: inheritance > 0 ? Math.floor(40 + Math.random() * 20) : null,
       inheritanceAmount: inheritance,
       vatApplicableRate: Math.round(50 + percentile * 50), // 50%-100%
-      incomeGrowth: (age) => (age <= 60 ? 1.02 + percentile * 0.03 : 1.01),
+      incomeGrowth: 1.02 + percentile * 0.03,
       yearlySpendingFromWealth: Math.round(wealth * (0.01 + percentile * 0.04)) // 1%-5% Ausgabequote
     })
   }

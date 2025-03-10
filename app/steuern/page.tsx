@@ -6,8 +6,6 @@ import IncomeVsInheritance from "@/components/tax-tabs/income-vs-inheritance"
 import { InheritanceTaxTab } from "@/components/tax-tabs/inheritance-tax-tab"
 import { PageHeader } from "@/components/ui/page-header"
 import { TaxRevenueChart } from "@/components/tax/tax-revenue-chart"
-import { TaxSimulationResults } from "@/components/tax/tax-simulation-results"
-import { baseline, target, finalResult } from "@/constants/simulation"
 import { TaxDistribution } from "@/types/life-income"
 
 export default function SteuernPage() {
@@ -27,11 +25,6 @@ export default function SteuernPage() {
       />
       <div className="flex-1 space-y-4 p-8 pt-6">
         <TaxRevenueChart data={defaultTaxDistribution} />
-        <TaxSimulationResults
-          baseline={baseline}
-          target={target}
-          result={finalResult}
-        />
 
         <Tabs defaultValue="income" className="space-y-4">
           <TabsList>

@@ -33,7 +33,7 @@ export function PersonaCreateOrShow({ userPersona }: PersonaCreateOrShowProps) {
 
   if (!currentPersona) {
     return (
-      <Card className="shadow-sm">
+      <Card className="shadow-sm max-w-lg">
         <CardHeader className="bg-muted/30 pb-4">
           <CardTitle>Erstellen Sie ihr Lebenseinkommen</CardTitle>
           <CardDescription>

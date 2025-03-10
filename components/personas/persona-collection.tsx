@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { PersonaList } from "@/components/personas/persona-list"
 import type { PersonaCollection } from "@/types/personaCollection"
 import type { Persona } from "@/types/persona"
+import { PersonaGroupStats } from "@/components/tax/persona-group-stats"
 
 interface PersonaCollectionProps {
   collection: PersonaCollection
@@ -16,6 +17,9 @@ export function PersonaCollection({ collection, onPersonaClick = () => {} }: Per
         <CardDescription>{collection.description}</CardDescription>
       </CardHeader>
       <CardContent>
+
+        <PersonaGroupStats personas={collection.personas} />
+
         <PersonaList personas={collection.personas} onPersonaClick={onPersonaClick} />
       </CardContent>
     </Card>

@@ -34,7 +34,7 @@ export default function NewPersonaPage() {
     vatApplicableRate: 0.7,
     yearlySpendingFromWealth: 0,
     currentWealth: 10000,
-    incomeGrowthType: "moderate",
+    incomeGrowth: 1.02,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -230,49 +230,46 @@ export default function NewPersonaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="incomeGrowthType">Income Growth</Label>
-              <Select
-                value={formData.incomeGrowthType}
-                onValueChange={(value) => handleSelectChange("incomeGrowthType", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select income growth" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="slow">Slow</SelectItem>
-                  <SelectItem value="moderate">Moderate</SelectItem>
-                  <SelectItem value="fast">Fast</SelectItem>
-                  <SelectItem value="ceo">CEO Track</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="incomeGrowth">Jährliches Einkommenswachstum (%)</Label>
+              <div className="pt-6">
+                <Slider
+                  id="incomeGrowth"
+                  min={1}
+                  max={1.1}
+                  step={0.01}
+                  value={[formData.incomeGrowth]}
+                  onValueChange={(value) => handleSliderChange("incomeGrowth", value)}
+                />
+              </div>
+              <div className="text-right text-sm text-muted-foreground">
+                {((formData.incomeGrowth - 1) * 100).toFixed(1)}%
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="inheritanceAge">Alter beim Erbe</Label>
-                <Input
-                  id="inheritanceAge"
-                  name="inheritanceAge"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.inheritanceAge}
-                  onChange={handleNumberChange}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="inheritanceAge">Alter beim Erbe</Label>
+              <Input
+                id="inheritanceAge"
+                name="inheritanceAge"
+                type="number"
+                min="0"
+                max="100"
+                value={formData.inheritanceAge}
+                onChange={handleNumberChange}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="inheritanceAmount">erhaltene Erbschaft (€)</Label>
-                <Input
-                  id="inheritanceAmount"
-                  name="inheritanceAmount"
-                  type="number"
-                  min="0"
-                  step="1000"
-                  value={formData.inheritanceAmount}
-                  onChange={handleNumberChange}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="inheritanceAmount">erhaltene Erbschaft (€)</Label>
+              <Input
+                id="inheritanceAmount"
+                name="inheritanceAmount"
+                type="number"
+                min="0"
+                step="1000"
+                value={formData.inheritanceAmount}
+                onChange={handleNumberChange}
+              />
             </div>
 
             <div className="space-y-2">

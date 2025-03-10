@@ -31,7 +31,7 @@ CREATE TABLE "Persona" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT false,
     "yearlyOverridesJson" TEXT,
-    "incomeGrowthType" TEXT NOT NULL DEFAULT 'default',
+    "incomeGrowth" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "Persona_pkey" PRIMARY KEY ("id")
 );

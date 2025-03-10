@@ -175,7 +175,7 @@ export function useLifeIncomeCalculator() {
     }
 
 
-    const defaultGrowthRate = () => 1.02
+    const defaultGrowthRate = 1.02
     const growthRate = currentPersona?.incomeGrowth || defaultGrowthRate
     const wealthGrowthRate = 0.05 // Base growth rate for wealth
     const wealthIncomeRate = 0.03 // Income generated from wealth (e.g., dividends, interest)
@@ -185,8 +185,7 @@ export function useLifeIncomeCalculator() {
     // Calculate initial income at initialAge by working backwards
     let initialIncome = currentIncome
     for (let age = currentAge; age > initialAge; age--) {
-      const growthFactor = typeof growthRate === 'function' ? growthRate(age - 1) : defaultGrowthRate()
-      initialIncome = initialIncome / growthFactor
+      initialIncome = initialIncome / growthRate
     }
 
     // Initialize totals
@@ -220,7 +219,7 @@ export function useLifeIncomeCalculator() {
       // Calculate work income (use override if available)
       let yearIncome = i === initialAge
         ? initialIncome
-        : results[results.length - 1].income * (typeof growthRate === 'function' ? growthRate(i) : defaultGrowthRate())
+        : results[results.length - 1].income * growthRate
 
       // Apply income override if available
       if (override && override.income !== undefined) {
