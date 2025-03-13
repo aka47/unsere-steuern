@@ -40,6 +40,7 @@ export interface PersonaSegmentStats {
     wealthIncomeTax: number
     total: number
   }
+  results: LifeIncomeCalculatorResult
 }
 
 const emptyStats: PersonaSegmentStats = {
@@ -77,6 +78,24 @@ const emptyStats: PersonaSegmentStats = {
     wealthTax: 0,
     wealthIncomeTax: 0,
     total: 0
+  },
+  results: {
+    totals: {
+      totalIncome: 0,
+      totalIncomeTax: 0,
+      totalWealth: 0,
+      totalWealthTax: 0,
+      totalVAT: 0,
+      totalInheritance: 0,
+      totalInheritanceTax: 0,
+      totalSpending: 0,
+      totalSavings: 0,
+      totalSpendingFromWealth: 0,
+      totalSpendingFromIncome: 0,
+      totalWealthIncome: 0,
+      totalWealthIncomeTax: 0
+    },
+    details: []
   }
 }
 
@@ -149,7 +168,8 @@ export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxS
         vat: yearlyAverages.vatPaid / yearlyAverages.taxPaid,
         wealthIncomeTax: (yearlyAverages.taxPaid - yearlyAverages.vatPaid - yearlyAverages.inheritanceTaxPaid) / yearlyAverages.taxPaid,
         total: yearlyAverages.taxPaid
-      }
+      },
+      results
     }
   }
 

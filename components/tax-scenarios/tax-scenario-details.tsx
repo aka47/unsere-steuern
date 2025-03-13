@@ -8,7 +8,8 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { TaxDistribution } from "@/types/life-income"
 import React from "react"
 import Markdown from "react-markdown"
-
+import { StatCard } from "@/components/ui/stat-card"
+import { WarningBox } from "@/components/warning-box"
 interface TaxScenarioDetailsProps {
   simulation: TaxDistribution
 }
@@ -19,6 +20,8 @@ export function TaxScenarioDetails({ simulation }: TaxScenarioDetailsProps) {
 
   return (
     <div className="space-y-6">
+
+      <WarningBox header="Steuerrechner ist noch im entstehen!" description="Die hier dargestellten Berechnungen und Zahlen sind noch nicht vollständig, die Zahlen sind noch nicht 100% korrekt und die Berechnungen fehlen noch viele der Ausnahmen und Sonderfälle, welche uns Millarden kosten und keiner wirklich verstehen soll. Das ist bis heute auch sehr gut gelungen." />
       <Card>
         <CardHeader>
           <CardTitle>{selectedTaxScenario.name}</CardTitle>
@@ -26,50 +29,42 @@ export function TaxScenarioDetails({ simulation }: TaxScenarioDetailsProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold">Gesamtsteuern</h3>
-              <p className="text-2xl font-bold">
-                {(simulation.total / 1_000_000_000).toLocaleString("de-DE", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 1,
-                })}
-                <span className="text-sm font-normal"> Mrd.</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">Einkommensteuer</h3>
-              <p className="text-2xl font-bold">
-                {(simulation.incomeTax / 1_000_000_000).toLocaleString("de-DE", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 1,
-                })}
-                <span className="text-sm font-normal"> Mrd.</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">Mehrwertsteuer</h3>
-              <p className="text-2xl font-bold">
-                {(simulation.vat / 1_000_000_000).toLocaleString("de-DE", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 1,
-                })}
-                <span className="text-sm font-normal"> Mrd.</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">Vermögenssteuer</h3>
-              <p className="text-2xl font-bold">
-                {(simulation.wealthTax / 1_000_000_000).toLocaleString("de-DE", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 1,
-                })}
-                <span className="text-sm font-normal"> Mrd.</span>
-              </p>
-            </div>
+            <StatCard
+              title="Gesamtsteuern"
+              value={(simulation.total / 1_000_000_000).toLocaleString("de-DE", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 1,
+              })}
+              suffix=" Mrd."
+            />
+            <StatCard
+              title="Einkommensteuer"
+              value={(simulation.incomeTax / 1_000_000_000).toLocaleString("de-DE", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 1,
+              })}
+              suffix=" Mrd."
+            />
+            <StatCard
+              title="Mehrwertsteuer"
+              value={(simulation.vat / 1_000_000_000).toLocaleString("de-DE", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 1,
+              })}
+              suffix=" Mrd."
+            />
+            <StatCard
+              title="Vermögenssteuer"
+              value={(simulation.wealthTax / 1_000_000_000).toLocaleString("de-DE", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 1,
+              })}
+              suffix=" Mrd."
+            />
           </div>
         </CardContent>
       </Card>

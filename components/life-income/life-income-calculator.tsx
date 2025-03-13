@@ -55,6 +55,14 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
 
   useEffect(() => {
     if (persona) {
+      setCurrentIncome(persona.currentIncome.toString())
+      setCurrentAge(persona.currentAge.toString())
+      setSavingsRate((persona.savingsRate * 100).toString())
+      setInheritanceAge(persona.inheritanceAge?.toString() ?? "")
+      setInheritanceAmount(persona.inheritanceAmount?.toString())
+      setSpending(persona.yearlySpendingFromWealth?.toString())
+      setWealth(persona.currentWealth?.toString() ?? "0")
+
       const results = calculateLifeIncome({
         ...persona,
         inheritanceAge: persona.inheritanceAge ?? 0,
@@ -73,23 +81,12 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
     }
   }, [persona, currentPersona, calculateLifeIncome, setResults, selectedTaxScenario])
 
-  useEffect(() => {
-    if (!persona && currentPersona) {
-      setPersona(currentPersona)
-    }
-  }, [currentPersona, persona, setPersona])
+  // useEffect(() => {
+  //   if (!persona && currentPersona) {
+  //     setPersona(currentPersona)
+  //   }
+  // }, [currentPersona, persona, setPersona])
 
-  useEffect(() => {
-    if (persona) {
-      setCurrentIncome(persona.currentIncome.toString())
-      setCurrentAge(persona.currentAge.toString())
-      setSavingsRate((persona.savingsRate * 100).toString())
-      setInheritanceAge(persona.inheritanceAge?.toString() ?? "")
-      setInheritanceAmount(persona.inheritanceAmount?.toString())
-      setSpending(persona.yearlySpendingFromWealth?.toString())
-      setWealth(persona.currentWealth?.toString() ?? "0")
-    }
-  }, [persona])
 
   const handleCalculation = () => {
     if (!persona) {
