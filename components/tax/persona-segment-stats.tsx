@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { usePersonaSegmentCalculator } from "@/hooks/usePersonaSegmentCalculator"
+import { usePersonaSegmentCollectionCalculator } from "@/hooks/usePersonaSegmentCalculator"
 import { TaxRevenueChart } from "./tax-revenue-chart"
 import { PersonaGroupStats } from "./persona-group-stats"
 import { Persona } from "@/types/persona"
@@ -11,15 +11,15 @@ interface PersonaSegmentStatsProps {
 }
 
 export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
-  const stats = usePersonaSegmentCalculator(personas)
+  const {aggregatedStats} = usePersonaSegmentCollectionCalculator(personas)
 
-  if (!stats) return null
+  if (!aggregatedStats) return null
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-4">Gesamtbevölkerung</h2>
-        <TaxRevenueChart data={stats.taxDistribution} />
+        <TaxRevenueChart data={aggregatedStats.taxDistribution} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           <Card>
@@ -28,10 +28,10 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {(stats.taxDistribution.total / 1e9).toFixed(1)} Mrd. €
+                {(aggregatedStats.taxDistribution.total / 1e9).toFixed(1)} Mrd. €
               </p>
               <p className="text-sm text-muted-foreground">
-                Durchschnittlicher Steuersatz: {(stats.averageTaxRate * 100).toFixed(1)}%
+                Durchschnittlicher Steuersatz: {(aggregatedStats.averageTaxRate * 100).toFixed(1)}%
               </p>
             </CardContent>
           </Card>
@@ -42,10 +42,10 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {(stats.totalIncomeReceived / 1e9).toFixed(1)} Mrd. €
+                {(aggregatedStats.totalIncomeReceived / 1e9).toFixed(1)} Mrd. €
               </p>
               <p className="text-sm text-muted-foreground">
-                Einkommensteuer: {(stats.averageIncomeTaxRate * 100).toFixed(1)}%
+                Einkommensteuer: {(aggregatedStats.averageIncomeTaxRate * 100).toFixed(1)}%
               </p>
             </CardContent>
           </Card>
@@ -56,10 +56,10 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {(stats.totalWealth / 1e9).toFixed(1)} Mrd. €
+                {(aggregatedStats.totalWealth / 1e9).toFixed(1)} Mrd. €
               </p>
               <p className="text-sm text-muted-foreground">
-                Vermögensteuer: {(stats.averageWealthTaxRate * 100).toFixed(1)}%
+                Vermögensteuer: {(aggregatedStats.averageWealthTaxRate * 100).toFixed(1)}%
               </p>
             </CardContent>
           </Card>
@@ -70,7 +70,7 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {stats.populationSize.toLocaleString()}
+                {aggregatedStats.populationSize.toLocaleString()}
               </p>
               <p className="text-sm text-muted-foreground">
                 Gesamte deutsche Bevölkerung
@@ -88,19 +88,19 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Einkommensteuer:</span>
-                  <span className="font-medium">{(stats.taxDistribution.incomeTax / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.taxDistribution.incomeTax / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Mehrwertsteuer:</span>
-                  <span className="font-medium">{(stats.taxDistribution.vat / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.taxDistribution.vat / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Vermögensteuer:</span>
-                  <span className="font-medium">{(stats.taxDistribution.wealthTax / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.taxDistribution.wealthTax / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Kapitalertragssteuer:</span>
-                  <span className="font-medium">{(stats.taxDistribution.wealthIncomeTax / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.taxDistribution.wealthIncomeTax / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
               </div>
             </CardContent>
@@ -114,11 +114,11 @@ export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Erbschaften:</span>
-                  <span className="font-medium">{(stats.totalInheritanceReceived / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.totalInheritanceReceived / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Mehrwertsteuer:</span>
-                  <span className="font-medium">{(stats.totalVATPaid / 1e9).toFixed(1)} Mrd. €</span>
+                  <span className="font-medium">{(aggregatedStats.totalVATPaid / 1e9).toFixed(1)} Mrd. €</span>
                 </div>
               </div>
             </CardContent>

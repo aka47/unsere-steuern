@@ -17,7 +17,10 @@ export function PersonaCollectionStats({ collection }: PersonaCollectionStatsPro
       ...persona,
       currentAge: persona.initialAge,
       currentPersona: persona,
-      inheritanceAge: persona.inheritanceAge ?? 0
+      inheritanceAge: persona.inheritanceAge ?? 0,
+      inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
+      inheritanceTaxableCompany: 0, // Assume 20% is company
+      inheritanceHardship: false // Default to false
     })
 
     if (!results) {

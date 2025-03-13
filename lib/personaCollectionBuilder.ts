@@ -1,30 +1,4 @@
-import { type PersonaCollection } from "@/types/personaCollection"
-
-// Extended Persona interface
-interface Persona {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  initialAge: number;
-  currentAge: number;
-  currentIncome: number;
-  currentIncomeFromWealth: number;
-  savingsRate: number;
-  inheritanceAge: number;
-  inheritanceAmount: number;
-  inheritanceTaxClass: 1 | 2 | 3;
-  vatRate: number;
-  vatApplicableRate: number;
-  incomeGrowth: (age: number) => number;
-  yearlySpendingFromWealth: number;
-  currentWealth: number;
-  inheritanceHousing: number;
-  inheritanceCompany: number;
-  inheritanceFinancial: number;
-  taxableInheritance: number;
-  inheritanceTax: number;
-}
+import { type Persona } from "@/types/persona"
 
 // Distribution configuration for Germany
 interface DistributionConfig {
@@ -53,10 +27,14 @@ class GrokPersonaBuilder {
   // Income distribution percentages (sum to 100%)
   private incomeDistribution: number[] = [
     0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.46
+    // 0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.03, 0.05, 0.10, 0.77
   ];
 
-  // Inheritance distribution percentages (sum to 100%), skewed to top
+
+
+  // Inheritance distribution percentages (sum to 100%)
   private inheritanceDistribution: number[] = [
+    // 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.13, 0.45 // Top 10% gets 45%
     0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.03, 0.05, 0.10, 0.77
   ];
 
@@ -74,7 +52,9 @@ class GrokPersonaBuilder {
 
   // Tax exemptions and rates
   private taxExemptionClass1 = 400000; // Per inheritance event
-  private companyTaxExemptionRate = 0.85; // 85% exempt for company assets
+  private companyTaxExemptionRate = 0.95; // 85% exempt for company assets
+  private hardshipExemptionThreshold = 1900000; // >1.9M euros qualifies
+  private hardshipExemptionRate = 0.6; // 60% of taxable amount exempt for Decile 10
   private taxRates = [
     { limit: 75000, rate: 0.07 },
     { limit: 225000, rate: 0.11 },
@@ -110,8 +90,11 @@ class GrokPersonaBuilder {
   ];
 
   // Calculate inheritance tax
-  private calculateInheritanceTax(taxableHousingFinancial: number, taxableCompany: number): number {
-    const totalTaxable = taxableHousingFinancial + taxableCompany;
+  private calculateInheritanceTax(inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean): number {
+    let totalTaxable = inheritanceTaxableHousingFinancial + inheritanceTaxableCompany;
+    if (inheritanceHardship && totalTaxable > this.hardshipExemptionThreshold) {
+      totalTaxable *= (1 - this.hardshipExemptionRate); // 75% exempt
+    }
     let tax = 0;
     let remaining = totalTaxable;
 
@@ -132,47 +115,38 @@ class GrokPersonaBuilder {
     const totalCompanyInheritance = this.config.totalInheritance * this.totalAssetDistribution.company;
 
     for (let i = 0; i < this.decileCount; i++) {
-      // Wealth calculation (per household)
+      // Wealth and income (per household)
       const householdsPerDecile = this.config.totalHouseholds / this.decileCount;
       const totalWealthInDecile = this.config.totalWealth * this.wealthDistribution[i];
       const currentWealth = Math.round(totalWealthInDecile / householdsPerDecile);
 
-      // Income calculation (per household)
       const totalIncomeInDecile = this.config.totalIncome * this.incomeDistribution[i];
       const currentIncome = Math.round(totalIncomeInDecile / householdsPerDecile);
 
-      // Income from wealth
       const wealthReturnRate = 0.05 + (i * 0.005);
       const currentIncomeFromWealth = Math.round(currentWealth * wealthReturnRate);
 
-      // Inheritance calculation (per estate)
+      // Inheritance (per estate)
       const totalInheritanceInDecile = this.config.totalInheritance * this.inheritanceDistribution[i];
       const inheritanceAmount = Math.round(totalInheritanceInDecile / estatesPerDecile);
 
-      // Company assets
       const companyInheritanceInDecile = totalCompanyInheritance * this.companyAssetDistribution[i];
       const inheritanceCompany = Math.round(companyInheritanceInDecile / estatesPerDecile);
 
-      // Remaining inheritance (housing + financial)
       const remainingInheritance = inheritanceAmount - inheritanceCompany;
       const housingProportion = this.totalAssetDistribution.housing / (this.totalAssetDistribution.housing + this.totalAssetDistribution.financial);
       const inheritanceHousing = Math.round(remainingInheritance * housingProportion);
       const inheritanceFinancial = Math.round(remainingInheritance * (1 - housingProportion));
 
-      // Taxable inheritance: Company assets get 85% exemption (100% for Decile 10)
-      const companyExemption = (i === 9) ? 1.0 : this.companyTaxExemptionRate; // 100% for Decile 10
-      const taxableCompany = Math.max(0, inheritanceCompany * (1 - companyExemption));
-      const taxableHousingFinancial = Math.max(0, (inheritanceHousing + inheritanceFinancial) - this.taxExemptionClass1);
-      const taxableInheritance = taxableHousingFinancial + taxableCompany;
-      const inheritanceTax = this.calculateInheritanceTax(taxableHousingFinancial, taxableCompany);
+      // Taxable inheritance
+      const companyExemption = (i === 9) ? 1.0 : this.companyTaxExemptionRate;
+      const inheritanceTaxableCompany = Math.max(0, inheritanceCompany * (1 - companyExemption));
+      const inheritanceTaxableHousingFinancial = Math.max(0, (inheritanceHousing + inheritanceFinancial) - this.taxExemptionClass1);
+      const inheritanceTaxable = inheritanceTaxableHousingFinancial + inheritanceTaxableCompany;
+      const inheritanceTax = this.calculateInheritanceTax(inheritanceTaxableHousingFinancial, inheritanceTaxableCompany, i === 9); // Hardship for Decile 10
 
-      // Savings rate
       const savingsRate = 0.05 + (i * 0.01);
-
-      // Spending from wealth
       const yearlySpendingFromWealth = Math.round(currentWealth * 0.05);
-
-      // Inheritance age
       const inheritanceAge = i < 5 ? 55 : 50 - (i - 5);
 
       const persona: Persona = {
@@ -190,16 +164,15 @@ class GrokPersonaBuilder {
         inheritanceTaxClass: 1,
         vatRate: 0,
         vatApplicableRate: 0,
-        incomeGrowth: () => 1.02,
+        incomeGrowth: 1.02,
         yearlySpendingFromWealth,
         currentWealth,
         inheritanceHousing,
         inheritanceCompany,
         inheritanceFinancial,
-        taxableInheritance,
+        inheritanceTaxable,
         inheritanceTax
       };
-
       this.personas.push(persona);
     }
 
@@ -273,8 +246,12 @@ console.log("Expected Totals (in billion euros):", {
   wealth: germanyConfig.totalWealth / 1e9,
   income: germanyConfig.totalIncome / 1e9,
   inheritance: germanyConfig.totalInheritance / 1e9,
-  tax: 11, // Expected tax revenue
+  tax: 11,
   housing: germanyConfig.totalInheritance * 0.50 / 1e9,
   company: germanyConfig.totalInheritance * 0.20 / 1e9,
   financial: germanyConfig.totalInheritance * 0.30 / 1e9
 });
+
+export function buildPersonaCollection(personas: Persona[]) {
+  return personas
+}

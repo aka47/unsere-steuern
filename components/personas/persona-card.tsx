@@ -26,7 +26,10 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
     ...persona,
     currentPersona: persona,
     taxScenario: activeTaxScenario,
-    inheritanceAge: persona.inheritanceAge ?? 0
+    inheritanceAge: persona.inheritanceAge ?? 0,
+    inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
+    inheritanceTaxableCompany: 0, // Assume 20% is company
+    inheritanceHardship: false // Default to false
   })
 
   // Always calculate results with the default tax scenario for comparison
@@ -34,7 +37,10 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
     ...persona,
     currentPersona: persona,
     taxScenario: defaultTaxScenario,
-    inheritanceAge: persona.inheritanceAge ?? 0
+    inheritanceAge: persona.inheritanceAge ?? 0,
+    inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
+    inheritanceTaxableCompany: 0, // Assume 20% is company
+    inheritanceHardship: false // Default to false
   })
 
   // Prepare data for comparison chart

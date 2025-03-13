@@ -96,7 +96,9 @@ const calculatedPersonas = personas.map((persona) => {
     vatApplicableRate: 80,
     currentIncomeFromWealth: 0,
     currentWealth: 0,
-    // incomeGrowth: (age: number) => (age <= 45 ? 1.02 : 1.0),
+    inheritanceTaxableHousingFinancial: persona.typicalInheritance, // Assume 40% is housing
+    inheritanceTaxableCompany: 0, // Assume 20% is company
+    inheritanceHardship: false // Default to false
   })
 
   if (!results) return null

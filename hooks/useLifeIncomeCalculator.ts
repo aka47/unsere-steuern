@@ -16,6 +16,9 @@ type CalculateLifeIncomeParams = {
   inheritanceAge: number | 20
   inheritanceAmount: number
   inheritanceTaxClass: 1 | 2 | 3
+  inheritanceTaxableHousingFinancial: number
+  inheritanceTaxableCompany: number
+  inheritanceHardship: boolean
   vatRate: number | 19
   vatApplicableRate: number | 70
   yearlySpendingFromWealth: number
@@ -117,6 +120,9 @@ export function useLifeIncomeCalculator() {
     inheritanceAge,
     inheritanceAmount,
     inheritanceTaxClass,
+    inheritanceTaxableHousingFinancial,
+    inheritanceTaxableCompany,
+    inheritanceHardship,
     vatRate = 19,
     vatApplicableRate = 70,
     yearlySpendingFromWealth,
@@ -248,7 +254,7 @@ export function useLifeIncomeCalculator() {
       let inheritanceTax = 0
       if (i === inheritanceAge) {
         inheritance = inheritanceAmount
-        inheritanceTax = taxScenario.calculateInheritanceTax(inheritance, inheritanceTaxClass)
+        inheritanceTax = taxScenario.calculateInheritanceTax(inheritanceTaxableHousingFinancial, inheritanceTaxableCompany, inheritanceHardship, inheritanceTaxClass)
         totalWealth += (inheritance - inheritanceTax)
       }
 

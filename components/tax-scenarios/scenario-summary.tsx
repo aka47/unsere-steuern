@@ -13,7 +13,7 @@ export function ScenarioSummary() {
           <CardTitle className="text-sm font-medium">Total Tax Revenue</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">€{scenarioDetails.totalTaxRevenue.toLocaleString()}</div>
+          <div className="text-2xl font-bold">€{(scenarioDetails.totalIncomeTax + scenarioDetails.totalVAT + scenarioDetails.totalInheritanceTax).toLocaleString()}</div>
         </CardContent>
       </Card>
       <Card>

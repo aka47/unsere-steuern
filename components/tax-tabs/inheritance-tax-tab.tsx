@@ -17,7 +17,7 @@ export function InheritanceTaxTab() {
             </div>
             <div>
               <h3 className="font-semibold mb-2">Steuerpflichtiges Erbe</h3>
-              <p className="text-2xl font-bold">{(INHERITANCE_TAX_DATA.taxableInheritance / 1e9).toFixed(1)} Mrd. €</p>
+              <p className="text-2xl font-bold">{(INHERITANCE_TAX_DATA.inheritanceTaxable / 1e9).toFixed(1)} Mrd. €</p>
             </div>
             <div>
               <div className="text-sm font-medium">Steuereinnahmen</div>

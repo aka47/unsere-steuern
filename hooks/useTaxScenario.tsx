@@ -8,26 +8,54 @@ import { useTaxScenarioCalculator } from "./useTaxScenarioCalculator"
 type ScenarioStat = {
   name: string
   description: string
+  totalIncomeTax: number
+  totalVAT: number
+  totalInheritanceTax: number
+  effectiveTaxRate: number
+  wageTaxRevenue: number
+  inheritanceTaxRevenue: number
 }
 
 const scenarioStats: Record<string, ScenarioStat> = {
   flat: {
     name: "Einheitssteuer",
     description: "Ein einfaches Modell: Jeder zahlt den gleichen Steuersatz von 16,13% auf Einkommen und Erbschaften.",
+    totalIncomeTax: 0,
+    totalVAT: 0,
+    totalInheritanceTax: 0,
+    effectiveTaxRate: 0,
+    wageTaxRevenue: 0,
+    inheritanceTaxRevenue: 0
   },
   "progressive-flat": {
     name: "Progressive Einheitssteuer",
     description: "Wer mehr verdient, zahlt auch prozentual mehr Steuern - ähnlich wie im aktuellen System.",
+    totalIncomeTax: 0,
+    totalVAT: 0,
+    totalInheritanceTax: 0,
+    effectiveTaxRate: 0,
+    wageTaxRevenue: 0,
+    inheritanceTaxRevenue: 0
   },
   "50es-tax-levels": {
     name: "Die Steuern unter Kanzler Adenauer",
     description: "Das Steuersystem der 50er Jahre, als Deutschland sein Wirtschaftswunder erlebte.",
-
+    totalIncomeTax: 0,
+    totalVAT: 0,
+    totalInheritanceTax: 0,
+    effectiveTaxRate: 0,
+    wageTaxRevenue: 0,
+    inheritanceTaxRevenue: 0
   },
   custom: {
     name: "Deine Steuer",
     description: "Gestalte dein eigenes Steuersystem",
-
+    totalIncomeTax: 0,
+    totalVAT: 0,
+    totalInheritanceTax: 0,
+    effectiveTaxRate: 0,
+    wageTaxRevenue: 0,
+    inheritanceTaxRevenue: 0
   }
 }
 

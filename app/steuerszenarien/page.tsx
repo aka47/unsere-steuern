@@ -1,19 +1,15 @@
 "use client"
 
-import { TaxScenarioSelector } from "@/components/tax-scenarios/tax-scenario-selector"
-import { DataSources } from "@/components/tax-scenarios/data-sources"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PersonalTaxImpact } from "@/components/tax-scenarios/personal-tax-impact"
-import { initialPersonas } from "@/types/persona"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { EditIcon, UserIcon } from "lucide-react"
-import { PersonaList } from "@/components/personas/persona-list"
 import { grokPersonas } from "@/types/persona"
 import { PersonaCollection } from "@/components/personas/persona-collection"
-
+import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
+import { TaxScenarioBuilderOrDetails } from "@/components/tax-scenarios/tax-scenario-builder-or-details"
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
   const userPersona = currentPersona || null
@@ -45,11 +41,22 @@ export default function TaxScenariosPage() {
             </Button>
           </Link>
         </PageHeader>
+        <TaxScenarioNavigation />
+        <div className="p-8 relative">
+          <TaxScenarioNavigation />
+        </div>
 
-        <div className="flex-1 space-y-4 p-8 pt-2">
-          <TaxScenarioSelector />
+        <div className="flex-1 space-y-4">
+          <div className="p-8 pt-2">
+            <TaxScenarioBuilderOrDetails />
+            <PersonalTaxImpact userPersona={userPersona} />
+            <PersonaCollection collection={personaCollection} />
+          </div>
 
-          <PersonalTaxImpact userPersona={userPersona} />
+          <div className="p-8 pt-2">
+            <PersonalTaxImpact userPersona={userPersona} />
+            <PersonaCollection collection={personaCollection} />
+          </div>
 
           {/* Szenario-Zusammenfassung */}
           {/* <Card>
@@ -63,7 +70,7 @@ export default function TaxScenariosPage() {
           </Card> */}
 
           {/* Persona-Simulationen */}
-          <PersonaCollection collection={personaCollection} />
+
 
 {/*
           <Card>
@@ -104,6 +111,8 @@ export default function TaxScenariosPage() {
               <DataSources />
             </CardContent>
           </Card> */}
+
+
         </div>
       </div>
     </>

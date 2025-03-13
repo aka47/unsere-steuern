@@ -1,4 +1,6 @@
+// import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 import { INHERITANCE_TAX_CLASSES } from "./tax"
+
 import { type TaxScenario } from "@/types/life-income"
 import {
   statusQuoDescription,
@@ -6,6 +8,8 @@ import {
   flatTaxDescription,
   fiftysTaxDescription
 } from "./tax-scenario-descriptions"
+
+type TaxClass = 1 | 2 | 3
 
 // Status Quo (current tax system)
 export const statusQuoScenario: TaxScenario = {
@@ -38,25 +42,29 @@ export const statusQuoScenario: TaxScenario = {
     return Math.max(0, tax); // Steuer darf nicht negativ sein
   },
 
+  calculateInheritanceTax(inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: TaxClass): number {
+    const hardshipExemptionThreshold = 1900000; // >1.9M euros qualifies
+    const hardshipExemptionRate = 0.6;
+    let taxableAmount = inheritanceTaxableHousingFinancial + inheritanceTaxableCompany;
+    if (inheritanceHardship && taxableAmount > hardshipExemptionThreshold) {
+      taxableAmount *= (1 - hardshipExemptionRate); // 60% exempt
+    }
+    let tax = 0;
+    let previousLimit = 0;
 
-
-  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
-    let tax = 0
-    let exemption = 400000 // freibetrag
-    let taxableAmount = amount - exemption
-
-    if (taxableAmount <= 0) return 0
+    if (taxClass === undefined) taxClass = 1
 
     for (const bracket of INHERITANCE_TAX_CLASSES[taxClass]) {
-      if (taxableAmount > bracket.limit) {
-        continue
-      }
+      if (taxableAmount <= previousLimit) break;
 
-      tax = Math.max(0, taxableAmount * bracket.rate)
-      break
+      const taxableInBracket = Math.min(taxableAmount, bracket.limit) - previousLimit;
+      if (taxableInBracket > 0) {
+        tax += taxableInBracket * bracket.rate;
+      }
+      previousLimit = bracket.limit;
     }
 
-    return tax
+    return tax;
   },
 
   calculateWealthTax: (wealth: number) => {
@@ -140,9 +148,9 @@ export const flatTaxScenario: TaxScenario = {
     return taxableIncome * 0.1034 //
   },
 
-  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
-    const exemption = 0 // Higher exemption
-    const taxableAmount = Math.max(0, amount - exemption)
+  calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: TaxClass) => {
+    const exemption = 0 // no exemption
+    const taxableAmount = Math.max(0, inheritanceTaxableHousingFinancial + inheritanceTaxableCompany - exemption)
     return taxableAmount * 0.1034 // 20% flat rate
   },
 
@@ -192,10 +200,10 @@ export const fiftysTaxScenario: TaxScenario = {
     return Math.max(0, tax);
   },
 
-  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
+  calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: TaxClass) => {
     // Inheritance tax was generally higher in the 1950s-60s
     let exemption = 200000; // Lower exemption than today
-    let taxableAmount = Math.max(0, amount - exemption);
+    let taxableAmount = Math.max(0, inheritanceTaxableHousingFinancial + inheritanceTaxableCompany - exemption);
 
     if (taxableAmount <= 0) return 0;
 
@@ -243,7 +251,7 @@ export const customTaxScenario: TaxScenario = {
     return 0
   },
 
-  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
+  calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: TaxClass) => {
     // This will be calculated dynamically based on user input
     return 0
   },

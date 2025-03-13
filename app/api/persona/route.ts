@@ -34,13 +34,32 @@ export async function GET(
 // Validation schema for persona data
 const personaSchema = z.object({
   id: z.string().optional(),
-  currentIncome: z.number(),
+  name: z.string().default("Standard Profile"),
+  description: z.string().default("Ein durchschnittliches Profil mit typischen Werten"),
+  icon: z.string().default("👤"),
+  initialAge: z.number().default(20),
   currentAge: z.number(),
+  currentIncome: z.number(),
+  currentIncomeFromWealth: z.number().default(0),
   savingsRate: z.number(),
   inheritanceAge: z.number().nullable(),
   inheritanceAmount: z.number(),
+  inheritanceTaxClass: z.union([z.literal(1), z.literal(2), z.literal(3)]).default(1),
+  vatRate: z.number().default(19),
+  vatApplicableRate: z.number().default(70),
+  incomeGrowth: z.number().default(1.02),
   yearlySpendingFromWealth: z.number(),
-  currentWealth: z.number()
+  currentWealth: z.number(),
+  inheritanceHousing: z.number().default(0),
+  inheritanceCompany: z.number().default(0),
+  inheritanceFinancial: z.number().default(0),
+  inheritanceTaxable: z.number().default(0),
+  inheritanceTax: z.number().default(0),
+  yearlyOverrides: z.array(z.object({
+    age: z.number(),
+    income: z.number(),
+    wealth: z.number()
+  })).optional()
 });
 
 // POST /api/persona - Create a new persona
@@ -58,11 +77,21 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = personaSchema.parse(body);
 
-    const persona = validatedData.id
-      ? await PersonaRepository.update(validatedData.id, validatedData)
-      : await PersonaRepository.create(validatedData, session.user.id);
+    // If updating existing persona
+    if (validatedData.id) {
+      const updatedPersona = await PersonaRepository.update(validatedData.id, validatedData);
+      return NextResponse.json(updatedPersona);
+    }
 
-    return NextResponse.json(persona);
+    // If creating new persona, generate a unique ID
+    const newPersona = {
+      ...validatedData,
+      id: crypto.randomUUID()
+    };
+
+    const createdPersona = await PersonaRepository.create(newPersona, session.user.id);
+    return NextResponse.json(createdPersona);
+
   } catch (error) {
     console.error("Error saving persona:", error);
     if (error instanceof z.ZodError) {

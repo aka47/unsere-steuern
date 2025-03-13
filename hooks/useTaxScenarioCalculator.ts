@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react"
 import { TaxDistribution } from "@/types/life-income"
 import { Persona } from "@/types/persona"
+import { InheritanceTaxClass } from "@/types/inheritance-tax"
 import { grokPersonas } from "@/types/persona"
 import { useLifeIncomeCalculator, type LifeIncomeCalculatorResult } from "./useLifeIncomeCalculator"
 import { type TaxScenario } from "@/types/life-income"
+
 
 interface TaxParams {
   incomeTax: {
@@ -104,9 +106,10 @@ export function useTaxScenarioCalculator() {
         return tax
       },
 
-      calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => {
+      calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: InheritanceTaxClass) => {
         const brackets = inheritanceTaxBrackets[params.inheritanceTax.taxLevel]
-        const adjustedAmount = Math.max(0, amount - params.inheritanceTax.taxFreeAmount)
+
+        const adjustedAmount = Math.max(0, inheritanceTaxableHousingFinancial + inheritanceTaxableCompany - params.inheritanceTax.taxFreeAmount)
 
         let tax = 0
         for (let i = 0; i < brackets.length - 1; i++) {
@@ -156,9 +159,11 @@ export function useTaxScenarioCalculator() {
         currentPersona: persona,
         initialAge: persona.initialAge,
         currentIncomeFromWealth: persona.currentIncomeFromWealth,
-        taxScenario: customTaxScenario
+        taxScenario: customTaxScenario,
+        inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
+        inheritanceTaxableCompany: persona.inheritanceCompany,
+        inheritanceHardship: false // Default to false as it's not in the Persona type
       })
-
       return result
     }).filter((result): result is NonNullable<typeof result> => result !== null)
 

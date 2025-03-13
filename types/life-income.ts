@@ -1,3 +1,5 @@
+import { InheritanceTaxClass } from "@/types/inheritance-tax"
+
 export type LifeIncomeYearlyResult = {
   age: number
   income: number
@@ -21,7 +23,7 @@ export type TaxScenario = {
   detailedDescription?: string  // Detailed explanation of tax rates and rules
   // Tax calculation functions
   calculateIncomeTax: (income: number) => number
-  calculateInheritanceTax: (amount: number, taxClass: 1 | 2 | 3) => number
+  calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: InheritanceTaxClass) => number
   calculateWealthTax: (wealth: number) => number
   calculateWealthIncomeTax: (wealthIncome: number) => number
   calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => number

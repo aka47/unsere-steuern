@@ -29,8 +29,7 @@ export async function GET(
     }
 
     return NextResponse.json(persona);
-  } catch (error) {
-
+  } catch (_error) {
     // console.error("Session:", session);
     // console.error("Request:", _req);
     // console.error("Auth Options:", authOptions);

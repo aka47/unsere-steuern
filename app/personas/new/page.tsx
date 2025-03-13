@@ -35,6 +35,11 @@ export default function NewPersonaPage() {
     yearlySpendingFromWealth: 0,
     currentWealth: 10000,
     incomeGrowth: 1.02,
+    inheritanceHousing: 0,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 0,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -3,7 +3,7 @@ export const WEALTH_TAX_DATA = {
   totalWealth: 13400, // Total wealth in billion €
   annualGrowth: 402, // Annual growth (3%) in billion €
   inheritanceTransfers: 400, // Annual inheritance transfers in billion €
-  taxableInheritance: 100, // Taxable inheritance in billion €
+  inheritanceTaxable: 100, // Taxable inheritance in billion €
   realizedAndTaxed: 48.5, // Realized and taxed in billion €
   untaxedUnrealized: 361.8, // Untaxed (unrealized) in billion €
   percentageUntaxed: 90, // Percentage untaxed

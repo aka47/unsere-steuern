@@ -52,7 +52,7 @@ export const INHERITANCE_TAX_CLASSES = {
 
 export const INHERITANCE_TAX_DATA = {
   totalInheritance: 400000000000, // 400 billion
-  taxableInheritance: 100000000000, // 100 billion
+  inheritanceTaxable: 100000000000, // 100 billion
   taxRevenue: 11000000000, // 11 billion
 }
 

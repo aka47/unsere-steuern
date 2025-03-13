@@ -18,9 +18,12 @@ import { TypographyH4, TypographyP } from "@/components/ui/typography"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
 import { YearlyBreakdown } from "@/components/life-income/yearly-breakdown"
-import { PersonaRepository } from "@/lib/repositories/persona-repository"
-import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
+
+
+// import { calculateInheritanceTax } from "@/lib/tax"
+// import { calculateLifeIncome } from "@/types/life-income"
+// import { type CalculateLifeIncomeParams, type LifeIncomeCalculatorResult } from "@/types/life-income"
 
 
 interface LifeIncomeCalculatorProps {
@@ -47,7 +50,6 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
   const [selectedTaxScenario] = useState<TaxScenario>(defaultTaxScenario)
   const [yearlyResults, setYearlyResults] = useState<LifeIncomeResults>(null)
   const [showYearlyBreakdown, setShowYearlyBreakdown] = useState(false)
-  const { session, isAuthenticated } = useAuth()
   const { calculateLifeIncome } = useLifeIncomeCalculator()
   const { currentPersona, setCurrentPersona } = useSessionPersona()
 
@@ -57,6 +59,9 @@ export function LifeIncomeCalculator({ setResults, persona, setPersona }: LifeIn
         ...persona,
         inheritanceAge: persona.inheritanceAge ?? 0,
         currentPersona,
+        inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
+        inheritanceTaxableCompany: persona.inheritanceCompany,
+        inheritanceHardship: false, // Default to false if not specified
         taxScenario: selectedTaxScenario
       })
       if (results) {

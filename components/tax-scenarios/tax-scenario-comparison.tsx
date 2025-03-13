@@ -34,10 +34,9 @@ export function TaxScenarioComparison() {
         inheritanceAge: persona.inheritanceAge ?? 20,
         inheritanceAmount: persona.inheritanceAmount || 0,
         inheritanceTaxClass: persona.inheritanceTaxClass || 1,
-        vatRate: persona.vatRate || 19,
-        vatApplicableRate: persona.vatApplicableRate || 70,
-        currentIncomeFromWealth: persona.currentIncomeFromWealth || 0,
-        yearlyOverrides: persona.yearlyOverrides || []
+        inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
+        inheritanceTaxableCompany: 0, // Assume 20% is company
+        inheritanceHardship: false // Default to false
       })
 
       // Default values if results or totals are undefined

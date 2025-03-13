@@ -158,18 +158,23 @@ class GrokPersonaBuilder {
         description: this.descriptions[i],
         icon: "👤",
         initialAge: 25,
-        currentAge: 60,
-        currentIncome,
-        currentIncomeFromWealth,
-        savingsRate,
-        inheritanceAge,
+        currentAge: 35 + i,
+        currentIncome: currentIncome,
+        currentIncomeFromWealth: currentIncomeFromWealth,
+        savingsRate: savingsRate,
+        inheritanceAge: inheritanceAge,
         inheritanceAmount: expectedInheritance,
         inheritanceTaxClass: 1,
-        vatRate: 0,
-        vatApplicableRate: 0,
-        incomeGrowth: 1.02,
-        yearlySpendingFromWealth,
-        currentWealth
+        vatRate: 19,
+        vatApplicableRate: 80,
+        incomeGrowth: 0.02,
+        yearlySpendingFromWealth: yearlySpendingFromWealth,
+        currentWealth: currentWealth,
+        inheritanceHousing: expectedInheritance * 0.4, // 40% housing
+        inheritanceCompany: expectedInheritance * 0.3, // 30% company
+        inheritanceFinancial: expectedInheritance * 0.3, // 30% financial
+        inheritanceTaxable: expectedInheritance,
+        inheritanceTax: 0 // This will be calculated later
       };
 
       this.personas.push(persona);

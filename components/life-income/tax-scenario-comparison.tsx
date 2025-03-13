@@ -48,7 +48,10 @@ export function TaxScenarioComparison({
         currentWealth,
         yearlySpendingFromWealth,
         taxScenario: scenario,
-        inheritanceAge: persona.inheritanceAge ?? 0
+        inheritanceAge: persona.inheritanceAge ?? 0,
+        inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
+        inheritanceTaxableCompany: 0, // Assume 20% is company
+        inheritanceHardship: false // Default to false
       })
 
       if (calculationResult) {

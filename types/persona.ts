@@ -16,6 +16,11 @@ export interface Persona {
   incomeGrowth: number
   yearlySpendingFromWealth: number
   currentWealth: number
+  inheritanceHousing: number
+  inheritanceCompany: number
+  inheritanceFinancial: number
+  inheritanceTaxable: number
+  inheritanceTax: number
   yearlyOverrides?: {
     age: number
     income: number
@@ -33,14 +38,19 @@ export const defaultPersona: Persona = {
   currentIncome: 30000,
   currentIncomeFromWealth: 0,
   savingsRate: 0,
-  inheritanceAge: null,
-  inheritanceAmount: 0,
-  inheritanceTaxClass: 1,
   vatRate: 19,
   vatApplicableRate: 70,
   incomeGrowth: 1.02,
   yearlySpendingFromWealth: 0,
   currentWealth: 0,
+  inheritanceHousing: 0,
+  inheritanceCompany: 0,
+  inheritanceFinancial: 0,
+  inheritanceTaxable: 0,
+  inheritanceTax: 0,
+  inheritanceAge: null,
+  inheritanceAmount: 0,
+  inheritanceTaxClass: 1,
 }
 
 export const initialPersonas: Persona[] = [
@@ -115,6 +125,7 @@ export const initialPersonas: Persona[] = [
 
 export const avgPersonas: Persona[] = [
   {
+    ...defaultPersona,
     id: "persona_1",
     name: "Geringverdiener",
     description: "Gehört zu den unteren 20% der Einkommens- und Vermögensverteilung. Kaum Erbschaft, niedrige Sparrate, begrenztes Einkommen.",
@@ -126,14 +137,13 @@ export const avgPersonas: Persona[] = [
     savingsRate: 0.05,
     inheritanceAge: 45,
     inheritanceAmount: 5000,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
     vatApplicableRate: 60,
     incomeGrowth: 1.01,
     yearlySpendingFromWealth: 0,
     currentWealth: 5000
   },
   {
+    ...defaultPersona,
     id: "persona_2",
     name: "Arbeiterschicht",
     description: "20–40% Einkommens- und Vermögensverteilung. Erhält eine moderate Erbschaft, wächst langsam im Einkommen.",
@@ -145,14 +155,13 @@ export const avgPersonas: Persona[] = [
     savingsRate: 0.1,
     inheritanceAge: 50,
     inheritanceAmount: 20000,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
     vatApplicableRate: 65,
     incomeGrowth: 1.02,
     yearlySpendingFromWealth: 0,
     currentWealth: 20000
   },
   {
+    ...defaultPersona,
     id: "persona_3",
     name: "Mittelschicht",
     description: "40–60% der Einkommens- und Vermögensverteilung. Hat gute Sparmöglichkeiten und erbt eine mittlere Summe.",
@@ -164,14 +173,13 @@ export const avgPersonas: Persona[] = [
     savingsRate: 0.15,
     inheritanceAge: 55,
     inheritanceAmount: 50000,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
     vatApplicableRate: 70,
     incomeGrowth: 1.03,
     yearlySpendingFromWealth: 500,
     currentWealth: 50000
   },
   {
+    ...defaultPersona,
     id: "persona_4",
     name: "Obere Mittelschicht",
     description: "60–80% Einkommens- und Vermögensverteilung. Erhält eine signifikante Erbschaft und spart aktiv.",
@@ -183,14 +191,13 @@ export const avgPersonas: Persona[] = [
     savingsRate: 0.2,
     inheritanceAge: 60,
     inheritanceAmount: 150000,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
     vatApplicableRate: 75,
     incomeGrowth: 1.04,
     yearlySpendingFromWealth: 2000,
     currentWealth: 150000
   },
   {
+    ...defaultPersona,
     id: "persona_5",
     name: "Vermögende Elite",
     description: "80–100% der Einkommens- und Vermögensverteilung. Sehr hohe Erbschaft, starkes Einkommen und Vermögenswachstum.",
@@ -202,17 +209,15 @@ export const avgPersonas: Persona[] = [
     savingsRate: 0.3,
     inheritanceAge: 50,
     inheritanceAmount: 1000000,
-    inheritanceTaxClass: 1,
-    vatRate: 19,
     vatApplicableRate: 80,
     incomeGrowth: 1.05,
     yearlySpendingFromWealth: 50000,
     currentWealth: 1000000
   }
 ]
-
 export const highIncomePersonas: Persona[] = [
   {
+    ...defaultPersona,
     id: "persona_6",
     name: "Wohlhabende Oberschicht",
     description: "80–85% der Einkommens- und Vermögensverteilung. Hohes Einkommen, spart effektiv und erbt eine beträchtliche Summe.",
@@ -220,11 +225,10 @@ export const highIncomePersonas: Persona[] = [
     initialAge: 20,
     currentAge: 65,
     currentIncome: 120000,
-    currentIncomeFromWealth: 30000, // 25% aus Vermögen
+    currentIncomeFromWealth: 30000,
     savingsRate: 0.25,
     inheritanceAge: 55,
     inheritanceAmount: 300000,
-    inheritanceTaxClass: 1,
     vatRate: 19,
     vatApplicableRate: 80,
     incomeGrowth: 1.045,
@@ -232,6 +236,7 @@ export const highIncomePersonas: Persona[] = [
     currentWealth: 300000
   },
   {
+    ...defaultPersona,
     id: "persona_7",
     name: "Vermögensverwalter",
     description: "85–90% der Einkommens- und Vermögensverteilung. Sehr hohe Erbschaft, wachsendes Einkommen durch Investitionen.",
@@ -239,11 +244,10 @@ export const highIncomePersonas: Persona[] = [
     initialAge: 20,
     currentAge: 65,
     currentIncome: 180000,
-    currentIncomeFromWealth: 54000, // 30% aus Vermögen
+    currentIncomeFromWealth: 54000,
     savingsRate: 0.28,
     inheritanceAge: 50,
     inheritanceAmount: 500000,
-    inheritanceTaxClass: 1,
     vatRate: 19,
     vatApplicableRate: 85,
     incomeGrowth: 1.05,
@@ -251,6 +255,7 @@ export const highIncomePersonas: Persona[] = [
     currentWealth: 500000
   },
   {
+    ...defaultPersona,
     id: "persona_8",
     name: "Top-Verdiener",
     description: "90–95% der Einkommens- und Vermögensverteilung. Sehr hohes Einkommen und erhebliche Vermögenszuwächse.",
@@ -258,7 +263,7 @@ export const highIncomePersonas: Persona[] = [
     initialAge: 20,
     currentAge: 65,
     currentIncome: 300000,
-    currentIncomeFromWealth: 120000, // 40% aus Vermögen
+    currentIncomeFromWealth: 120000,
     savingsRate: 0.32,
     inheritanceAge: 45,
     inheritanceAmount: 800000,
@@ -270,6 +275,7 @@ export const highIncomePersonas: Persona[] = [
     currentWealth: 800000
   },
   {
+    ...defaultPersona,
     id: "persona_9",
     name: "Vermögenselite",
     description: "95–99% der Einkommens- und Vermögensverteilung. Extrem hohes Einkommen und Vermögen, erhebliche Erbschaften.",
@@ -277,7 +283,7 @@ export const highIncomePersonas: Persona[] = [
     initialAge: 20,
     currentAge: 65,
     currentIncome: 500000,
-    currentIncomeFromWealth: 250000, // 50% aus Vermögen
+    currentIncomeFromWealth: 250000,
     savingsRate: 0.35,
     inheritanceAge: 40,
     inheritanceAmount: 2000000,
@@ -289,6 +295,7 @@ export const highIncomePersonas: Persona[] = [
     currentWealth: 2000000
   },
   {
+    ...defaultPersona,
     id: "persona_10",
     name: "Superreiche",
     description: "Top 1% der Einkommens- und Vermögensverteilung. Astronomisches Einkommen und Vermögen, lebt primär von Kapitalerträgen.",
@@ -296,7 +303,7 @@ export const highIncomePersonas: Persona[] = [
     initialAge: 20,
     currentAge: 65,
     currentIncome: 5000000,
-    currentIncomeFromWealth: 4000000, // 80% aus Vermögen
+    currentIncomeFromWealth: 4000000,
     savingsRate: 0.5,
     inheritanceAge: 45,
     inheritanceAmount: 50000000,
@@ -312,6 +319,7 @@ export const highIncomePersonas: Persona[] = [
 
 export const grokOldPersonas: Persona[] = [
   {
+    ...defaultPersona,
     id: "p1",
     name: "Geringverdiener im Ruhestand",
     description: "Untere 10% Vermögen, minimale Ersparnisse, niedriges Einkommen hauptsächlich aus Arbeit.",
@@ -319,7 +327,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 20000,
-    currentIncomeFromWealth: 1000,  // 5% of total income
+    currentIncomeFromWealth: 1000,
     savingsRate: 0.05,
     inheritanceAge: 55,
     inheritanceAmount: 50000,
@@ -327,10 +335,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 400,  // ~5% of €7,932
+    yearlySpendingFromWealth: 400,
     currentWealth: 7932,
   },
   {
+    ...defaultPersona,
     id: "p2",
     name: "Bescheidener Verdiener",
     description: "10-20% Vermögen, bescheidenes Einkommen mit kleinem Vermögensbeitrag.",
@@ -338,7 +347,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 28000,
-    currentIncomeFromWealth: 1400,  // 5% of total income
+    currentIncomeFromWealth: 1400,
     savingsRate: 0.07,
     inheritanceAge: 55,
     inheritanceAmount: 75000,
@@ -346,10 +355,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 550,  // ~5% of €11,058
+    yearlySpendingFromWealth: 550,
     currentWealth: 11058,
   },
   {
+    ...defaultPersona,
     id: "p3",
     name: "Untere Mittelschicht",
     description: "20-30% Vermögen, moderates Einkommen mit wachsenden Ersparnissen.",
@@ -357,7 +367,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 36000,
-    currentIncomeFromWealth: 1800,  // 5% of total income
+    currentIncomeFromWealth: 1800,
     savingsRate: 0.08,
     inheritanceAge: 55,
     inheritanceAmount: 100000,
@@ -365,10 +375,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 870,  // ~5% of €17,428
+    yearlySpendingFromWealth: 870,
     currentWealth: 17428,
   },
   {
+    ...defaultPersona,
     id: "p4",
     name: "Durchschnittsverdiener",
     description: "30-40% Vermögen, stabiles Einkommen mit moderatem Vermögen.",
@@ -376,7 +387,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 44000,
-    currentIncomeFromWealth: 2200,  // 5% of total income
+    currentIncomeFromWealth: 2200,
     savingsRate: 0.09,
     inheritanceAge: 55,
     inheritanceAmount: 150000,
@@ -384,10 +395,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 1268,  // ~5% of €25,361
+    yearlySpendingFromWealth: 1268,
     currentWealth: 25361,
   },
   {
+    ...defaultPersona,
     id: "p5",
     name: "Gehobene Mittelschicht",
     description: "40-50% Vermögen, überdurchschnittliches Einkommen mit soliden Ersparnissen.",
@@ -395,7 +407,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 52000,
-    currentIncomeFromWealth: 2600,  // 5% of total income
+    currentIncomeFromWealth: 2600,
     savingsRate: 0.10,
     inheritanceAge: 55,
     inheritanceAmount: 200000,
@@ -403,10 +415,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 1905,  // ~5% of €38,101
+    yearlySpendingFromWealth: 1905,
     currentWealth: 38101,
   },
   {
+    ...defaultPersona,
     id: "p6",
     name: "Gutverdiener",
     description: "50-60% Vermögen, hohes Einkommen mit bemerkenswertem Vermögenseinkommen.",
@@ -414,7 +427,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 64000,
-    currentIncomeFromWealth: 6400,  // 10% of total income
+    currentIncomeFromWealth: 6400,
     savingsRate: 0.12,
     inheritanceAge: 50,
     inheritanceAmount: 250000,
@@ -422,10 +435,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 2855,  // ~5% of €57,091
+    yearlySpendingFromWealth: 2855,
     currentWealth: 57091,
   },
   {
+    ...defaultPersona,
     id: "p7",
     name: "Besserverdiener",
     description: "60-70% Vermögen, sehr hohes Einkommen mit beträchtlichem Vermögen.",
@@ -433,7 +447,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 80000,
-    currentIncomeFromWealth: 8000,  // 10% of total income
+    currentIncomeFromWealth: 8000,
     savingsRate: 0.13,
     inheritanceAge: 50,
     inheritanceAmount: 300000,
@@ -441,10 +455,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 4123,  // ~5% of €82,452
+    yearlySpendingFromWealth: 4123,
     currentWealth: 82452,
   },
   {
+    ...defaultPersona,
     id: "p8",
     name: "Wohlhabender Berufstätiger",
     description: "70-80% Vermögen, Spitzeneinkommen mit signifikantem Vermögenseinkommen.",
@@ -452,7 +467,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 100000,
-    currentIncomeFromWealth: 10000,  // 10% of total income
+    currentIncomeFromWealth: 10000,
     savingsRate: 0.14,
     inheritanceAge: 50,
     inheritanceAmount: 400000,
@@ -460,10 +475,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 6184,  // ~5% of €123,678
+    yearlySpendingFromWealth: 6184,
     currentWealth: 123678,
   },
   {
+    ...defaultPersona,
     id: "p9",
     name: "Vermögender Investor",
     description: "80-90% Vermögen, sehr hohes Einkommen mit großem Vermögenseinkommen.",
@@ -471,7 +487,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 140000,
-    currentIncomeFromWealth: 14000,  // 10% of total income
+    currentIncomeFromWealth: 14000,
     savingsRate: 0.15,
     inheritanceAge: 45,
     inheritanceAmount: 450000,
@@ -479,10 +495,11 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 13095,  // ~5% of €261,899
+    yearlySpendingFromWealth: 13095,
     currentWealth: 261899,
   },
   {
+    ...defaultPersona,
     id: "p10",
     name: "Spitzenvermögensinhaber",
     description: "Top 10% Vermögen, extrem hohes Einkommen mit bedeutendem Vermögenseinkommen.",
@@ -490,7 +507,7 @@ export const grokOldPersonas: Persona[] = [
     initialAge: 25,
     currentAge: 60,
     currentIncome: 200000,
-    currentIncomeFromWealth: 40000,  // 20% of total income
+    currentIncomeFromWealth: 40000,
     savingsRate: 0.15,
     inheritanceAge: 45,
     inheritanceAmount: 500000,
@@ -498,13 +515,14 @@ export const grokOldPersonas: Persona[] = [
     vatRate: 0,
     vatApplicableRate: 0,
     incomeGrowth: 1,
-    yearlySpendingFromWealth: 44389,  // ~5% of €887,788
+    yearlySpendingFromWealth: 44389,
     currentWealth: 887788,
   },
 ];
 
-export const grokPersonas: Persona[] = [
+export const grok3Personas: Persona[] = [
   {
+    ...defaultPersona,
     id: 'p1',
     name: 'Geringverdiener im Ruhestand',
     description: 'Untere 10% Vermögen, minimale Ersparnisse, niedriges Einkommen hauptsächlich aus Arbeit.',
@@ -524,6 +542,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 3095
   },
   {
+    ...defaultPersona,
     id: 'p2',
     name: 'Bescheidener Verdiener',
     description: '10-20% Vermögen, bescheidenes Einkommen mit kleinem Vermögensbeitrag.',
@@ -543,6 +562,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 15476
   },
   {
+    ...defaultPersona,
     id: 'p3',
     name: 'Untere Mittelschicht',
     description: '20-30% Vermögen, moderates Einkommen mit wachsenden Ersparnissen.',
@@ -562,6 +582,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 30952
   },
   {
+    ...defaultPersona,
     id: 'p4',
     name: 'Durchschnittsverdiener',
     description: '30-40% Vermögen, stabiles Einkommen mit moderatem Vermögen.',
@@ -581,6 +602,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 61905
   },
   {
+    ...defaultPersona,
     id: 'p5',
     name: 'Gehobene Mittelschicht',
     description: '40-50% Vermögen, überdurchschnittliches Einkommen mit soliden Ersparnissen.',
@@ -600,6 +622,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 92857
   },
   {
+    ...defaultPersona,
     id: 'p6',
     name: 'Gutverdiener',
     description: '50-60% Vermögen, hohes Einkommen mit bemerkenswertem Vermögenseinkommen.',
@@ -619,6 +642,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 123810
   },
   {
+    ...defaultPersona,
     id: 'p7',
     name: 'Besserverdiener',
     description: '60-70% Vermögen, sehr hohes Einkommen mit beträchtlichem Vermögen.',
@@ -638,6 +662,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 185714
   },
   {
+    ...defaultPersona,
     id: 'p8',
     name: 'Wohlhabender Berufstätiger',
     description: '70-80% Vermögen, Spitzeneinkommen mit signifikantem Vermögenseinkommen.',
@@ -657,6 +682,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 247619
   },
   {
+    ...defaultPersona,
     id: 'p9',
     name: 'Vermögender Investor',
     description: '80-90% Vermögen, sehr hohes Einkommen mit großem Vermögenseinkommen.',
@@ -676,6 +702,7 @@ export const grokPersonas: Persona[] = [
     currentWealth: 309524
   },
   {
+    ...defaultPersona,
     id: 'p10',
     name: 'Spitzenvermögensinhaber',
     description: 'Top 10% Vermögen, extrem hohes Einkommen mit bedeutendem Vermögenseinkommen.',
@@ -693,5 +720,226 @@ export const grokPersonas: Persona[] = [
     incomeGrowth: 1.02,
     yearlySpendingFromWealth: 101214,
     currentWealth: 2024286
+  }
+]
+
+export const grokPersonas: Persona[] = [
+  {
+    ...defaultPersona,
+    id: 'p1',
+    name: 'Geringverdiener im Ruhestand',
+    description: 'Untere 10% Vermögen, minimale Ersparnisse.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 12286,
+    currentIncomeFromWealth: 155,
+    savingsRate: 0.05,
+    inheritanceAge: 55,
+    inheritanceAmount: 8000,
+    vatApplicableRate: 0,
+    yearlySpendingFromWealth: 155,
+    currentWealth: 3095,
+    inheritanceHousing: 5000,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 3000,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
+  },
+  {
+    ...defaultPersona,
+    id: 'p2',
+    name: 'Bescheidener Verdiener',
+    description: '10-20% Vermögen, bescheidenes Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 18429,
+    currentIncomeFromWealth: 851,
+    savingsRate: 0.060000000000000005,
+    inheritanceAge: 55,
+    inheritanceAmount: 16000,
+    vatApplicableRate: 0,
+    incomeGrowth: 1.02,
+    yearlySpendingFromWealth: 774,
+    currentWealth: 15476,
+    inheritanceHousing: 10000,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 6000,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
+  },
+  {
+    ...defaultPersona,
+    id: 'p3',
+    name: 'Untere Mittelschicht',
+    description: '20-30% Vermögen, moderates Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 24571,
+    currentIncomeFromWealth: 1857,
+    savingsRate: 0.07,
+    inheritanceAge: 55,
+    inheritanceAmount: 24000,
+    vatApplicableRate: 0,
+    incomeGrowth: 1.02,
+    yearlySpendingFromWealth: 1548,
+    currentWealth: 30952,
+    inheritanceHousing: 15000,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 9000,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
+  },
+  {
+    ...defaultPersona,
+    id: 'p4',
+    name: 'Durchschnittsverdiener',
+    description: '30-40% Vermögen, stabiles Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 30714,
+    currentIncomeFromWealth: 4024,
+    savingsRate: 0.08,
+    inheritanceAge: 55,
+    inheritanceAmount: 32000,
+    yearlySpendingFromWealth: 3095,
+    currentWealth: 61905,
+    inheritanceHousing: 20000,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 12000,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
+  },
+  {
+    ...defaultPersona,
+    id: 'p5',
+    name: 'Gehobene Mittelschicht',
+    description: '40-50% Vermögen, überdurchschnittliches Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 36857,
+    currentIncomeFromWealth: 6500,
+    savingsRate: 0.09,
+    inheritanceAge: 55,
+    inheritanceAmount: 40000,
+    yearlySpendingFromWealth: 4643,
+    currentWealth: 92857,
+    inheritanceHousing: 25000,
+    inheritanceCompany: 0,
+    inheritanceFinancial: 15000,
+    inheritanceTaxable: 0,
+    inheritanceTax: 0
+  },
+  {
+    ...defaultPersona,
+    id: 'p6',
+    name: 'Gutverdiener',
+    description: '50-60% Vermögen, hohes Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 43000,
+    currentIncomeFromWealth: 9286,
+    savingsRate: 0.1,
+    inheritanceAge: 50,
+    inheritanceAmount: 80000,
+    yearlySpendingFromWealth: 6191,
+    currentWealth: 123810,
+    inheritanceHousing: 37500,
+    inheritanceCompany: 20000,
+    inheritanceFinancial: 22500,
+    inheritanceTaxable: 3000.0000000000005,
+    inheritanceTax: 210
+  },
+  {
+    ...defaultPersona,
+    id: 'p7',
+    name: 'Besserverdiener',
+    description: '60-70% Vermögen, sehr hohes Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 49143,
+    currentIncomeFromWealth: 14857,
+    savingsRate: 0.11,
+    inheritanceAge: 49,
+    inheritanceAmount: 120000,
+    vatRate: 0,
+    vatApplicableRate: 0,
+    incomeGrowth: 1.02,
+    yearlySpendingFromWealth: 9286,
+    currentWealth: 185714,
+    inheritanceHousing: 62500,
+    inheritanceCompany: 20000,
+    inheritanceFinancial: 37500,
+    inheritanceTaxable: 3000.0000000000005,
+    inheritanceTax: 210
+  },
+  {
+    ...defaultPersona,
+    id: 'p8',
+    name: 'Wohlhabender Berufstätiger',
+    description: '70-80% Vermögen, Spitzeneinkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 55286,
+    currentIncomeFromWealth: 21048,
+    savingsRate: 0.12000000000000001,
+    inheritanceAge: 48,
+    inheritanceAmount: 200000,
+    yearlySpendingFromWealth: 12381,
+    currentWealth: 247619,
+    inheritanceHousing: 112500,
+    inheritanceCompany: 20000,
+    inheritanceFinancial: 67500,
+    inheritanceTaxable: 3000.0000000000005,
+    inheritanceTax: 210
+  },
+  {
+    ...defaultPersona,
+    id: 'p9',
+    name: 'Vermögender Investor',
+    description: '80-90% Vermögen, sehr hohes Einkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 61429,
+    currentIncomeFromWealth: 27857,
+    savingsRate: 0.13,
+    inheritanceAge: 47,
+    inheritanceAmount: 400000,
+    yearlySpendingFromWealth: 15476,
+    currentWealth: 309524,
+    inheritanceHousing: 237500,
+    inheritanceCompany: 20000,
+    inheritanceFinancial: 142500,
+    inheritanceTaxable: 3000.0000000000005,
+    inheritanceTax: 210
+  },
+  {
+    ...defaultPersona,
+    id: 'p10',
+    name: 'Spitzenvermögensinhaber',
+    description: 'Top 10% Vermögen, extrem hohes Einkommen mit bedeutendem Vermögenseinkommen.',
+    icon: '👤',
+    initialAge: 25,
+    currentAge: 60,
+    currentIncome: 282571,
+    currentIncomeFromWealth: 192307,
+    savingsRate: 0.14,
+    inheritanceAge: 46,
+    inheritanceAmount: 3080000,
+    yearlySpendingFromWealth: 101214,
+    currentWealth: 2024286,
+    inheritanceHousing: 1475000,
+    inheritanceCompany: 720000,
+    inheritanceFinancial: 885000,
+    inheritanceTaxable: 1960000,
+    inheritanceTax: 446000
   }
 ]
