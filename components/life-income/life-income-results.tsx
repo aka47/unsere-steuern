@@ -42,7 +42,7 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
       | "income"
       | "incomeTax"
       | "wealth"
-      | "wealthCreatedThisYear"
+      | "wealthGrowth"
       | "inheritance"
       | "inheritanceTax"
       | "vat"
@@ -419,8 +419,8 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
                       <TableCell>
                         <Input
                           type="number"
-                          value={result.wealthCreatedThisYear}
-                          onChange={(e) => handleValueChange(result.age, "wealthCreatedThisYear", e.target.value)}
+                          value={result.wealthGrowth}
+                          onChange={(e) => handleValueChange(result.age, "wealthGrowth", e.target.value)}
                           className="w-full"
                         />
                       </TableCell>

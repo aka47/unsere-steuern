@@ -1,91 +1,71 @@
+"use client"
+
+import { useEffect } from "react"
+import { useTaxScenario } from "@/hooks/useTaxScenario"
+import { useTaxScenarioCalculator } from "@/hooks/useTaxScenarioCalculator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Slider } from "@/components/ui/slider"
+// import { Switch } from "@/components/ui/switch"
 import { TaxDistribution } from "@/types/life-income"
 import { TaxRevenueChart } from "./tax-revenue-chart"
-import { useTaxScenarioCalculator } from "@/hooks/useTaxScenarioCalculator"
-import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-
-interface TaxScenarioBuilderProps {
-  simulation: {
-    params: {
-      incomeTaxMultiplier: number
-      vatRate: number
-      wealthTaxRate: number
-      wealthIncomeTaxRate: number
-    }
-    result: TaxDistribution
-  }
-}
-
-interface TaxParams {
-  incomeTax: {
-    taxFreeAmount: number
-    taxLevel: "lower" | "current" | "adenauer"
-  }
-  wealthTax: {
-    taxFreeAmount: number
-    taxRate: number
-  }
-  inheritanceTax: {
-    taxFreeAmount: number
-    taxLevel: "lower" | "current" | "higher"
-  }
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const TAX_FREE_AMOUNTS = [0, 11000, 22000, 33000]
-const WEALTH_TAX_RATES = [0.01, 0.02, 0.03, 0.05]
+const WEALTH_TAX_RATES = [0, 0.01, 0.02, 0.03, 0.05, 0.1]
+const WEALTH_INCOME_TAX_RATES = [0.10, 0.25, 0.30, 0.35, 0.42]
 
-export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
+export const TaxScenarioBuilder = () => {
   const { results, calculateScenario } = useTaxScenarioCalculator()
-  const [taxParams, setTaxParams] = useState<TaxParams>({
-    incomeTax: {
-      taxFreeAmount: 11000,
-      taxLevel: "current"
-    },
-    wealthTax: {
-      taxFreeAmount: 1000000,
-      taxRate: 0.02
-    },
-    inheritanceTax: {
-      taxFreeAmount: 400000,
-      taxLevel: "current"
-    }
-  })
+  const { taxParams, setTaxParams } = useTaxScenario()
 
-  const handleCalculate = useCallback(() => {
+  // Calculate on mount
+  useEffect(() => {
     calculateScenario(taxParams)
-  }, [calculateScenario, taxParams])
+  }, [taxParams]) // Empty dependency array means this only runs once on mount
 
-  const handleIncomeTaxChange = useCallback((field: keyof TaxParams["incomeTax"], value: string | number) => {
-    setTaxParams(prev => ({
-      ...prev,
+  const handleCalculate = () => {
+    calculateScenario(taxParams)
+  }
+
+  const handleIncomeTaxChange = (field: keyof typeof taxParams.incomeTax, value: string | number) => {
+    setTaxParams({
+      ...taxParams,
       incomeTax: {
-        ...prev.incomeTax,
+        ...taxParams.incomeTax,
         [field]: value
       }
-    }))
-  }, [])
+    })
+  }
 
-  const handleWealthTaxChange = useCallback((field: keyof TaxParams["wealthTax"], value: string | number) => {
-    setTaxParams(prev => ({
-      ...prev,
+  const handleWealthTaxChange = (field: keyof typeof taxParams.wealthTax, value: string | number) => {
+    setTaxParams({
+      ...taxParams,
       wealthTax: {
-        ...prev.wealthTax,
+        ...taxParams.wealthTax,
         [field]: value
       }
-    }))
-  }, [])
+    })
+  }
 
-  const handleInheritanceTaxChange = useCallback((field: keyof TaxParams["inheritanceTax"], value: string | number) => {
-    setTaxParams(prev => ({
-      ...prev,
+  const handleInheritanceTaxChange = (field: keyof typeof taxParams.inheritanceTax, value: string | number) => {
+    setTaxParams({
+      ...taxParams,
       inheritanceTax: {
-        ...prev.inheritanceTax,
+        ...taxParams.inheritanceTax,
         [field]: value
       }
-    }))
-  }, [])
+    })
+  }
+
+  const handleWealthIncomeTaxChange = (value: string | number) => {
+    setTaxParams({
+      ...taxParams,
+      wealthIncomeTax: {
+        taxRate: Number(value)
+      }
+    })
+  }
 
   // Calculate tax distribution from results
   const taxDistribution: TaxDistribution = results ? {
@@ -95,7 +75,13 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
     wealthIncomeTax: results.totals.totalWealthIncomeTax,
     total: results.totals.totalIncomeTax + results.totals.totalVAT +
           results.totals.totalWealthTax + results.totals.totalWealthIncomeTax
-  } : simulation.result
+  } : {
+    incomeTax: 0,
+    vat: 0,
+    wealthTax: 0,
+    wealthIncomeTax: 0,
+    total: 0
+  }
 
   return (
     <div className="space-y-6">
@@ -114,7 +100,7 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
               <label className="text-sm font-medium">Steuerfreigrenze</label>
               <Select
                 value={taxParams.incomeTax.taxFreeAmount.toString()}
-                onValueChange={(value) => handleIncomeTaxChange("taxFreeAmount", parseInt(value))}
+                onValueChange={(value) => handleIncomeTaxChange("taxFreeAmount", Number(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -157,7 +143,7 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
               <label className="text-sm font-medium">Steuerfreigrenze</label>
               <Select
                 value={taxParams.wealthTax.taxFreeAmount.toString()}
-                onValueChange={(value) => handleWealthTaxChange("taxFreeAmount", parseInt(value))}
+                onValueChange={(value) => handleWealthTaxChange("taxFreeAmount", Number(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -173,7 +159,7 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
               <label className="text-sm font-medium">Steuersatz</label>
               <Select
                 value={taxParams.wealthTax.taxRate.toString()}
-                onValueChange={(value) => handleWealthTaxChange("taxRate", parseFloat(value))}
+                onValueChange={(value) => handleWealthTaxChange("taxRate", Number(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -181,7 +167,7 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
                 <SelectContent>
                   {WEALTH_TAX_RATES.map((rate) => (
                     <SelectItem key={rate} value={rate.toString()}>
-                      {(rate * 100).toFixed(1)}%
+                      {rate === 0 ? "0%" : `${(rate * 100).toFixed(1)}%`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -200,7 +186,7 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
               <label className="text-sm font-medium">Steuerfreigrenze</label>
               <Select
                 value={taxParams.inheritanceTax.taxFreeAmount.toString()}
-                onValueChange={(value) => handleInheritanceTaxChange("taxFreeAmount", parseInt(value))}
+                onValueChange={(value) => handleInheritanceTaxChange("taxFreeAmount", Number(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -230,7 +216,38 @@ export const TaxScenarioBuilder = ({ simulation }: TaxScenarioBuilderProps) => {
             </div>
           </CardContent>
         </Card>
+
+
+
+       {/* We Tax Configuration */}
+       <Card>
+          <CardHeader>
+            <CardTitle>Vermögenseinkünfte / Kapitalertragssteuer</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Effektive Steuerquote</label>
+              <Select
+                value={taxParams.wealthIncomeTax?.taxRate.toString() || "0.10"}
+                onValueChange={(value) => handleWealthIncomeTaxChange(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {WEALTH_INCOME_TAX_RATES.map((rate) => (
+                    <SelectItem key={rate} value={rate.toString()}>
+                      {(rate * 100).toFixed(0)}%
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+
 
       <div className="flex justify-center">
         <Button onClick={handleCalculate} className="w-full md:w-auto">

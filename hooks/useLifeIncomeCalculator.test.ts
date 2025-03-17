@@ -90,7 +90,7 @@ describe("useLifeIncomeCalculator", () => {
       expect(firstYear).toMatchObject({
         age: 25,
         income: 50000,
-        wealthCreatedThisYear: 10000, // 20% savings rate
+        wealthGrowth: 10000, // 20% savings rate
         inheritance: 0, // No inheritance in first year
         inheritanceTax: 0,
       })

@@ -5,13 +5,15 @@ export type LifeIncomeYearlyResult = {
   income: number
   incomeTax: number
   wealth: number
-  wealthCreatedThisYear: number
+  wealthGrowth: number
   wealthIncome: number
   wealthTax: number
   inheritance: number
   inheritanceTax: number
   vat: number
   spending: number
+  tax: number
+  taxRate: number
 }
 
 export type LifeIncomeResults = LifeIncomeYearlyResult[] | null

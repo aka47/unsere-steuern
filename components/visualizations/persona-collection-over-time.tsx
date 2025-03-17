@@ -9,7 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Persona } from "@/types/persona"
 import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
-import { Tooltip as RechartsTooltip } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
+import { type TaxScenario } from "@/types/life-income"
+import { defaultTaxScenario } from "@/constants/tax-scenarios"
 
 // Define the data structure for a single data point
 interface DataPoint {
@@ -26,27 +29,27 @@ interface DataPoint {
 interface PersonaCollectionOverTimeProps {
   personas: Persona[]
   personaStats: PersonaSegmentStats[]
-}
-
-interface TooltipData {
-  personaName: string
-  year: number
-  value: number
-  metric: string
+  taxScenario: TaxScenario
 }
 
 // Main component
-export function PersonaCollectionOverTime({ personas, personaStats }: PersonaCollectionOverTimeProps) {
+export function PersonaCollectionOverTime({ personas, personaStats, taxScenario }: PersonaCollectionOverTimeProps) {
   const [metric, setMetric] = useState<"wealth" | "income" | "tax" | "taxRate">("wealth")
   const [_hoveredCell, setHoveredCell] = useState<DataPoint | null>(null)
   const [view, setView] = useState<"3d" | "2d">("3d")
+  const [key, setKey] = useState(0)
+
+  // Force re-render when personaStats or taxScenario changes
+  useEffect(() => {
+    setKey(prev => prev + 1)
+  }, [personaStats, taxScenario])
 
   // Sort personas by their order in the original array
   const sortedPersonas = useMemo(() => {
     return [...personas].sort((a, b) => {
       const aIndex = personas.findIndex(p => p.id === a.id)
       const bIndex = personas.findIndex(p => p.id === b.id)
-      return aIndex - bIndex
+      return bIndex - aIndex
     })
   }, [personas])
 
@@ -64,8 +67,8 @@ export function PersonaCollectionOverTime({ personas, personaStats }: PersonaCol
           personaName: persona.name,
           wealth: detail.wealth,
           income: detail.income,
-          tax: detail.incomeTax + detail.wealthTax + detail.vat + detail.inheritanceTax,
-          taxRate: (detail.incomeTax + detail.wealthTax + detail.vat + detail.inheritanceTax) / detail.income
+          tax: detail.tax,
+          taxRate: detail.taxRate * 1,
         })
       })
     })
@@ -120,7 +123,7 @@ export function PersonaCollectionOverTime({ personas, personaStats }: PersonaCol
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Persona Collection Over Time</CardTitle>
+          <CardTitle>Einkommen, Steuern und Vermögensentwicklung über die Jahre</CardTitle>
           <div className="flex space-x-4">
             <Tabs value={view} onValueChange={(v) => setView(v as "3d" | "2d")}>
               <TabsList>
@@ -148,7 +151,7 @@ export function PersonaCollectionOverTime({ personas, personaStats }: PersonaCol
       <CardContent>
         <div className="h-[600px] w-full">
           {view === "3d" ? (
-            <Canvas camera={{ position: [15, 15, 15], fov: 50 }}>
+            <Canvas key={key} camera={{ position: [15, 15, 15], fov: 50 }}>
               <ambientLight intensity={0.5} />
               <pointLight position={[10, 10, 10]} />
               <Landscape
@@ -163,27 +166,21 @@ export function PersonaCollectionOverTime({ personas, personaStats }: PersonaCol
               />
               <OrbitControls />
               <axesHelper args={[10]} />
-              <RechartsTooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload as TooltipData
-                    return (
-                      <div className="bg-white p-2 rounded shadow text-sm">
-                        <div>
-                          <strong>Persona:</strong> {data.personaName}
-                        </div>
-                        <div>
-                          <strong>Year:</strong> {data.year}
-                        </div>
-                        <div>
-                          <strong>{data.metric}:</strong> {formatValue(data.value, data.metric)}
-                        </div>
-                      </div>
-                    )
-                  }
-                  return null
-                }}
-              />
+              {_hoveredCell && (
+                <Html position={[0, 5, 0]} transform>
+                  <div className="bg-white p-2 rounded shadow text-sm">
+                    <div>
+                      <strong>Persona:</strong> {_hoveredCell.personaName}
+                    </div>
+                    <div>
+                      <strong>Year:</strong> {_hoveredCell.year}
+                    </div>
+                    <div>
+                      <strong>{metric}:</strong> {formatValue(_hoveredCell[metric as keyof DataPoint] as number, metric)}
+                    </div>
+                  </div>
+                </Html>
+              )}
             </Canvas>
           ) : (
             <HeatmapView

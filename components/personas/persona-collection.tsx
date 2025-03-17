@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { PersonaList } from "@/components/personas/persona-list"
 import type { PersonaCollection } from "@/types/personaCollection"
 import type { Persona } from "@/types/persona"
 import { PersonaGroupStats } from "@/components/tax/persona-group-stats"
 import { TypographyH2 } from "@/components/ui/typography"
+import { useTaxScenario } from "@/hooks/useTaxScenario"
+import { PersonaList } from "./persona-list"
 
 interface PersonaCollectionProps {
   collection: PersonaCollection
@@ -11,6 +12,8 @@ interface PersonaCollectionProps {
 }
 
 export function PersonaCollection({ collection, onPersonaClick = () => {} }: PersonaCollectionProps) {
+  const { selectedTaxScenario } = useTaxScenario()
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -22,7 +25,7 @@ export function PersonaCollection({ collection, onPersonaClick = () => {} }: Per
 
         <TypographyH2 className="mt-12 mb-6">Wie wirken sich diese auf unser Vermögen, Einkommen und Steuerlast aus?</TypographyH2>
 
-        <PersonaList personas={collection.personas} onPersonaClick={onPersonaClick} />
+        <PersonaList personas={collection.personas} onPersonaClick={onPersonaClick} taxScenario={selectedTaxScenario} />
       </CardContent>
     </Card>
   )

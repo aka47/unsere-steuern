@@ -7,6 +7,7 @@ import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import type { TaxScenario } from "@/types/life-income"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
+import { useTaxScenarioCalculator } from "@/hooks/useTaxScenarioCalculator"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { useState } from "react"
 import { CalendarDays, LifeBuoy, Database } from "lucide-react"
@@ -17,8 +18,8 @@ type ViewType = "lifetime" | "annual" | "data"
 
 export interface PersonaCardProps {
   persona: Persona
-  taxScenario?: TaxScenario
-  onClick: () => void
+  taxScenario: TaxScenario
+  onClick?: () => void
 }
 
 // Update the PersonaCard component to include the icon navigation and different views
@@ -26,35 +27,54 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
   // Add state to track the selected view
   const [view, setView] = useState<ViewType>("lifetime")
 
+  const { selectedScenarioId, taxParams, selectedTaxScenario } = useTaxScenario()
+  const { createCustomTaxScenario } = useTaxScenarioCalculator()
   const { calculateLifeIncome } = useLifeIncomeCalculator()
-  // Always call the hook, regardless of whether we use its value
-  const { selectedTaxScenario } = useTaxScenario()
 
-  // Use the tax scenario from props if provided, otherwise use the one from context
-  const activeTaxScenario = propsTaxScenario || selectedTaxScenario
+  // Get the active scenario based on selection
+  const activeTaxScenario = selectedScenarioId === "custom"
+    ? createCustomTaxScenario(taxParams)
+    : selectedTaxScenario
 
-  // Calculate results with the selected tax scenario
-  const selectedScenarioResults = calculateLifeIncome({
-    ...persona,
-    currentPersona: persona,
-    taxScenario: activeTaxScenario,
-    inheritanceAge: persona.inheritanceAge ?? 0,
-    inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
-    inheritanceTaxableCompany: 0, // Assume 20% is company
-    inheritanceHardship: false, // Default to false
-  })
+  console.log("selectedScenarioId:", selectedScenarioId)
+  console.log("activeTaxScenario:", activeTaxScenario)
+  console.log("propsTaxScenario:", propsTaxScenario)
+  console.log("selectedTaxScenario:", selectedTaxScenario)
 
-  // Always calculate results with the default tax scenario for comparison
+  // Calculate results for both scenarios
   const defaultScenarioResults = calculateLifeIncome({
     ...persona,
-    currentPersona: persona,
     taxScenario: defaultTaxScenario,
-    inheritanceAge: persona.inheritanceAge ?? 0,
-    inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing
-    inheritanceTaxableCompany: 0, // Assume 20% is company
-    inheritanceHardship: false, // Default to false
+    yearlySpendingFromWealth: persona.yearlySpendingFromWealth || 0,
+    currentWealth: persona.currentWealth || 0,
+    inheritanceAge: persona.inheritanceAge ?? 20,
+    inheritanceAmount: persona.inheritanceAmount || 0,
+    inheritanceTaxClass: persona.inheritanceTaxClass || 1,
+    inheritanceTaxableHousingFinancial: persona.inheritanceAmount,
+    inheritanceTaxableCompany: 0,
+    inheritanceHardship: false
   })
 
+  const selectedScenarioResults = calculateLifeIncome({
+    ...persona,
+    taxScenario: activeTaxScenario,
+    yearlySpendingFromWealth: persona.yearlySpendingFromWealth || 0,
+    currentWealth: persona.currentWealth || 0,
+    inheritanceAge: persona.inheritanceAge ?? 20,
+    inheritanceAmount: persona.inheritanceAmount || 0,
+    inheritanceTaxClass: persona.inheritanceTaxClass || 1,
+    inheritanceTaxableHousingFinancial: persona.inheritanceAmount,
+    inheritanceTaxableCompany: 0,
+    inheritanceHardship: false
+  })
+
+  console.log("defaultScenarioResults", defaultScenarioResults)
+  console.log("selectedScenarioResults", selectedScenarioResults)
+
+  // Only show comparison if the selected scenario is different from default
+  const showComparison = activeTaxScenario.id !== defaultTaxScenario.id
+
+  console.log("showComparison", showComparison)
   // Prepare data for comparison chart
   const comparisonData = [
     {
@@ -70,13 +90,9 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
     {
       name: "Steuern",
       current:
-        (defaultScenarioResults?.totals.totalIncomeTax || 0) +
-        (defaultScenarioResults?.totals.totalVAT || 0) +
-        (defaultScenarioResults?.totals.totalInheritanceTax || 0),
+        (defaultScenarioResults?.totals.totalTax || 0),
       proposed:
-        (selectedScenarioResults?.totals.totalIncomeTax || 0) +
-        (selectedScenarioResults?.totals.totalVAT || 0) +
-        (selectedScenarioResults?.totals.totalInheritanceTax || 0),
+        (selectedScenarioResults?.totals.totalTax || 0),
     },
   ]
 
@@ -102,9 +118,6 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
         (67 - persona.initialAge),
     },
   ]
-
-  // Only show comparison if the selected scenario is different from default
-  const showComparison = activeTaxScenario.id !== defaultTaxScenario.id
 
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
@@ -246,12 +259,8 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                       <span>Steuerdifferenz:</span>
                       <span
                         className={
-                          (selectedScenarioResults?.totals.totalIncomeTax || 0) +
-                            (selectedScenarioResults?.totals.totalVAT || 0) +
-                            (selectedScenarioResults?.totals.totalInheritanceTax || 0) <
-                          (defaultScenarioResults?.totals.totalIncomeTax || 0) +
-                            (defaultScenarioResults?.totals.totalVAT || 0) +
-                            (defaultScenarioResults?.totals.totalInheritanceTax || 0)
+                          (selectedScenarioResults?.totals.totalTax || 0) <
+                          (defaultScenarioResults?.totals.totalTax || 0)
                             ? "text-green-600"
                             : "text-red-600"
                         }
@@ -261,12 +270,8 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                           currency: "EUR",
                           signDisplay: "always",
                         }).format(
-                          (selectedScenarioResults?.totals.totalIncomeTax || 0) +
-                            (selectedScenarioResults?.totals.totalVAT || 0) +
-                            (selectedScenarioResults?.totals.totalInheritanceTax || 0) -
-                            ((defaultScenarioResults?.totals.totalIncomeTax || 0) +
-                              (defaultScenarioResults?.totals.totalVAT || 0) +
-                              (defaultScenarioResults?.totals.totalInheritanceTax || 0)),
+                          (selectedScenarioResults?.totals.totalTax || 0) -
+                            ((defaultScenarioResults?.totals.totalTax || 0)),
                         )}
                       </span>
                     </div>
@@ -277,9 +282,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <span>Steuern ({activeTaxScenario.name}):</span>
                         <span>
                           {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-                            (selectedScenarioResults?.totals.totalIncomeTax || 0) +
-                              (selectedScenarioResults?.totals.totalVAT || 0) +
-                              (selectedScenarioResults?.totals.totalInheritanceTax || 0),
+                            (selectedScenarioResults?.totals.totalTax || 0),
                           )}
                         </span>
                       </div>
@@ -287,9 +290,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <span>Steuern ({defaultTaxScenario.name}):</span>
                         <span>
                           {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-                            (defaultScenarioResults?.totals.totalIncomeTax || 0) +
-                              (defaultScenarioResults?.totals.totalVAT || 0) +
-                              (defaultScenarioResults?.totals.totalInheritanceTax || 0),
+                            (defaultScenarioResults?.totals.totalTax || 0),
                           )}
                         </span>
                       </div>
@@ -454,7 +455,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                   <p className="font-medium">Durchschnittliches Jahreseinkommen:</p>
                   <p>
                     {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-                      (selectedScenarioResults?.totals.totalIncome || 0) / (67 - persona.initialAge),
+                      (selectedScenarioResults?.totals.totalIncome || 0) / (selectedScenarioResults?.details.length || 1),
                     )}
                   </p>
                 </div>
@@ -462,9 +463,8 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                   <p className="font-medium">Effektiver Steuersatz:</p>
                   <p>
                     {(
-                      (((selectedScenarioResults?.totals.totalIncomeTax || 0) +
-                        (selectedScenarioResults?.totals.totalVAT || 0)) /
-                        (selectedScenarioResults?.totals.totalIncome || 1)) *
+                      (((selectedScenarioResults?.totals.totalTax || 0)) /
+                        (((selectedScenarioResults?.totals.totalIncome || 0 ) + (selectedScenarioResults?.totals.totalWealthGrowth || 0) + (selectedScenarioResults?.totals.totalInheritance || 0)) || 1)) *
                       100
                     ).toFixed(2)}
                     %

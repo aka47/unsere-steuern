@@ -6,6 +6,19 @@ import { grokPersonas } from "@/types/persona"
 import { useLifeIncomeCalculator, type LifeIncomeCalculatorResult } from "./useLifeIncomeCalculator"
 import { type TaxScenario } from "@/types/life-income"
 
+// Common tax bracket calculation function
+const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
+  let tax = 0
+  for (let i = 0; i < brackets.length - 1; i++) {
+    const [lowerLimit, rate] = brackets[i]
+    const [upperLimit] = brackets[i + 1]
+    if (amount > lowerLimit) {
+      const taxableAmount = Math.min(amount - lowerLimit, upperLimit - lowerLimit)
+      tax += taxableAmount * rate
+    }
+  }
+  return tax
+}
 
 interface TaxParams {
   incomeTax: {
@@ -20,6 +33,66 @@ interface TaxParams {
     taxFreeAmount: number
     taxLevel: "lower" | "current" | "higher"
   }
+  wealthIncomeTax: {
+    taxRate: number
+  }
+}
+
+// Predefined tax brackets
+const TAX_BRACKETS = {
+  income: {
+    lower: [
+      [12096, 0.00],
+      [17443, 0.08],
+      [68480, 0.18],
+      [277825, 0.36],
+      [Number.POSITIVE_INFINITY, 0.39]
+    ] as Array<[number, number]>,
+    current: [
+      [12096, 0],
+      [17443, 0.14],
+      [68480, 0.24],
+      [277825, 0.42],
+      [Number.POSITIVE_INFINITY, 0.45],
+    ] as Array<[number, number]>,
+    adenauer: [
+      [8000, 0],
+      [16000, 0.20],
+      [32000, 0.30],
+      [64000, 0.40],
+      [120000, 0.48],
+      [Number.POSITIVE_INFINITY, 0.53],
+    ] as Array<[number, number]>,
+  },
+  inheritance: {
+    lower: [
+      [75000, 0.04],
+      [300000, 0.07],
+      [600000, 0.10],
+      [6000000, 0.13],
+      [13000000, 0.16],
+      [26000000, 0.19],
+      [Number.POSITIVE_INFINITY, 0.22]
+    ] as Array<[number, number]>,
+    current: [
+      [75000, 0.07],
+      [300000, 0.11],
+      [600000, 0.15],
+      [6000000, 0.19],
+      [13000000, 0.23],
+      [26000000, 0.27],
+      [Number.POSITIVE_INFINITY, 0.30],
+    ] as Array<[number, number]>,
+    higher: [
+      [75000, 0.10],
+      [300000, 0.15],
+      [600000, 0.20],
+      [6000000, 0.25],
+      [13000000, 0.30],
+      [26000000, 0.35],
+      [Number.POSITIVE_INFINITY, 0.40],
+    ] as Array<[number, number]>,
+  },
 }
 
 export function useTaxScenarioCalculator() {
@@ -27,63 +100,6 @@ export function useTaxScenarioCalculator() {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   const createCustomTaxScenario = useCallback((params: TaxParams): TaxScenario => {
-    // Income tax brackets based on tax level
-    const incomeTaxBrackets = {
-      lower: [
-        [12096, 0],
-        [17443, 0.14],
-        [68480, 0.24],
-        [277825, 0.42],
-        [Number.POSITIVE_INFINITY, 0.45],
-      ],
-      current: [
-        [12096, 0],
-        [17443, 0.14],
-        [68480, 0.24],
-        [277825, 0.42],
-        [Number.POSITIVE_INFINITY, 0.45],
-      ],
-      adenauer: [
-        [8000, 0],
-        [16000, 0.20],
-        [32000, 0.30],
-        [64000, 0.40],
-        [120000, 0.48],
-        [Number.POSITIVE_INFINITY, 0.53],
-      ],
-    }
-
-    // Inheritance tax brackets based on tax level
-    const inheritanceTaxBrackets = {
-      lower: [
-        [75000, 0.07],
-        [300000, 0.11],
-        [600000, 0.15],
-        [6000000, 0.19],
-        [13000000, 0.23],
-        [26000000, 0.27],
-        [Number.POSITIVE_INFINITY, 0.30],
-      ],
-      current: [
-        [75000, 0.07],
-        [300000, 0.11],
-        [600000, 0.15],
-        [6000000, 0.19],
-        [13000000, 0.23],
-        [26000000, 0.27],
-        [Number.POSITIVE_INFINITY, 0.30],
-      ],
-      higher: [
-        [75000, 0.10],
-        [300000, 0.15],
-        [600000, 0.20],
-        [6000000, 0.25],
-        [13000000, 0.30],
-        [26000000, 0.35],
-        [Number.POSITIVE_INFINITY, 0.40],
-      ],
-    }
-
     return {
       id: "custom",
       name: "Deine Steuer",
@@ -91,46 +107,22 @@ export function useTaxScenarioCalculator() {
       detailedDescription: "Passe die Steuerparameter an, um dein eigenes Steuersystem zu erstellen.",
 
       calculateIncomeTax: (income: number) => {
-        const brackets = incomeTaxBrackets[params.incomeTax.taxLevel]
         const adjustedIncome = Math.max(0, income - params.incomeTax.taxFreeAmount)
-
-        let tax = 0
-        for (let i = 0; i < brackets.length - 1; i++) {
-          const [lowerLimit, rate] = brackets[i]
-          const [upperLimit] = brackets[i + 1]
-          if (adjustedIncome > lowerLimit) {
-            const taxableAmount = Math.min(adjustedIncome - lowerLimit, upperLimit - lowerLimit)
-            tax += taxableAmount * rate
-          }
-        }
-        return tax
+        return calculateTaxWithBrackets(adjustedIncome, TAX_BRACKETS.income[params.incomeTax.taxLevel])
       },
 
       calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: InheritanceTaxClass) => {
-        const brackets = inheritanceTaxBrackets[params.inheritanceTax.taxLevel]
-
         const adjustedAmount = Math.max(0, inheritanceTaxableHousingFinancial + inheritanceTaxableCompany - params.inheritanceTax.taxFreeAmount)
-
-        let tax = 0
-        for (let i = 0; i < brackets.length - 1; i++) {
-          const [lowerLimit, rate] = brackets[i]
-          const [upperLimit] = brackets[i + 1]
-          if (adjustedAmount > lowerLimit) {
-            const taxableAmount = Math.min(adjustedAmount - lowerLimit, upperLimit - lowerLimit)
-            tax += taxableAmount * rate
-          }
-        }
-        return tax
+        return calculateTaxWithBrackets(adjustedAmount, TAX_BRACKETS.inheritance[params.inheritanceTax.taxLevel])
       },
 
       calculateWealthTax: (wealth: number) => {
         const adjustedWealth = Math.max(0, wealth - params.wealthTax.taxFreeAmount)
-        return adjustedWealth * params.wealthTax.taxRate
+        return adjustedWealth * (params.wealthTax.taxRate / 100)
       },
 
       calculateWealthIncomeTax: (wealthIncome: number) => {
-        // Using a flat rate for wealth income tax
-        return wealthIncome * 0.26375 // 26.375% flat rate
+        return wealthIncome * params.wealthIncomeTax.taxRate
       },
 
       calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
@@ -162,22 +154,10 @@ export function useTaxScenarioCalculator() {
         taxScenario: customTaxScenario,
         inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
         inheritanceTaxableCompany: persona.inheritanceCompany,
-        inheritanceHardship: false // Default to false as it's not in the Persona type
+        inheritanceHardship: false
       })
       return result
     }).filter((result): result is NonNullable<typeof result> => result !== null)
-
-    // Aggregate results
-    const totalDistribution: TaxDistribution = {
-      incomeTax: personaResults.reduce((sum, result) => sum + result.totals.totalIncomeTax, 0),
-      vat: personaResults.reduce((sum, result) => sum + result.totals.totalVAT, 0),
-      wealthTax: personaResults.reduce((sum, result) => sum + result.totals.totalWealthTax, 0),
-      wealthIncomeTax: personaResults.reduce((sum, result) => sum + result.totals.totalWealthIncomeTax, 0),
-      total: personaResults.reduce((sum, result) =>
-        sum + result.totals.totalIncomeTax + result.totals.totalVAT +
-        result.totals.totalWealthTax + result.totals.totalWealthIncomeTax, 0
-      ),
-    }
 
     // Calculate average results
     const avgResult = personaResults.reduce((acc, result) => ({
@@ -195,6 +175,8 @@ export function useTaxScenarioCalculator() {
         totalSavings: acc.totals.totalSavings + result.totals.totalSavings,
         totalSpendingFromWealth: acc.totals.totalSpendingFromWealth + result.totals.totalSpendingFromWealth,
         totalSpendingFromIncome: acc.totals.totalSpendingFromIncome + result.totals.totalSpendingFromIncome,
+        totalTax: acc.totals.totalTax + result.totals.totalTax,
+        totalWealthGrowth: acc.totals.totalWealthGrowth + result.totals.totalWealthGrowth
       },
       details: result.details,
     }), {
@@ -212,29 +194,21 @@ export function useTaxScenarioCalculator() {
         totalSavings: 0,
         totalSpendingFromWealth: 0,
         totalSpendingFromIncome: 0,
+        totalTax: 0,
+        totalWealthGrowth: 0
       },
       details: [],
     })
 
     // Divide by number of personas to get average
     const numPersonas = personaResults.length
-    avgResult.totals.totalWealth /= numPersonas
-    avgResult.totals.totalIncome /= numPersonas
-    avgResult.totals.totalIncomeTax /= numPersonas
-    avgResult.totals.totalWealthIncome /= numPersonas
-    avgResult.totals.totalWealthIncomeTax /= numPersonas
-    avgResult.totals.totalWealthTax /= numPersonas
-    avgResult.totals.totalVAT /= numPersonas
-    avgResult.totals.totalInheritance /= numPersonas
-    avgResult.totals.totalInheritanceTax /= numPersonas
-    avgResult.totals.totalSpending /= numPersonas
-    avgResult.totals.totalSavings /= numPersonas
-    avgResult.totals.totalSpendingFromWealth /= numPersonas
-    avgResult.totals.totalSpendingFromIncome /= numPersonas
+    Object.keys(avgResult.totals).forEach(key => {
+      avgResult.totals[key as keyof typeof avgResult.totals] /= numPersonas
+    })
 
     setResults(avgResult)
     return avgResult
   }, [calculateLifeIncome, createCustomTaxScenario])
 
-  return { calculateScenario, results }
+  return { calculateScenario, results, createCustomTaxScenario }
 }

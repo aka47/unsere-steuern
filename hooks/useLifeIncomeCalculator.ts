@@ -44,6 +44,8 @@ type LifeIncomeTotals = {
   totalSavings: number
   totalSpendingFromWealth: number
   totalSpendingFromIncome: number
+  totalTax: number
+  totalWealthGrowth: number
 }
 
 export type LifeIncomeCalculatorResult = {
@@ -209,6 +211,8 @@ export function useLifeIncomeCalculator() {
       totalSavings: 0,
       totalSpendingFromWealth: 0,
       totalSpendingFromIncome: 0,
+      totalWealthGrowth: 0,
+      totalTax: 0
     }
 
     // Create a map of yearly overrides for quick lookup
@@ -282,6 +286,7 @@ export function useLifeIncomeCalculator() {
       totals.totalSavings += yearSavings
       totals.totalSpendingFromWealth += yearlySpendingFromWealth
       totals.totalSpendingFromIncome += yearSpendingFromIncome
+      totals.totalWealthGrowth += wealthIncome
 
       // Add this year's results
       results.push({
@@ -290,11 +295,13 @@ export function useLifeIncomeCalculator() {
         incomeTax: Math.round(incomeTax),
         savings: Math.round(yearSavings),
         wealth: Math.round(totalWealth),
-        wealthCreatedThisYear: Math.round(yearContribution),
+        wealthGrowth: Math.round(yearContribution),
         wealthIncome: Math.round(wealthIncome),
         wealthTax: Math.round(wealthTax),
         inheritance: Math.round(inheritance),
         inheritanceTax: Math.round(inheritanceTax),
+        tax: Math.round(incomeTax + wealthIncomeTax + wealthTax + inheritanceTax),
+        taxRate: parseFloat(((incomeTax + wealthIncomeTax + wealthTax + inheritanceTax) / (yearIncome + wealthIncome + inheritance)).toFixed(2)),
         vat: Math.round(vat),
         spending: Math.round(yearlySpendingFromWealth + yearSpendingFromIncome),
         spendingFromIncome: Math.round(yearSpendingFromIncome)
@@ -315,7 +322,8 @@ export function useLifeIncomeCalculator() {
     totals.totalSavings = Math.round(totals.totalSavings)
     totals.totalSpendingFromWealth = Math.round(totals.totalSpendingFromWealth)
     totals.totalSpendingFromIncome = Math.round(totals.totalSpendingFromIncome)
-
+    totals.totalTax = Math.round(totals.totalIncomeTax + totals.totalWealthIncomeTax + totals.totalWealthTax + totals.totalInheritanceTax)
+    totals.totalWealthGrowth = Math.round(totals.totalWealthGrowth)
     return { totals, details: results }
   }
 

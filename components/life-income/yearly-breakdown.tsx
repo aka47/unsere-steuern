@@ -63,7 +63,7 @@ export function YearlyBreakdown({
 
     const totalIncome = editableResults.reduce((sum, item) => sum + item.income, 0)
     const totalIncomeTax = editableResults.reduce((sum, item) => sum + item.incomeTax, 0)
-    const totalWealthCreated = editableResults.reduce((sum, item) => sum + item.wealthCreatedThisYear, 0)
+    const totalWealthCreated = editableResults.reduce((sum, item) => sum + item.wealthGrowth, 0)
     const totalWealthIncome = editableResults.reduce((sum, item) => sum + item.wealthIncome, 0)
     const totalWealthTax = editableResults.reduce((sum, item) => sum + item.wealthTax, 0)
     const finalWealth = editableResults[editableResults.length - 1].wealth
@@ -348,7 +348,7 @@ export function YearlyBreakdown({
                         <SortButton field="wealth" label="Vermögen" />
                       </TableHead>
                       <TableHead>
-                        <SortButton field="wealthCreatedThisYear" label="Vermögenszuwachs" />
+                        <SortButton field="wealthGrowth" label="Vermögenszuwachs" />
                       </TableHead>
                       <TableHead>
                         <SortButton field="wealthIncome" label="Vermögenseinkommen" />
@@ -416,12 +416,12 @@ export function YearlyBreakdown({
                             {editingRow === actualIndex ? (
                               <Input
                                 type="number"
-                                value={result.wealthCreatedThisYear}
-                                onChange={(e) => handleValueChange(actualIndex, 'wealthCreatedThisYear', e.target.value)}
+                                value={result.wealthGrowth}
+                                onChange={(e) => handleValueChange(actualIndex, 'wealthGrowth', e.target.value)}
                                 className="w-24"
                               />
                             ) : (
-                              formatCurrency(result.wealthCreatedThisYear)
+                              formatCurrency(result.wealthGrowth)
                             )}
                           </TableCell>
                           <TableCell>

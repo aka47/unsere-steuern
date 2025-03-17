@@ -10,31 +10,9 @@ export function TaxScenarioBuilderOrDetails() {
   return (
     <div>
       {selectedScenarioId === "custom" ? (
-        <TaxScenarioBuilder simulation={{
-          params: {
-            incomeTaxMultiplier: 1,
-            vatRate: 0.19,
-            wealthTaxRate: 0.02,
-            wealthIncomeTaxRate: 0.25
-          },
-          result: {
-            incomeTax: 0,
-            vat: 0,
-            wealthTax: 0,
-            wealthIncomeTax: 0,
-            total: 0
-          }
-        }} />
+        <TaxScenarioBuilder />
       ) : (
-        <TaxScenarioDetails
-          simulation={{
-            incomeTax: 0,
-            vat: 0,
-            wealthTax: 0,
-            wealthIncomeTax: 0,
-            total: 0
-          }}
-        />
+        <TaxScenarioDetails />
       )}
     </div>
   )

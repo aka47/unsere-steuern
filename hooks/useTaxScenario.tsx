@@ -90,50 +90,74 @@ const scenarioIdMap: Record<ScenarioId, string> = {
   "custom": "custom"
 }
 
-const TaxScenarioContext = createContext<ScenarioContextType | undefined>(undefined)
+interface TaxParams {
+  incomeTax: {
+    taxFreeAmount: number
+    taxLevel: "lower" | "current" | "adenauer"
+  }
+  wealthTax: {
+    taxFreeAmount: number
+    taxRate: number
+  }
+  inheritanceTax: {
+    taxFreeAmount: number
+    taxLevel: "lower" | "current" | "higher"
+  }
+  wealthIncomeTax: {
+    taxRate: number
+  }
+}
+
+interface TaxScenarioContextType {
+  selectedTaxScenario: TaxScenario
+  selectedScenarioId: string
+  setSelectedScenarioId: (id: string) => void
+  taxParams: TaxParams
+  setTaxParams: (params: TaxParams) => void
+}
+
+const defaultTaxParams: TaxParams = {
+  incomeTax: {
+    taxFreeAmount: 11000,
+    taxLevel: "current"
+  },
+  wealthTax: {
+    taxFreeAmount: 1000000,
+    taxRate: 0
+  },
+  inheritanceTax: {
+    taxFreeAmount: 400000,
+    taxLevel: "current"
+  },
+  wealthIncomeTax: {
+    taxRate: 0.10
+  }
+}
+
+const TaxScenarioContext = createContext<TaxScenarioContextType | undefined>(undefined)
 
 export function TaxScenarioProvider({ children }: { children: ReactNode }) {
-  const [selectedScenarioId, setSelectedScenarioId] = useState<ScenarioId>("flat")
-  const [customTaxParams, setCustomTaxParams] = useState<ScenarioContextType["customTaxParams"]>({
-    incomeTax: {
-      taxFreeAmount: 11000,
-      taxLevel: "current"
-    },
-    wealthTax: {
-      taxFreeAmount: 1000000,
-      taxRate: 0.02
-    },
-    inheritanceTax: {
-      taxFreeAmount: 400000,
-      taxLevel: "current"
-    }
-  })
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>("status-quo")
+  const [taxParams, setTaxParams] = useState<TaxParams>(defaultTaxParams)
 
-  // const { calculateScenario, results } = useTaxScenarioCalculator()
-
-  // Find the corresponding tax scenario object
-  const getTaxScenario = (scenarioId: ScenarioId): TaxScenario => {
-    const taxScenarioId = scenarioIdMap[scenarioId]
-    return taxScenarios.find(scenario => scenario.id === taxScenarioId) || defaultTaxScenario
-  }
-
-  const value = {
-    selectedScenarioId,
-    setSelectedScenarioId,
-    scenarioDetails: scenarioStats[selectedScenarioId],
-    selectedTaxScenario: getTaxScenario(selectedScenarioId),
-    customTaxParams,
-    setCustomTaxParams
-  }
+  // Map the selectedScenarioId to the correct tax scenario ID
+  const mappedScenarioId = scenarioIdMap[selectedScenarioId as keyof typeof scenarioIdMap] || selectedScenarioId
+  const selectedTaxScenario = taxScenarios.find(scenario => scenario.id === mappedScenarioId) || taxScenarios[0]
 
   return (
-    <TaxScenarioContext.Provider value={value}>
+    <TaxScenarioContext.Provider value={{
+      selectedTaxScenario,
+      selectedScenarioId,
+      setSelectedScenarioId,
+      taxParams,
+      setTaxParams
+    }}>
       {children}
     </TaxScenarioContext.Provider>
   )
 }
 
-export function useTaxScenario(): ScenarioContextType {
+export function useTaxScenario() {
   const context = useContext(TaxScenarioContext)
   if (context === undefined) {
     throw new Error("useTaxScenario must be used within a TaxScenarioProvider")

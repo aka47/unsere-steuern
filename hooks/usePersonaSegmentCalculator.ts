@@ -3,6 +3,7 @@ import { LifeIncomeCalculatorResult } from "./useLifeIncomeCalculator"
 import { Persona } from "@/types/persona"
 import { avgPersonas } from "@/types/persona"
 import { TaxScenario } from "@/types/life-income"
+import { useMemo } from 'react'
 
 export interface PersonaSegmentStats {
   persona: Persona
@@ -93,7 +94,9 @@ const emptyStats: PersonaSegmentStats = {
       totalSpendingFromWealth: 0,
       totalSpendingFromIncome: 0,
       totalWealthIncome: 0,
-      totalWealthIncomeTax: 0
+      totalWealthIncomeTax: 0,
+      totalTax: 0,
+      totalWealthGrowth: 0
     },
     details: []
   }
@@ -108,7 +111,7 @@ const scaleValue = (value: number): number => value * personaScale;
 export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxScenario): PersonaSegmentStats {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
-  const calculatePersonaSegmentStats = (): PersonaSegmentStats => {
+  return useMemo(() => {
     // Skip if persona is undefined or missing required properties
     if (!persona || !persona.currentIncome || !persona.currentAge) {
       return emptyStats
@@ -118,11 +121,11 @@ export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxS
       ...persona,
       currentAge: persona.currentAge,
       currentPersona: persona,
-      inheritanceAge: persona.inheritanceAge ?? 20, // Default to 20 if null
-      inheritanceTaxableHousingFinancial: persona.inheritanceAmount, // Assume 40% is housing/financial
-      inheritanceTaxableCompany: 0, // Assume 20% is company
-      inheritanceHardship: false, // Default to false
-      taxScenario // Pass through the tax scenario
+      inheritanceAge: persona.inheritanceAge ?? 20,
+      inheritanceTaxableHousingFinancial: persona.inheritanceAmount,
+      inheritanceTaxableCompany: 0,
+      inheritanceHardship: false,
+      taxScenario
     })
 
     if (!results) {
@@ -171,28 +174,32 @@ export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxS
       },
       results
     }
-  }
-
-  return calculatePersonaSegmentStats()
+  }, [persona, taxScenario, calculateLifeIncome]) // Add all dependencies here
 }
 
 export function usePersonaSegmentCollectionCalculator(personas: Persona[], taxScenario?: TaxScenario): { personaStats: PersonaSegmentStats[]; aggregatedStats: PersonaSegmentStats } {
-  const personaStats = personas.map(persona => usePersonaSegmentCalculator(persona, taxScenario));
+  // Call hooks at the top level for each persona
+  const individualStats = personas.map(persona => usePersonaSegmentCalculator(persona, taxScenario));
 
-  const aggregatedStats = personaStats.reduce((acc, stats) => {
-    acc.totalTaxPaid += stats.totalTaxPaid;
-    acc.totalIncomeReceived += stats.totalIncomeReceived;
-    acc.totalWealth += stats.totalWealth;
-    acc.totalVATPaid += stats.totalVATPaid;
-    acc.totalInheritanceReceived += stats.totalInheritanceReceived;
-    acc.totalInheritanceTaxPaid += stats.totalInheritanceTaxPaid;
-    acc.totalSpending += stats.totalSpending;
-    acc.totalSavings += stats.totalSavings;
-    acc.totalSpendingFromWealth += stats.totalSpendingFromWealth;
-    acc.totalSpendingFromIncome += stats.totalSpendingFromIncome;
-    acc.populationSize += 1;
-    return acc;
-  }, emptyStats);
+  // Then memoize the final stats array
+  const personaStats = useMemo(() => individualStats, [individualStats]);
+
+  const aggregatedStats = useMemo(() => {
+    return personaStats.reduce((acc, stats) => {
+      acc.totalTaxPaid += stats.totalTaxPaid;
+      acc.totalIncomeReceived += stats.totalIncomeReceived;
+      acc.totalWealth += stats.totalWealth;
+      acc.totalVATPaid += stats.totalVATPaid;
+      acc.totalInheritanceReceived += stats.totalInheritanceReceived;
+      acc.totalInheritanceTaxPaid += stats.totalInheritanceTaxPaid;
+      acc.totalSpending += stats.totalSpending;
+      acc.totalSavings += stats.totalSavings;
+      acc.totalSpendingFromWealth += stats.totalSpendingFromWealth;
+      acc.totalSpendingFromIncome += stats.totalSpendingFromIncome;
+      acc.populationSize += 1;
+      return acc;
+    }, { ...emptyStats });
+  }, [personaStats]);
 
   return {
     personaStats,

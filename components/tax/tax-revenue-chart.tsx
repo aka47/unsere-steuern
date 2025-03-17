@@ -29,7 +29,7 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
 
   // Format currency for tooltips
   const formatCurrency = (value: number): string => {
-    return `${(value / 1e9).toFixed(1)} Mrd. €`
+    return `${value.toFixed(1)} €`
   }
 
   // Format percentage for tooltips
@@ -62,7 +62,13 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
       amount: data.wealthIncomeTax,
       percentage: (data.wealthIncomeTax / data.total) * 100,
       description: "Steuer auf Kapitalerträge"
-    }
+    },
+    // {
+    //   category: "Erbschaftsteuer",
+    //   amount: data.inheritanceTax,
+    //   percentage: (data.inheritanceTax / data.total) * 100,
+    //   description: "Steuer auf vererbte Vermögen"
+    // }
   ]
 
   return (
@@ -104,7 +110,7 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
                       fill="#8884d8"
                       dataKey="amount"
                       nameKey="category"
-                      label={({ category, percentage }) => percentage > 3 ? `${category}: ${percentage}%` : ''}
+                      label={({ category, percentage }) => percentage > 3 ? `${category}: ${percentage.toFixed(1)}%` : ''}
                     >
                       {COLORS.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -121,7 +127,7 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
                       formatter={(value, _entry) => {
                         // Find the corresponding data entry
                         const dataEntry = chartData.find(item => item.category === value);
-                        return dataEntry ? `${value} (${formatPercentage(dataEntry.amount, data.total)})` : value;
+                        return dataEntry ? `${value} (${(dataEntry.amount / data.total * 100).toFixed(1)}%)` : value;
                       }}
                     />
                   </PieChart>
