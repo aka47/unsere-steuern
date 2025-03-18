@@ -2,7 +2,7 @@
 
 import { usePersonaSegmentCollectionCalculator } from "@/hooks/usePersonaSegmentCalculator"
 import { Persona } from "@/types/persona"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { PersonaYearlyAverage } from "@/components/visualizations/persona-yearly-average"
 import { PersonaCollectionOverTime } from "@/components/visualizations/persona-collection-over-time"
@@ -13,9 +13,10 @@ export function PersonaGroupStats({ personas }: { personas: Persona[] }) {
   const { selectedTaxScenario } = useTaxScenario()
   const { personaStats } = usePersonaSegmentCollectionCalculator(personas, selectedTaxScenario)
 
+  // Force recalculation when tax scenario changes
+  const [key, setKey] = useState(0)
   useEffect(() => {
-    // This effect will run whenever selectedTaxScenario changes
-    // The usePersonaSegmentCollectionCalculator hook will recalculate with the new scenario
+    setKey(prev => prev + 1)
   }, [selectedTaxScenario])
 
   const formatValue = (value: number, type: "currency" | "percentage" | "number") => {
@@ -48,10 +49,10 @@ export function PersonaGroupStats({ personas }: { personas: Persona[] }) {
           <TabsTrigger value="over-time">Entwicklung über die Zeit</TabsTrigger>
         </TabsList>
         <TabsContent value="over-time">
-          <PersonaCollectionOverTime personas={personas} personaStats={personaStats} taxScenario={selectedTaxScenario} />
+          <PersonaCollectionOverTime key={key} personas={personas} personaStats={personaStats} taxScenario={selectedTaxScenario} />
         </TabsContent>
         <TabsContent value="yearly">
-          <PersonaYearlyAverage personas={personas} personaStats={personaStats} />
+          <PersonaYearlyAverage key={key} personas={personas} personaStats={personaStats} />
         </TabsContent>
       </Tabs>
 
