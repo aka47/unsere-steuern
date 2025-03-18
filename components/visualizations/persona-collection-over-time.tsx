@@ -20,7 +20,7 @@ interface DataPoint {
   personaId: string
   personaName: string
   wealth: number
-  income: number
+  spending: number
   tax: number
   taxRate: number
 }
@@ -34,7 +34,7 @@ interface PersonaCollectionOverTimeProps {
 
 // Main component
 export function PersonaCollectionOverTime({ personas, personaStats, taxScenario }: PersonaCollectionOverTimeProps) {
-  const [metric, setMetric] = useState<"wealth" | "income" | "tax" | "taxRate">("wealth")
+  const [metric, setMetric] = useState<"wealth" | "spending" | "tax" | "taxRate">("wealth")
   const [_hoveredCell, setHoveredCell] = useState<DataPoint | null>(null)
   const [view, setView] = useState<"3d" | "2d">("3d")
   const [key, setKey] = useState(0)
@@ -66,7 +66,7 @@ export function PersonaCollectionOverTime({ personas, personaStats, taxScenario 
           personaId: persona.id,
           personaName: persona.name,
           wealth: detail.wealth,
-          income: detail.income,
+          spending: detail.spending,
           tax: detail.tax,
           taxRate: detail.taxRate * 1,
         })
@@ -133,14 +133,14 @@ export function PersonaCollectionOverTime({ personas, personaStats, taxScenario 
             </Tabs>
             <Select
               value={metric}
-              onValueChange={(value: "wealth" | "income" | "tax" | "taxRate") => setMetric(value)}
+              onValueChange={(value: "wealth" | "spending" | "tax" | "taxRate") => setMetric(value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select metric" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="wealth">Wealth</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
+                <SelectItem value="spending">Spending</SelectItem>
                 <SelectItem value="tax">Tax</SelectItem>
                 <SelectItem value="taxRate">Tax Rate</SelectItem>
               </SelectContent>
@@ -151,7 +151,7 @@ export function PersonaCollectionOverTime({ personas, personaStats, taxScenario 
       <CardContent>
         <div className="h-[600px] w-full">
           {view === "3d" ? (
-            <Canvas key={key} camera={{ position: [15, 15, 15], fov: 50 }}>
+            <Canvas camera={{ position: [0, 5, 20], fov: 50 }}>
               <ambientLight intensity={0.5} />
               <pointLight position={[10, 10, 10]} />
               <Landscape
@@ -165,7 +165,7 @@ export function PersonaCollectionOverTime({ personas, personaStats, taxScenario 
                 onHover={setHoveredCell}
               />
               <OrbitControls />
-              <axesHelper args={[10]} />
+              {/* <axesHelper args={[10]} /> */}
               {_hoveredCell && (
                 <Html position={[0, 5, 0]} transform>
                   <div className="bg-white p-2 rounded shadow text-sm">
@@ -194,23 +194,7 @@ export function PersonaCollectionOverTime({ personas, personaStats, taxScenario 
             />
           )}
         </div>
-        <div className="mt-4 flex justify-between">
-          <div className="flex items-center">
-            <div className={`w-full h-4 ${view === "3d" ? "bg-gradient-to-r from-red-600 via-yellow-400 to-blue-600" : "bg-gradient-to-r from-blue-50 via-blue-300 to-blue-900"}`}></div>
-            <div className="flex justify-between w-full px-2">
-              <span>
-                {metric === "taxRate"
-                  ? `${(minValue * 100).toFixed(2)}%`
-                  : new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(minValue)}
-              </span>
-              <span>
-                {metric === "taxRate"
-                  ? `${(maxValue * 100).toFixed(2)}%`
-                  : new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(maxValue)}
-              </span>
-            </div>
-          </div>
-        </div>
+
       </CardContent>
     </Card>
   )

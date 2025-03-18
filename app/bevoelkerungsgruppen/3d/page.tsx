@@ -7,11 +7,12 @@ import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-n
 import { TaxScenarioProvider, useTaxScenario } from "@/hooks/useTaxScenario"
 import { TaxScenario } from "@/types/life-income"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
-
+import { defaultTaxScenario } from "@/constants/tax-scenarios"
+import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
 
 // Sample data generator function
 function GenerateSampleData(personas: Persona[], startYear: number, endYear: number, taxScenario: TaxScenario) {
-  const data = []
+  const data: PersonaSegmentStats[] = []
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   for (const persona of personas) {
@@ -19,6 +20,7 @@ function GenerateSampleData(personas: Persona[], startYear: number, endYear: num
     const baseIncome = persona.currentIncome
     const baseWealth = baseIncome * 5
 
+    const details = []
     for (let year = startYear; year <= endYear; year++) {
       // Calculate growth factors based on years
       const yearsSinceStart = year - startYear
@@ -43,28 +45,90 @@ function GenerateSampleData(personas: Persona[], startYear: number, endYear: num
         inheritanceHardship: false
       })
 
-      // Calculate effective tax rate from totals
-      const totals = calculationResult?.totals || { totalIncomeTax: 0, totalIncome: 0 }
-      const taxRate = totals.totalIncome > 0 ? totals.totalIncomeTax / totals.totalIncome : 0.2
-      const tax = income * taxRate
-
-      data.push({
-        year,
-        personaId: persona.id,
-        personaName: persona.name,
-        wealth,
-        income,
-        tax,
-        taxRate,
-      })
+      if (calculationResult) {
+        details.push({
+          age: year - startYear + 20, // Convert year to age starting from 20
+          income,
+          incomeTax: calculationResult.totals.totalIncomeTax,
+          wealth,
+          wealthGrowth: calculationResult.totals.totalWealthGrowth,
+          wealthIncome: calculationResult.totals.totalWealthIncome,
+          wealthTax: calculationResult.totals.totalWealthTax,
+          inheritance: calculationResult.totals.totalInheritance,
+          inheritanceTax: calculationResult.totals.totalInheritanceTax,
+          vat: calculationResult.totals.totalVAT,
+          spending: calculationResult.totals.totalSpending,
+          tax: calculationResult.totals.totalTax,
+          taxRate: calculationResult.totals.totalTax / (calculationResult.totals.totalIncome + calculationResult.totals.totalWealth)
+        })
+      }
     }
+
+    data.push({
+      persona,
+      totalTaxPaid: details.reduce((sum, d) => sum + d.tax, 0),
+      totalIncomeReceived: details.reduce((sum, d) => sum + d.income, 0),
+      totalWealth: details[details.length - 1]?.wealth || 0,
+      totalVATPaid: details.reduce((sum, d) => sum + d.vat, 0),
+      totalInheritanceReceived: details.reduce((sum, d) => sum + d.inheritance, 0),
+      totalInheritanceTaxPaid: details.reduce((sum, d) => sum + d.inheritanceTax, 0),
+      totalSpending: details.reduce((sum, d) => sum + d.spending, 0),
+      totalSavings: details.reduce((sum, d) => sum + (d.income - d.spending), 0),
+      totalSpendingFromWealth: details.reduce((sum, d) => sum + (d.spending * 0.3), 0), // Assume 30% from wealth
+      totalSpendingFromIncome: details.reduce((sum, d) => sum + (d.spending * 0.7), 0), // Assume 70% from income
+      averageTaxRate: details.reduce((sum, d) => sum + d.taxRate, 0) / details.length,
+      averageIncomeTaxRate: details.reduce((sum, d) => sum + (d.incomeTax / d.income), 0) / details.length,
+      averageWealthTaxRate: details.reduce((sum, d) => sum + (d.wealthTax / d.wealth), 0) / details.length,
+      populationSize: 1,
+      yearlyAverages: {
+        taxPaid: details.reduce((sum, d) => sum + d.tax, 0) / details.length,
+        incomeReceived: details.reduce((sum, d) => sum + d.income, 0) / details.length,
+        wealth: details.reduce((sum, d) => sum + d.wealth, 0) / details.length,
+        vatPaid: details.reduce((sum, d) => sum + d.vat, 0) / details.length,
+        inheritanceReceived: details.reduce((sum, d) => sum + d.inheritance, 0) / details.length,
+        inheritanceTaxPaid: details.reduce((sum, d) => sum + d.inheritanceTax, 0) / details.length,
+        spending: details.reduce((sum, d) => sum + d.spending, 0) / details.length,
+        savings: details.reduce((sum, d) => sum + (d.income - d.spending), 0) / details.length,
+        spendingFromWealth: details.reduce((sum, d) => sum + (d.spending * 0.3), 0) / details.length,
+        spendingFromIncome: details.reduce((sum, d) => sum + (d.spending * 0.7), 0) / details.length,
+        taxRate: details.reduce((sum, d) => sum + d.taxRate, 0) / details.length
+      },
+      taxDistribution: {
+        incomeTax: details.reduce((sum, d) => sum + d.incomeTax, 0),
+        vat: details.reduce((sum, d) => sum + d.vat, 0),
+        wealthTax: details.reduce((sum, d) => sum + d.wealthTax, 0),
+        wealthIncomeTax: details.reduce((sum, d) => sum + d.wealthTax, 0),
+        total: details.reduce((sum, d) => sum + d.tax, 0)
+      },
+      results: {
+        totals: {
+          totalWealth: details[details.length - 1]?.wealth || 0,
+          totalIncome: details.reduce((sum, d) => sum + d.income, 0),
+          totalIncomeTax: details.reduce((sum, d) => sum + d.incomeTax, 0),
+          totalWealthIncome: details.reduce((sum, d) => sum + d.wealthIncome, 0),
+          totalWealthIncomeTax: details.reduce((sum, d) => sum + d.wealthTax, 0),
+          totalWealthTax: details.reduce((sum, d) => sum + d.wealthTax, 0),
+          totalVAT: details.reduce((sum, d) => sum + d.vat, 0),
+          totalInheritance: details.reduce((sum, d) => sum + d.inheritance, 0),
+          totalInheritanceTax: details.reduce((sum, d) => sum + d.inheritanceTax, 0),
+          totalSpending: details.reduce((sum, d) => sum + d.spending, 0),
+          totalSavings: details.reduce((sum, d) => sum + (d.income - d.spending), 0),
+          totalSpendingFromWealth: details.reduce((sum, d) => sum + (d.spending * 0.3), 0),
+          totalSpendingFromIncome: details.reduce((sum, d) => sum + (d.spending * 0.7), 0),
+          totalTax: details.reduce((sum, d) => sum + d.tax, 0),
+          totalTaxWithVAT: details.reduce((sum, d) => sum + d.tax + d.vat, 0),
+          totalWealthGrowth: details.reduce((sum, d) => sum + d.wealthGrowth, 0)
+        },
+        details
+      }
+    })
   }
 
   return data
 }
 
 function PersonaLandscapeContent() {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<PersonaSegmentStats[]>([])
   const { selectedTaxScenario } = useTaxScenario()
 
   // Define the time range
@@ -96,6 +160,7 @@ function PersonaLandscapeContent() {
         <PersonaCollectionOverTime
           personas={personas}
           personaStats={data}
+          taxScenario={selectedTaxScenario}
         />
       </div>
     </div>

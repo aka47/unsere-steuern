@@ -74,7 +74,8 @@ export const statusQuoScenario: TaxScenario = {
 
   calculateWealthIncomeTax: (wealthIncome: number) => {
     // Flat tax rate of 25% (Abgeltungssteuer) + 5,5% solidarity surcharge
-    return wealthIncome * 0.26375
+    const wealthIncomeTaxedRate = 0.1
+    return wealthIncome * wealthIncomeTaxedRate * 0.26375
   },
 
   calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {

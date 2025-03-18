@@ -94,10 +94,11 @@ const emptyStats: PersonaSegmentStats = {
       totalSavings: 0,
       totalSpendingFromWealth: 0,
       totalSpendingFromIncome: 0,
-      totalWealthIncome: 0,
-      totalWealthIncomeTax: 0,
       totalTax: 0,
-      totalWealthGrowth: 0
+      totalTaxWithVAT: 0,
+      totalWealthGrowth: 0,
+      totalWealthIncome: 0,
+      totalWealthIncomeTax: 0
     },
     details: []
   }
@@ -180,79 +181,14 @@ export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxS
 }
 
 export function usePersonaSegmentCollectionCalculator(personas: Persona[], taxScenario?: TaxScenario): { personaStats: PersonaSegmentStats[]; aggregatedStats: PersonaSegmentStats } {
-  const { calculateLifeIncome } = useLifeIncomeCalculator()
-  const { taxParams } = useTaxScenario()
+  // Call hooks at the top level for each persona
+  const individualStats = personas.map(persona => usePersonaSegmentCalculator(persona, taxScenario));
 
-  // Calculate all stats in a single useMemo
-  const { personaStats, aggregatedStats } = useMemo(() => {
-    // Calculate individual stats
-    const individualStats = personas.map(persona => {
-      // Skip if persona is undefined or missing required properties
-      if (!persona || !persona.currentIncome || !persona.currentAge) {
-        return emptyStats
-      }
+  // Then memoize the final stats array and include taxScenario in dependencies
+  const personaStats = useMemo(() => individualStats, [individualStats, taxScenario]);
 
-      const results = calculateLifeIncome({
-        ...persona,
-        currentAge: persona.currentAge,
-        currentPersona: persona,
-        inheritanceAge: persona.inheritanceAge ?? 20,
-        inheritanceTaxableHousingFinancial: persona.inheritanceAmount,
-        inheritanceTaxableCompany: 0,
-        inheritanceHardship: false,
-        taxScenario
-      })
-
-      if (!results) {
-        return emptyStats
-      }
-
-      const totalYears = results.details.length
-      const yearlyAverages = {
-        taxPaid: (results.totals.totalIncomeTax + results.totals.totalWealthTax + results.totals.totalVAT + results.totals.totalInheritanceTax) / totalYears,
-        incomeReceived: (results.totals.totalIncome + results.totals.totalWealthIncome) / totalYears,
-        wealth: results.totals.totalWealth / totalYears,
-        vatPaid: results.totals.totalVAT / totalYears,
-        inheritanceReceived: results.totals.totalInheritance / totalYears,
-        inheritanceTaxPaid: results.totals.totalInheritanceTax / totalYears,
-        spending: results.totals.totalSpending / totalYears,
-        savings: results.totals.totalSavings / totalYears,
-        spendingFromWealth: results.totals.totalSpendingFromWealth / totalYears,
-        spendingFromIncome: results.totals.totalSpendingFromIncome / totalYears,
-        taxRate: (results.totals.totalIncomeTax + results.totals.totalWealthTax + results.totals.totalVAT + results.totals.totalInheritanceTax) /
-          (results.totals.totalIncome + results.totals.totalWealthIncome + results.totals.totalInheritance)
-      }
-
-      return {
-        persona,
-        totalTaxPaid: scaleValue(yearlyAverages.taxPaid),
-        totalIncomeReceived: scaleValue(yearlyAverages.incomeReceived),
-        totalWealth: scaleValue(yearlyAverages.wealth),
-        totalVATPaid: scaleValue(yearlyAverages.vatPaid),
-        totalInheritanceReceived: scaleValue(yearlyAverages.inheritanceReceived),
-        totalInheritanceTaxPaid: scaleValue(yearlyAverages.inheritanceTaxPaid),
-        totalSpending: scaleValue(yearlyAverages.spending),
-        totalSavings: scaleValue(yearlyAverages.savings),
-        totalSpendingFromWealth: scaleValue(yearlyAverages.spendingFromWealth),
-        totalSpendingFromIncome: scaleValue(yearlyAverages.spendingFromIncome),
-        averageTaxRate: (yearlyAverages.taxPaid - yearlyAverages.vatPaid - yearlyAverages.inheritanceTaxPaid) / yearlyAverages.taxPaid,
-        averageIncomeTaxRate: yearlyAverages.incomeReceived / yearlyAverages.taxPaid,
-        averageWealthTaxRate: yearlyAverages.vatPaid / yearlyAverages.taxPaid,
-        populationSize: 1,
-        yearlyAverages,
-        taxDistribution: {
-          incomeTax: (yearlyAverages.taxPaid - yearlyAverages.vatPaid - yearlyAverages.inheritanceTaxPaid) / yearlyAverages.taxPaid,
-          wealthTax: yearlyAverages.vatPaid / yearlyAverages.taxPaid,
-          vat: yearlyAverages.vatPaid / yearlyAverages.taxPaid,
-          wealthIncomeTax: (yearlyAverages.taxPaid - yearlyAverages.vatPaid - yearlyAverages.inheritanceTaxPaid) / yearlyAverages.taxPaid,
-          total: yearlyAverages.taxPaid
-        },
-        results
-      }
-    });
-
-    // Calculate aggregated stats
-    const aggregated = individualStats.reduce((acc, stats) => {
+  const aggregatedStats = useMemo(() => {
+    return personaStats.reduce((acc, stats) => {
       acc.totalTaxPaid += stats.totalTaxPaid;
       acc.totalIncomeReceived += stats.totalIncomeReceived;
       acc.totalWealth += stats.totalWealth;
@@ -266,37 +202,35 @@ export function usePersonaSegmentCollectionCalculator(personas: Persona[], taxSc
       acc.populationSize += 1;
       return acc;
     }, { ...emptyStats });
+  }, [personaStats]);
 
-    return {
-      personaStats: individualStats,
-      aggregatedStats: {
-        ...aggregated,
-        averageTaxRate: (aggregated.totalTaxPaid - aggregated.totalVATPaid - aggregated.totalInheritanceTaxPaid) / aggregated.totalTaxPaid,
-        averageIncomeTaxRate: aggregated.totalIncomeReceived / aggregated.totalTaxPaid,
-        averageWealthTaxRate: aggregated.totalVATPaid / aggregated.totalTaxPaid,
-        yearlyAverages: {
-          taxPaid: aggregated.totalTaxPaid / aggregated.populationSize,
-          incomeReceived: aggregated.totalIncomeReceived / aggregated.populationSize,
-          wealth: aggregated.totalWealth / aggregated.populationSize,
-          vatPaid: aggregated.totalVATPaid / aggregated.populationSize,
-          inheritanceReceived: aggregated.totalInheritanceReceived / aggregated.populationSize,
-          inheritanceTaxPaid: aggregated.totalInheritanceTaxPaid / aggregated.populationSize,
-          spending: aggregated.totalSpending / aggregated.populationSize,
-          savings: aggregated.totalSavings / aggregated.populationSize,
-          spendingFromWealth: aggregated.totalSpendingFromWealth / aggregated.populationSize,
-          spendingFromIncome: aggregated.totalSpendingFromIncome / aggregated.populationSize,
-          taxRate: aggregated.totalTaxPaid / (aggregated.totalIncomeReceived + aggregated.totalWealth)
-        },
-        taxDistribution: {
-          incomeTax: (aggregated.totalTaxPaid - aggregated.totalVATPaid - aggregated.totalInheritanceTaxPaid) / aggregated.totalTaxPaid,
-          wealthTax: aggregated.totalVATPaid / aggregated.totalTaxPaid,
-          vat: aggregated.totalVATPaid / aggregated.totalTaxPaid,
-          wealthIncomeTax: (aggregated.totalTaxPaid - aggregated.totalVATPaid - aggregated.totalInheritanceTaxPaid) / aggregated.totalTaxPaid,
-          total: aggregated.totalTaxPaid
-        }
+  return {
+    personaStats,
+    aggregatedStats: {
+      ...aggregatedStats,
+      averageTaxRate: (aggregatedStats.totalTaxPaid - aggregatedStats.totalVATPaid - aggregatedStats.totalInheritanceTaxPaid) / aggregatedStats.totalTaxPaid,
+      averageIncomeTaxRate: aggregatedStats.totalIncomeReceived / aggregatedStats.totalTaxPaid,
+      averageWealthTaxRate: aggregatedStats.totalVATPaid / aggregatedStats.totalTaxPaid,
+      yearlyAverages: {
+        taxPaid: aggregatedStats.totalTaxPaid / aggregatedStats.populationSize,
+        incomeReceived: aggregatedStats.totalIncomeReceived / aggregatedStats.populationSize,
+        wealth: aggregatedStats.totalWealth / aggregatedStats.populationSize,
+        vatPaid: aggregatedStats.totalVATPaid / aggregatedStats.populationSize,
+        inheritanceReceived: aggregatedStats.totalInheritanceReceived / aggregatedStats.populationSize,
+        inheritanceTaxPaid: aggregatedStats.totalInheritanceTaxPaid / aggregatedStats.populationSize,
+        spending: aggregatedStats.totalSpending / aggregatedStats.populationSize,
+        savings: aggregatedStats.totalSavings / aggregatedStats.populationSize,
+        spendingFromWealth: aggregatedStats.totalSpendingFromWealth / aggregatedStats.populationSize,
+        spendingFromIncome: aggregatedStats.totalSpendingFromIncome / aggregatedStats.populationSize,
+        taxRate: aggregatedStats.totalTaxPaid / (aggregatedStats.totalIncomeReceived + aggregatedStats.totalWealth)
+      },
+      taxDistribution: {
+        incomeTax: (aggregatedStats.totalTaxPaid - aggregatedStats.totalVATPaid - aggregatedStats.totalInheritanceTaxPaid) / aggregatedStats.totalTaxPaid,
+        wealthTax: aggregatedStats.totalVATPaid / aggregatedStats.totalTaxPaid,
+        vat: aggregatedStats.totalVATPaid / aggregatedStats.totalTaxPaid,
+        wealthIncomeTax: (aggregatedStats.totalTaxPaid - aggregatedStats.totalVATPaid - aggregatedStats.totalInheritanceTaxPaid) / aggregatedStats.totalTaxPaid,
+        total: aggregatedStats.totalTaxPaid
       }
-    };
-  }, [personas, taxScenario, calculateLifeIncome, taxParams]);
-
-  return { personaStats, aggregatedStats };
+    }
+  };
 }

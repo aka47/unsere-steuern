@@ -38,3 +38,22 @@ export interface TaxDistribution {
   wealthIncomeTax: number;
   total: number;
 }
+
+export interface LifeIncomeTotals {
+  totalWealth: number
+  totalIncome: number
+  totalIncomeTax: number
+  totalWealthIncome: number
+  totalWealthIncomeTax: number
+  totalWealthTax: number
+  totalVAT: number
+  totalInheritance: number
+  totalInheritanceTax: number
+  totalSpending: number
+  totalSavings: number
+  totalSpendingFromWealth: number
+  totalSpendingFromIncome: number
+  totalTax: number
+  totalTaxWithVAT: number
+  totalWealthGrowth: number
+}

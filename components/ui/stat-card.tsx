@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 interface StatCardProps {
   title: string
   value: string | number
-  description?: string
+  description?: React.ReactNode
   suffix?: string
 }
 
@@ -18,7 +18,7 @@ export function StatCard({ title, value, description, suffix }: StatCardProps) {
           {value}{suffix}
         </p>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <div className="text-sm text-muted-foreground">{description}</div>
         )}
       </CardContent>
     </Card>

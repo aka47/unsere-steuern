@@ -2,7 +2,7 @@
 
 import { usePersonaSegmentCollectionCalculator } from "@/hooks/usePersonaSegmentCalculator"
 import { Persona } from "@/types/persona"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { PersonaYearlyAverage } from "@/components/visualizations/persona-yearly-average"
 import { PersonaCollectionOverTime } from "@/components/visualizations/persona-collection-over-time"
@@ -13,10 +13,9 @@ export function PersonaGroupStats({ personas }: { personas: Persona[] }) {
   const { selectedTaxScenario } = useTaxScenario()
   const { personaStats } = usePersonaSegmentCollectionCalculator(personas, selectedTaxScenario)
 
-  // Force recalculation when tax scenario changes
-  const [key, setKey] = useState(0)
   useEffect(() => {
-    setKey(prev => prev + 1)
+    // This effect will run whenever selectedTaxScenario changes
+    // The usePersonaSegmentCollectionCalculator hook will recalculate with the new scenario
   }, [selectedTaxScenario])
 
   const formatValue = (value: number, type: "currency" | "percentage" | "number") => {
@@ -43,16 +42,16 @@ export function PersonaGroupStats({ personas }: { personas: Persona[] }) {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="yearly" className="w-full">
+      <Tabs defaultValue="over-time" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="yearly">Jährliche Durchschnitte</TabsTrigger>
           <TabsTrigger value="over-time">Entwicklung über die Zeit</TabsTrigger>
+          <TabsTrigger value="yearly">Jährliche Durchschnitte</TabsTrigger>
         </TabsList>
         <TabsContent value="over-time">
-          <PersonaCollectionOverTime key={key} personas={personas} personaStats={personaStats} taxScenario={selectedTaxScenario} />
+          <PersonaCollectionOverTime personas={personas} personaStats={personaStats} taxScenario={selectedTaxScenario} />
         </TabsContent>
         <TabsContent value="yearly">
-          <PersonaYearlyAverage key={key} personas={personas} personaStats={personaStats} />
+          <PersonaYearlyAverage personas={personas} personaStats={personaStats} />
         </TabsContent>
       </Tabs>
 

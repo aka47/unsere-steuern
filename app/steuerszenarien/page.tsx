@@ -7,6 +7,7 @@ import { grokPersonas } from "@/types/persona"
 import { PersonaCollection } from "@/components/personas/persona-collection"
 import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
 import { TaxScenarioBuilderOrDetails } from "@/components/tax-scenarios/tax-scenario-builder-or-details"
+import { WarningBox } from "@/components/warning-box"
 
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
@@ -28,6 +29,10 @@ export default function TaxScenariosPage() {
       >
       </PageHeader>
       <TaxScenarioNavigation />
+      <div className="mx-8 max-w-4xl">
+
+        <WarningBox  header="Steuerrechner ist noch im entstehen!" description="Die hier dargestellten Berechnungen und Zahlen sind noch nicht vollständig, die Zahlen sind noch nicht 100% korrekt und die Berechnungen fehlen noch viele der Ausnahmen und Sonderfälle, welche uns Millarden kosten und keiner wirklich verstehen soll. Das ist bis heute auch sehr gut gelungen." />
+      </div>
 
       <div className="flex-1 space-y-4">
         <div className="p-8 pt-2">
@@ -48,7 +53,6 @@ export default function TaxScenariosPage() {
             <CardDescription>Die wichtigsten Ergebnisse des gewählten Steuermodells übersichtlich zusammengefasst</CardDescription>
           </CardHeader>
           <CardContent>
-            <ScenarioSummary />
           </CardContent>
         </Card> */}
 

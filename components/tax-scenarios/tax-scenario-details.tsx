@@ -5,28 +5,58 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { TaxDistribution } from "@/types/life-income"
-import React, { useEffect } from "react"
+import { TaxDistribution, type TaxScenario } from "@/types/life-income"
+import React, { useEffect, useState } from "react"
 import Markdown from "react-markdown"
 import { StatCard } from "@/components/ui/stat-card"
-import { WarningBox } from "@/components/warning-box"
 import { useTaxScenarioCalculator } from "@/hooks/useTaxScenarioCalculator"
+import { type LifeIncomeCalculatorResult } from "@/hooks/useLifeIncomeCalculator"
+import { taxScenarios } from "@/constants/tax-scenarios"
 
 export function TaxScenarioDetails() {
   const { selectedTaxScenario, taxParams } = useTaxScenario()
   const [isOpen, setIsOpen] = React.useState(false)
   const { calculateScenario, results } = useTaxScenarioCalculator()
+  const statusQuoScenario = taxScenarios.find(s => s.id === "status-quo")!
+  const { calculateScenario: calculateStatusQuo } = useTaxScenarioCalculator(statusQuoScenario)
+  const [statusQuoResults, setStatusQuoResults] = useState<LifeIncomeCalculatorResult | null>(null)
 
-  // Calculate the scenario when the component mounts or when taxParams changes
+
   useEffect(() => {
-    if (selectedTaxScenario.id === "custom") {
-      calculateScenario(taxParams)
-    }
-  }, [calculateScenario, taxParams, selectedTaxScenario.id])
+    // Always calculate status quo results unless we're viewing status quo
+    // if (selectedTaxScenario.id === "status-quo") {
+    //   setStatusQuoResults(null)
+    // } else {
+    //   const results = calculateStatusQuo(taxParams)
+    //   setStatusQuoResults(results)
+    // }
+    calculateScenario(taxParams)
+  }, [selectedTaxScenario.id, taxParams])
+
+  const formatDifference = (current: number, baseline: number) => {
+    const diff = current - baseline
+    const percentage = (diff / baseline) * 100
+    const formattedDiff = Math.abs(diff).toLocaleString("de-DE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 1,
+    })
+    const formattedPercentage = Math.abs(percentage).toFixed(1)
+
+    if (diff === 0) return null
+
+    const color = diff > 0 ? "text-green-600" : "text-red-600"
+    const arrow = diff > 0 ? "↑" : "↓"
+
+    return (
+      <div className={`${color}`}>
+        {arrow} {formattedDiff} Mrd. ({formattedPercentage}%)
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      <WarningBox header="Steuerrechner ist noch im entstehen!" description="Die hier dargestellten Berechnungen und Zahlen sind noch nicht vollständig, die Zahlen sind noch nicht 100% korrekt und die Berechnungen fehlen noch viele der Ausnahmen und Sonderfälle, welche uns Millarden kosten und keiner wirklich verstehen soll. Das ist bis heute auch sehr gut gelungen." />
       <Card>
         <CardHeader>
           <CardTitle>{selectedTaxScenario.name}</CardTitle>
@@ -34,16 +64,19 @@ export function TaxScenarioDetails() {
         </CardHeader>
         <CardContent>
           {results && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
               <StatCard
                 title="Gesamtsteuern"
-                value={((results.totals.totalIncomeTax + results.totals.totalVAT +
-                        results.totals.totalWealthTax + results.totals.totalWealthIncomeTax)).toLocaleString("de-DE", {
+                value={((results.totals.totalTaxWithVAT)).toLocaleString("de-DE", {
                   style: "currency",
                   currency: "EUR",
                   maximumFractionDigits: 1,
                 })}
-                suffix=" Mrd."
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalTaxWithVAT,
+                  statusQuoResults.totals.totalTaxWithVAT
+                )}
               />
               <StatCard
                 title="Einkommensteuer"
@@ -52,16 +85,37 @@ export function TaxScenarioDetails() {
                   currency: "EUR",
                   maximumFractionDigits: 1,
                 })}
-                suffix=" Mrd."
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalIncomeTax,
+                  statusQuoResults.totals.totalIncomeTax
+                )}
               />
               <StatCard
-                title="Mehrwertsteuer"
-                value={(results.totals.totalVAT).toLocaleString("de-DE", {
+                title="Erbschaftsteuer"
+                value={(results.totals.totalInheritanceTax).toLocaleString("de-DE", {
                   style: "currency",
                   currency: "EUR",
                   maximumFractionDigits: 1,
                 })}
-                suffix=" Mrd."
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalInheritanceTax,
+                  statusQuoResults.totals.totalInheritanceTax
+                )}
+              />
+              <StatCard
+                title="Kapitalertragsteuer"
+                value={(results.totals.totalWealthIncomeTax).toLocaleString("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                  maximumFractionDigits: 1,
+                })}
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalWealthIncomeTax,
+                  statusQuoResults.totals.totalWealthIncomeTax
+                )}
               />
               <StatCard
                 title="Vermögenssteuer"
@@ -70,7 +124,24 @@ export function TaxScenarioDetails() {
                   currency: "EUR",
                   maximumFractionDigits: 1,
                 })}
-                suffix=" Mrd."
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalWealthTax,
+                  statusQuoResults.totals.totalWealthTax
+                )}
+              />
+                <StatCard
+                title="Mehrwertsteuer"
+                value={(results.totals.totalVAT).toLocaleString("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                  maximumFractionDigits: 1,
+                })}
+                suffix=""
+                description={statusQuoResults && formatDifference(
+                  results.totals.totalVAT,
+                  statusQuoResults.totals.totalVAT
+                )}
               />
             </div>
           )}

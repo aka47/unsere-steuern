@@ -45,6 +45,7 @@ type LifeIncomeTotals = {
   totalSpendingFromWealth: number
   totalSpendingFromIncome: number
   totalTax: number
+  totalTaxWithVAT: number
   totalWealthGrowth: number
 }
 
@@ -211,8 +212,9 @@ export function useLifeIncomeCalculator() {
       totalSavings: 0,
       totalSpendingFromWealth: 0,
       totalSpendingFromIncome: 0,
-      totalWealthGrowth: 0,
-      totalTax: 0
+      totalTax: 0,
+      totalTaxWithVAT: 0,
+      totalWealthGrowth: 0
     }
 
     // Create a map of yearly overrides for quick lookup
@@ -323,6 +325,7 @@ export function useLifeIncomeCalculator() {
     totals.totalSpendingFromWealth = Math.round(totals.totalSpendingFromWealth)
     totals.totalSpendingFromIncome = Math.round(totals.totalSpendingFromIncome)
     totals.totalTax = Math.round(totals.totalIncomeTax + totals.totalWealthIncomeTax + totals.totalWealthTax + totals.totalInheritanceTax)
+    totals.totalTaxWithVAT = Math.round(totals.totalTax + totals.totalVAT)
     totals.totalWealthGrowth = Math.round(totals.totalWealthGrowth)
     return { totals, details: results }
   }

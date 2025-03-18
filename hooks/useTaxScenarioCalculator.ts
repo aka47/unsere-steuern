@@ -5,6 +5,7 @@ import { InheritanceTaxClass } from "@/types/inheritance-tax"
 import { grokPersonas } from "@/types/persona"
 import { useLifeIncomeCalculator, type LifeIncomeCalculatorResult } from "./useLifeIncomeCalculator"
 import { type TaxScenario } from "@/types/life-income"
+import { useTaxScenario } from "./useTaxScenario"
 
 // Common tax bracket calculation function
 const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
@@ -95,9 +96,10 @@ const TAX_BRACKETS = {
   },
 }
 
-export function useTaxScenarioCalculator() {
+export function useTaxScenarioCalculator(scenarioOverride?: TaxScenario) {
   const [results, setResults] = useState<LifeIncomeCalculatorResult | null>(null)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
+  const { selectedTaxScenario } = useTaxScenario()
 
   const createCustomTaxScenario = useCallback((params: TaxParams): TaxScenario => {
     return {
@@ -133,7 +135,8 @@ export function useTaxScenarioCalculator() {
   }, [])
 
   const calculateScenario = useCallback((params: TaxParams) => {
-    const customTaxScenario = createCustomTaxScenario(params)
+    // Use the override scenario if provided, otherwise use selected or custom
+    const taxScenario = scenarioOverride || (selectedTaxScenario.id === "custom" ? createCustomTaxScenario(params) : selectedTaxScenario)
 
     // Calculate results for each persona
     const personaResults = grokPersonas.map(persona => {
@@ -151,7 +154,7 @@ export function useTaxScenarioCalculator() {
         currentPersona: persona,
         initialAge: persona.initialAge,
         currentIncomeFromWealth: persona.currentIncomeFromWealth,
-        taxScenario: customTaxScenario,
+        taxScenario,
         inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
         inheritanceTaxableCompany: persona.inheritanceCompany,
         inheritanceHardship: false
@@ -176,6 +179,7 @@ export function useTaxScenarioCalculator() {
         totalSpendingFromWealth: acc.totals.totalSpendingFromWealth + result.totals.totalSpendingFromWealth,
         totalSpendingFromIncome: acc.totals.totalSpendingFromIncome + result.totals.totalSpendingFromIncome,
         totalTax: acc.totals.totalTax + result.totals.totalTax,
+        totalTaxWithVAT: acc.totals.totalTaxWithVAT + result.totals.totalTaxWithVAT,
         totalWealthGrowth: acc.totals.totalWealthGrowth + result.totals.totalWealthGrowth
       },
       details: result.details,
@@ -195,6 +199,7 @@ export function useTaxScenarioCalculator() {
         totalSpendingFromWealth: 0,
         totalSpendingFromIncome: 0,
         totalTax: 0,
+        totalTaxWithVAT: 0,
         totalWealthGrowth: 0
       },
       details: [],
@@ -208,7 +213,7 @@ export function useTaxScenarioCalculator() {
 
     setResults(avgResult)
     return avgResult
-  }, [calculateLifeIncome, createCustomTaxScenario])
+  }, [calculateLifeIncome, createCustomTaxScenario, selectedTaxScenario])
 
   return { calculateScenario, results, createCustomTaxScenario }
 }
