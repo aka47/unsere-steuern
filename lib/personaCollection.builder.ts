@@ -1,26 +1,5 @@
-import { type Persona } from "@/types/persona"
+import { type Persona, defaultPersona } from "@/types/persona"
 import { type PersonaCollection } from "@/types/personaCollection"
-
-// Define the Persona interface
-// interface Persona {
-//   id: string;
-//   name: string;
-//   description: string;
-//   icon: string;
-//   initialAge: number;
-//   currentAge: number;
-//   currentIncome: number;
-//   currentIncomeFromWealth: number; // Income derived from wealth (e.g., 5-20%)
-//   savingsRate: number;
-//   inheritanceAge: number;
-//   inheritanceAmount: number; // Expected inheritance if received
-//   inheritanceTaxClass: 1 | 2 | 3;
-//   vatRate: number;
-//   vatApplicableRate: number;
-//   incomeGrowth: (age: number) => number;
-//   yearlySpendingFromWealth: number;
-//   currentWealth: number;
-// }
 
 // Distribution configuration for Germany
 interface DistributionConfig {
@@ -153,6 +132,7 @@ class GrokPersonaBuilder {
       const inheritanceAge = i < 5 ? 55 : 50 - (i - 5);
 
       const persona: Persona = {
+        ...defaultPersona,
         id: `p${i + 1}`,
         name: this.names[i],
         description: this.descriptions[i],
@@ -165,16 +145,13 @@ class GrokPersonaBuilder {
         inheritanceAge: inheritanceAge,
         inheritanceAmount: expectedInheritance,
         inheritanceTaxClass: 1,
-        vatRate: 19,
-        vatApplicableRate: 80,
-        incomeGrowth: 0.02,
         yearlySpendingFromWealth: yearlySpendingFromWealth,
         currentWealth: currentWealth,
         inheritanceHousing: expectedInheritance * 0.4, // 40% housing
         inheritanceCompany: expectedInheritance * 0.3, // 30% company
         inheritanceFinancial: expectedInheritance * 0.3, // 30% financial
         inheritanceTaxable: expectedInheritance,
-        inheritanceTax: 0 // This will be calculated later
+        inheritanceTax: 0
       };
 
       this.personas.push(persona);

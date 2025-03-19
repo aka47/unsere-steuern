@@ -33,8 +33,10 @@ export function TaxScenarioDetails() {
     calculateScenario(taxParams)
   }, [selectedTaxScenario.id, taxParams])
 
-  const formatDifference = (current: number, baseline: number) => {
+  const formatDifference = (current: number, baseline: number): string | undefined => {
     const diff = current - baseline
+    if (diff === 0) return undefined
+
     const percentage = (diff / baseline) * 100
     const formattedDiff = Math.abs(diff).toLocaleString("de-DE", {
       style: "currency",
@@ -42,17 +44,10 @@ export function TaxScenarioDetails() {
       maximumFractionDigits: 1,
     })
     const formattedPercentage = Math.abs(percentage).toFixed(1)
-
-    if (diff === 0) return null
-
     const color = diff > 0 ? "text-green-600" : "text-red-600"
     const arrow = diff > 0 ? "↑" : "↓"
 
-    return (
-      <div className={`${color}`}>
-        {arrow} {formattedDiff} Mrd. ({formattedPercentage}%)
-      </div>
-    )
+    return `${arrow} ${formattedDiff} Mrd. (${formattedPercentage}%)`
   }
 
   return (
@@ -73,10 +68,10 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalTaxWithVAT,
                   statusQuoResults.totals.totalTaxWithVAT
-                )}
+                )) ?? undefined}
               />
               <StatCard
                 title="Einkommensteuer"
@@ -86,10 +81,10 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalIncomeTax,
                   statusQuoResults.totals.totalIncomeTax
-                )}
+                )) ?? undefined}
               />
               <StatCard
                 title="Erbschaftsteuer"
@@ -99,10 +94,10 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalInheritanceTax,
                   statusQuoResults.totals.totalInheritanceTax
-                )}
+                )) ?? undefined}
               />
               <StatCard
                 title="Kapitalertragsteuer"
@@ -112,10 +107,10 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalWealthIncomeTax,
                   statusQuoResults.totals.totalWealthIncomeTax
-                )}
+                )) ?? undefined}
               />
               <StatCard
                 title="Vermögenssteuer"
@@ -125,12 +120,12 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalWealthTax,
                   statusQuoResults.totals.totalWealthTax
-                )}
+                )) ?? undefined}
               />
-                <StatCard
+              <StatCard
                 title="Mehrwertsteuer"
                 value={(results.totals.totalVAT).toLocaleString("de-DE", {
                   style: "currency",
@@ -138,10 +133,10 @@ export function TaxScenarioDetails() {
                   maximumFractionDigits: 1,
                 })}
                 suffix=""
-                description={statusQuoResults && formatDifference(
+                description={(statusQuoResults && formatDifference(
                   results.totals.totalVAT,
                   statusQuoResults.totals.totalVAT
-                )}
+                )) ?? undefined}
               />
             </div>
           )}

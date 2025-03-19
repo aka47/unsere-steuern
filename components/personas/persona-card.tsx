@@ -12,6 +12,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { useState } from "react"
 import { CalendarDays, LifeBuoy, Database } from "lucide-react"
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatCurrency } from "@/lib/utils"
 
 // Add a type for the view options
 type ViewType = "lifetime" | "annual" | "data"
@@ -222,20 +223,13 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                                 {entry.name === defaultTaxScenario.name
                                   ? `${defaultTaxScenario.name}: `
                                   : `${activeTaxScenario.name}: `}
-                                {new Intl.NumberFormat("de-DE", {
-                                  style: "currency",
-                                  currency: "EUR",
-                                }).format(entry.value as number)}
+                                {formatCurrency(entry.value as number)}
                               </p>
                             ))}
                             {showComparison && payload.length > 1 && (
                               <p className="mt-2 pt-2 border-t">
                                 Difference:{" "}
-                                {new Intl.NumberFormat("de-DE", {
-                                  style: "currency",
-                                  currency: "EUR",
-                                  signDisplay: "always",
-                                }).format((payload[1].value as number) - (payload[0].value as number))}
+                                {formatCurrency((payload[1].value as number) - (payload[0].value as number))}
                               </p>
                             )}
                           </div>
@@ -265,11 +259,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                             : "text-red-600"
                         }
                       >
-                        {new Intl.NumberFormat("de-DE", {
-                          style: "currency",
-                          currency: "EUR",
-                          signDisplay: "always",
-                        }).format(
+                        {formatCurrency(
                           (selectedScenarioResults?.totals.totalTax || 0) -
                             ((defaultScenarioResults?.totals.totalTax || 0)),
                         )}
@@ -281,7 +271,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                       <div className="flex justify-between text-sm">
                         <span>Steuern ({activeTaxScenario.name}):</span>
                         <span>
-                          {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                          {formatCurrency(
                             (selectedScenarioResults?.totals.totalTax || 0),
                           )}
                         </span>
@@ -289,7 +279,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                       <div className="flex justify-between text-sm">
                         <span>Steuern ({defaultTaxScenario.name}):</span>
                         <span>
-                          {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                          {formatCurrency(
                             (defaultScenarioResults?.totals.totalTax || 0),
                           )}
                         </span>
@@ -312,11 +302,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                             : "text-red-600"
                         }
                       >
-                        {new Intl.NumberFormat("de-DE", {
-                          style: "currency",
-                          currency: "EUR",
-                          signDisplay: "always",
-                        }).format(
+                        {formatCurrency(
                           (selectedScenarioResults?.totals.totalSpending || 0) +
                             (selectedScenarioResults?.totals.totalWealth || 0) -
                             ((defaultScenarioResults?.totals.totalSpending || 0) +
@@ -332,7 +318,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm">
                           <span>Konsum:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               selectedScenarioResults?.totals.totalSpending || 0,
                             )}
                           </span>
@@ -340,7 +326,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm">
                           <span>Vermögen:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               selectedScenarioResults?.totals.totalWealth || 0,
                             )}
                           </span>
@@ -348,7 +334,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm border-t border-dashed mt-1 pt-1">
                           <span>Summe:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               (selectedScenarioResults?.totals.totalSpending || 0) +
                                 (selectedScenarioResults?.totals.totalWealth || 0),
                             )}
@@ -360,7 +346,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm">
                           <span>Konsum:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               defaultScenarioResults?.totals.totalSpending || 0,
                             )}
                           </span>
@@ -368,7 +354,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm">
                           <span>Vermögen:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               defaultScenarioResults?.totals.totalWealth || 0,
                             )}
                           </span>
@@ -376,7 +362,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                         <div className="flex justify-between text-sm border-t border-dashed mt-1 pt-1">
                           <span>Summe:</span>
                           <span>
-                            {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                            {formatCurrency(
                               (defaultScenarioResults?.totals.totalSpending || 0) +
                                 (defaultScenarioResults?.totals.totalWealth || 0),
                             )}
@@ -420,20 +406,13 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                                 {entry.name === defaultTaxScenario.name
                                   ? `${defaultTaxScenario.name}: `
                                   : `${activeTaxScenario.name}: `}
-                                {new Intl.NumberFormat("de-DE", {
-                                  style: "currency",
-                                  currency: "EUR",
-                                }).format(entry.value as number)}
+                                {formatCurrency(entry.value as number)}
                               </p>
                             ))}
                             {showComparison && payload.length > 1 && (
                               <p className="mt-2 pt-2 border-t">
                                 Difference:{" "}
-                                {new Intl.NumberFormat("de-DE", {
-                                  style: "currency",
-                                  currency: "EUR",
-                                  signDisplay: "always",
-                                }).format((payload[1].value as number) - (payload[0].value as number))}
+                                {formatCurrency((payload[1].value as number) - (payload[0].value as number))}
                               </p>
                             )}
                           </div>
@@ -454,7 +433,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                 <div>
                   <p className="font-medium">Durchschnittliches Jahreseinkommen:</p>
                   <p>
-                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                    {formatCurrency(
                       (selectedScenarioResults?.totals.totalIncome || 0) / (selectedScenarioResults?.details.length || 1),
                     )}
                   </p>
@@ -477,7 +456,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                 <div>
                   <p className="font-medium">Jährliche Ersparnis:</p>
                   <p>
-                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+                    {formatCurrency(
                       (selectedScenarioResults?.totals.totalWealth || 0) / (67 - persona.initialAge),
                     )}
                   </p>
@@ -498,7 +477,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
               <div>
                 <p className="text-sm font-medium">Einkommen:</p>
                 <p className="text-lg">
-                  {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(persona.currentIncome)}
+                  {formatCurrency(persona.currentIncome)}
                 </p>
               </div>
               <div>
@@ -509,11 +488,25 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                 <p className="text-sm font-medium">Erbschaft:</p>
                 <p className="text-lg">
                   {persona.inheritanceAge
-                    ? `${new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(persona.inheritanceAmount)} (${persona.inheritanceAge} Jahre)`
+                    ? `${formatCurrency(persona.inheritanceAmount)} (${persona.inheritanceAge} Jahre)`
                     : "Keine"}
                 </p>
               </div>
             </div>
+
+            {persona.examples && persona.examples.length > 0 && (
+              <div className="mt-4 border-t pt-4">
+                <p className="font-medium mb-2">Beispiele:</p>
+                <div className="space-y-2">
+                  {persona.examples.map((example, index) => (
+                    <div key={index} className="text-sm">
+                      <p className="font-medium">{example.profession}</p>
+                      <p className="text-muted-foreground">{example.yearlyIncome}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* {persona.yearlyOverrides.length > 0 && (
               <div className="mt-4 border-t pt-4">
@@ -535,16 +528,12 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                             <td className="py-1">{override.year}</td>
                             <td className="text-right py-1">
                               {override.income
-                                ? new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-                                    override.income,
-                                  )
+                                ? formatCurrency(override.income)
                                 : "-"}
                             </td>
                             <td className="text-right py-1">
                               {override.wealth
-                                ? new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
-                                    override.wealth,
-                                  )
+                                ? formatCurrency(override.wealth)
                                 : "-"}
                             </td>
                           </tr>

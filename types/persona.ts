@@ -26,6 +26,15 @@ export interface Persona {
     income: number
     wealth: number
   }[]
+  examples: {
+    name: string;
+    profession: string;
+    familyStatus: string;
+    monthlyIncome: number;
+    yearlyIncome: number;
+    createdWealth: number;
+  }[];
+  examples_summary: string;
 }
 
 export const defaultPersona: Persona = {
@@ -51,6 +60,8 @@ export const defaultPersona: Persona = {
   inheritanceAge: null,
   inheritanceAmount: 0,
   inheritanceTaxClass: 1,
+  examples: [],
+  examples_summary: "",
 }
 
 export const initialPersonas: Persona[] = [

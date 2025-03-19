@@ -4,10 +4,13 @@ import { PersonalTaxImpact } from "@/components/tax-scenarios/personal-tax-impac
 import { PageHeader } from "@/components/ui/page-header"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { grokPersonas } from "@/types/persona"
+import { grok2Personas } from "@/data/persona/grok"
 import { PersonaCollection } from "@/components/personas/persona-collection"
 import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
 import { TaxScenarioBuilderOrDetails } from "@/components/tax-scenarios/tax-scenario-builder-or-details"
 import { WarningBox } from "@/components/warning-box"
+import { CollapsibleBox, DismissibleBox } from "@/components/onboarding"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
@@ -17,17 +20,30 @@ export default function TaxScenariosPage() {
     id: "grok",
     title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
     description: "Eine Auswahl repräsentativer Lebensrealitäten",
-    personas: grokPersonas
+    personas: grok2Personas
   }
 
   return (
     <div className="flex flex-col ">
 
       <PageHeader
-        title="Steuerszenarien"
+        title="Unser Steuersystem heute und Alternativen"
         subtitle="Wählen Sie ein Steuerszenario für die Berechnung"
       >
       </PageHeader>
+      <div className="max-w-6xl m-6">
+        <DismissibleBox  title="Aktuelle Struktur und Alternativen">
+          <p>
+            Das Steuersystem in Deutschland basiert auf einem progressiven Modell, bei dem höhere Einkommen stärker besteuert werden. Dies ermöglicht die Finanzierung wichtiger öffentlicher Dienstleistungen wie Bildung, Gesundheitsversorgung und Infrastruktur. Doch es gibt immer wieder Diskussionen über Fairness, Effizienz und die langfristigen Auswirkungen auf unterschiedliche Einkommensgruppen.
+          </p>
+          <p className="mt-4">
+            Diese Seite zeigt nicht nur das aktuelle Steuersystem, sondern auch verschiedene Alternativen. Dazu gehören ein Einheitssteuersatz, eine lebenslange progressive Besteuerung aller Einkommen, historische Steuersysteme in Deutschland und eine individuell anpassbare Variante. Mithilfe interaktiver Grafiken und Modellrechnungen können Sie die Auswirkungen dieser Modelle auf Steuereinnahmen und Einkommensverläufe im Laufe des Lebens nachvollziehen.
+          </p>
+        </DismissibleBox>
+      </div>
+
+
+
       <TaxScenarioNavigation />
       <div className="mx-8 max-w-4xl">
 

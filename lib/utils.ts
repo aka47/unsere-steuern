@@ -12,10 +12,15 @@ export function cn(...inputs: ClassValue[]) {
  * @param currency The currency to use (default: 'EUR')
  * @returns A formatted currency string
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("de-DE", {
+export function formatCurrency(
+  value: number,
+  locale = "de-DE",
+  currency = "EUR"
+): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "EUR",
+    currency,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount)
+  }).format(value);
 }

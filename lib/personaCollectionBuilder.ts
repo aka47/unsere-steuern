@@ -171,7 +171,9 @@ class GrokPersonaBuilder {
         inheritanceCompany,
         inheritanceFinancial,
         inheritanceTaxable,
-        inheritanceTax
+        inheritanceTax,
+        examples: [],
+        examples_summary: ""
       };
       this.personas.push(persona);
     }

@@ -7,26 +7,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { type LifeIncomeYearlyResult, type LifeIncomeResults } from "@/types/life-income"
+import { type LifeIncomeYearlyResult } from "@/types/life-income"
 import { type Persona } from "@/types/persona"
 import { TypographyH3, TypographySmall, TypographyLarge, TypographyMuted } from "@/components/ui/typography"
+import { type LifeIncomeCalculatorResult } from "@/hooks/useLifeIncomeCalculator"
 
 interface LifeIncomeResultsProps {
-  results: LifeIncomeYearlyResult[]
-  setResults: React.Dispatch<React.SetStateAction<LifeIncomeResults>>
+  results: LifeIncomeCalculatorResult
+  setResults: React.Dispatch<React.SetStateAction<LifeIncomeCalculatorResult | null>>
   currentPersona?: Persona | null
 }
 
-export function LifeIncomeResults({ results: initialResults, setResults, currentPersona }: LifeIncomeResultsProps) {
-  const [localResults, setLocalResults] = useState(initialResults)
+export function LifeIncomeResults({ results, setResults, currentPersona }: LifeIncomeResultsProps) {
+  const [localResults, setLocalResults] = useState(results.details)
   const [showDetailedTable, setShowDetailedTable] = useState(false)
 
-  useEffect(() => {
-    setLocalResults(initialResults)
-  }, [initialResults])
+  // useEffect(() => {
+  //   setLocalResults(initialResults)
+  // }, [initialResults])
 
   const totalIncome = localResults.reduce((sum, result) => sum + result.income, 0)
   const totalIncomeTax = localResults.reduce((sum, result) => sum + result.incomeTax, 0)
@@ -49,10 +50,16 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
       | "spending",
     newValue: string,
   ) => {
-    const updatedResults = localResults.map((result) =>
+    const updatedDetails = localResults.map((result) =>
       result.age === age ? { ...result, [field]: Number.parseInt(newValue) || 0 } : result,
     )
-    setLocalResults(updatedResults)
+    setLocalResults(updatedDetails)
+
+    // Update the full results object
+    const updatedResults: LifeIncomeCalculatorResult = {
+      ...results,
+      details: updatedDetails
+    }
     setResults(updatedResults)
     localStorage.setItem("lifeIncomeResults", JSON.stringify(updatedResults))
   }
@@ -83,22 +90,22 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
   return (
     <div className="space-y-8">
       <Card className="shadow-md border-primary/20">
-        <CardHeader className="bg-muted/30 pb-4">
+        {/* <CardHeader className="bg-muted/30 pb-4">
           <CardTitle>Zusammenfassung</CardTitle>
           <CardDescription>
             {currentPersona ? `Übersicht für ${currentPersona.name}` : "Übersicht Ihrer finanziellen Lebensbilanz"}
           </CardDescription>
-        </CardHeader>
+        </CardHeader> */}
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-2">
-            {currentPersona && (
+            {/* {currentPersona && (
               <div className="md:col-span-2 mb-2 pb-2 border-b">
                 <TypographyLarge>{currentPersona.name}</TypographyLarge>
                 {currentPersona.description && (
                   <TypographyMuted className="mt-1">{currentPersona.description}</TypographyMuted>
                 )}
               </div>
-            )}
+            )} */}
             <div className="space-y-2">
               <TypographySmall className="text-muted-foreground">Lebenseinkommen</TypographySmall>
               <TypographyLarge>{formatCurrency(totalIncome)}</TypographyLarge>
@@ -170,7 +177,7 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="income" className="space-y-4">
+      {/* <Tabs defaultValue="income" className="space-y-4">
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="combined">Steuern</TabsTrigger>
           <TabsTrigger value="percentage">Steueranteil in %</TabsTrigger>
@@ -342,7 +349,7 @@ export function LifeIncomeResults({ results: initialResults, setResults, current
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
 
       <div className="flex justify-between items-center mb-4">
         <TypographyH3>Detaillierte Daten</TypographyH3>

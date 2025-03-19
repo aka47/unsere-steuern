@@ -1,16 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { LifeIncomeCalculator } from "@/components/life-income/life-income-calculator"
-import { type Persona } from "@/types/persona"
 import { type LifeIncomeResults as _LifeIncomeResultsType } from "@/types/life-income"
+import { useSessionPersona } from "@/hooks/useSessionPersona"
+import { type Persona } from "@/types/persona"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TypographyP } from "@/components/ui/typography"
 
 export default function LifeIncomeCalculatorPage() {
-  const [currentPersona, setCurrentPersona] = useState<Persona | null>(null)
-  const [_results, setResults] = useState<_LifeIncomeResultsType>(null)
+  const { currentPersona: sessionPersona, setCurrentPersona: setSessionPersona } = useSessionPersona()
+  const [currentPersona, setCurrentPersona] = useState<Persona | null>(sessionPersona ?? null)
+  const [results, setResults] = useState<_LifeIncomeResultsType>(null)
+
+  // Update local state when session persona changes
+  useEffect(() => {
+    setCurrentPersona(sessionPersona ?? null)
+  }, [sessionPersona])
 
   return (
     <div className="flex flex-col">
@@ -20,7 +27,6 @@ export default function LifeIncomeCalculatorPage() {
       />
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="grid gap-8 lg:grid-cols-1">
-          {/* Calculator Column */}
           <Card className="shadow-sm">
             <CardHeader className="bg-muted/30 pb-4">
               <CardTitle>Ihre Daten</CardTitle>
@@ -36,24 +42,13 @@ export default function LifeIncomeCalculatorPage() {
               <TypographyP className="text-sm w-2/3 mt-2">
                 Wir freuen uns, wenn Sie eine E-Mail Adresse benutzen für ihren Account auf unsere-steuern.de, die anonymisiert ist und keine Rückschlüsse auf Ihre Person zulässt.
               </TypographyP>
-
             </CardContent>
           </Card>
           <LifeIncomeCalculator
-                setResults={setResults}
-                persona={currentPersona}
-                setPersona={setCurrentPersona}
-              />
-
-          {/* {results && (
-            <div className="space-y-6">
-              <LifeIncomeResults
-                results={results}
-                setResults={setResults}
-                currentPersona={currentPersona}
-              />
-            </div>
-          )} */}
+            setResults={setResults}
+            persona={currentPersona}
+            setPersona={setCurrentPersona}
+          />
         </div>
       </div>
     </div>

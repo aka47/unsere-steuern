@@ -59,7 +59,16 @@ const personaSchema = z.object({
     age: z.number(),
     income: z.number(),
     wealth: z.number()
-  })).optional()
+  })).optional(),
+  examples: z.array(z.object({
+    name: z.string(),
+    profession: z.string(),
+    familyStatus: z.string(),
+    monthlyIncome: z.number(),
+    yearlyIncome: z.number(),
+    createdWealth: z.number()
+  })).optional(),
+  examples_summary: z.string().optional()
 });
 
 // POST /api/persona - Create a new persona
@@ -86,7 +95,9 @@ export async function POST(req: Request) {
     // If creating new persona, generate a unique ID
     const newPersona = {
       ...validatedData,
-      id: crypto.randomUUID()
+      id: crypto.randomUUID(),
+      examples: validatedData.examples || [],
+      examples_summary: validatedData.examples_summary || ""
     };
 
     const createdPersona = await PersonaRepository.create(newPersona, session.user.id);
