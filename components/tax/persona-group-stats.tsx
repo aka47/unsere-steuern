@@ -1,21 +1,21 @@
 "use client"
 
-import { usePersonaSegmentCollectionCalculator } from "@/hooks/usePersonaSegmentCalculator"
-import { Persona } from "@/types/persona"
 import React, { useEffect } from "react"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { PersonaYearlyAverage } from "@/components/visualizations/persona-yearly-average"
 import { PersonaCollectionOverTime } from "@/components/visualizations/persona-collection-over-time"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { usePersonaCollectionCalculator } from "@/hooks/usePersonaCollectionCalculations"
+import { Persona } from "@/types/persona"
 import { StatCard } from "@/components/ui/stat-card"
 
 export function PersonaGroupStats({ personas }: { personas: Persona[] }) {
   const { selectedTaxScenario } = useTaxScenario()
-  const { personaStats } = usePersonaSegmentCollectionCalculator(personas, selectedTaxScenario)
+  const { personaStats } = usePersonaCollectionCalculator(personas, selectedTaxScenario)
 
   useEffect(() => {
     // This effect will run whenever selectedTaxScenario changes
-    // The usePersonaSegmentCollectionCalculator hook will recalculate with the new scenario
+    // The usePersonaCollectionCalculator hook will recalculate with the new scenario
   }, [selectedTaxScenario])
 
   const formatValue = (value: number, type: "currency" | "percentage" | "number") => {

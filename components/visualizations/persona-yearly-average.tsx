@@ -3,12 +3,12 @@
 import { useState, useMemo } from "react"
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 import type { Persona } from "@/types/persona"
 
 interface PersonaYearlyAverageProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
 }
 
 interface ChartData {

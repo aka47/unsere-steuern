@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Persona } from "@/types/persona"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import { type TaxScenario } from "@/types/life-income"
@@ -28,7 +28,7 @@ interface DataPoint {
 // Props for the component
 interface PersonaCollectionOverTimeProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
   taxScenario: TaxScenario
 }
 

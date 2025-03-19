@@ -3,12 +3,11 @@
 import React, { useState, useMemo } from "react"
 import { type Persona } from "@/types/persona"
 import { type TaxScenario } from "@/types/life-income"
-import { usePersonaSegmentCalculator } from "@/hooks/usePersonaSegmentCalculator"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Text, Html } from "@react-three/drei"
 import * as d3 from "d3"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 
 interface DataPoint {
   year: number
@@ -20,7 +19,7 @@ interface DataPoint {
 
 interface PersonaStackedAreaChart3DProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
 }
 
 export function PersonaStackedAreaChart3D({ personas, personaStats }: PersonaStackedAreaChart3DProps) {

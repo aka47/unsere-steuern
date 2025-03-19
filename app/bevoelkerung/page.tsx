@@ -1,4 +1,4 @@
-import { PersonaSegmentStats } from "@/components/tax/persona-segment-stats"
+import { PersonaCollectionStats } from "@/components/tax/persona-segment-stats"
 import { PageHeader } from "@/components/ui"
 import { grokPersonas } from "@/types/persona"
 
@@ -10,7 +10,7 @@ export default function BevoelkerungPage() {
         subtitle="Diese Seite zeigt die aggregierten Steuer- und Einkommensstatistiken für 10% der deutschen Bevölkerung, basierend auf verschiedenen Personas."
       />
       <div className="container mx-auto px-4">
-        <PersonaSegmentStats personas={grokPersonas} />
+        <PersonaCollectionStats personas={grokPersonas} />
       </div>
     </>
   )

@@ -1,4 +1,4 @@
-export const personaSegmentStats = [{
+export const personaCollectionStats = [{
     "persona": {
         "id": "p1",
         "name": "Geringverdiener im Ruhestand",

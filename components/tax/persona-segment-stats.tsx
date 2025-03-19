@@ -1,17 +1,17 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { usePersonaSegmentCollectionCalculator } from "@/hooks/usePersonaSegmentCalculator"
+import { usePersonaCollectionCalculator } from "@/hooks/usePersonaCollectionCalculations"
 import { TaxRevenueChart } from "./tax-revenue-chart"
 import { PersonaGroupStats } from "./persona-group-stats"
 import { Persona } from "@/types/persona"
 
-interface PersonaSegmentStatsProps {
+interface PersonaCollectionStatsProps {
   personas: Persona[]
 }
 
-export function PersonaSegmentStats({ personas }: PersonaSegmentStatsProps) {
-  const {aggregatedStats} = usePersonaSegmentCollectionCalculator(personas)
+export function PersonaCollectionStats({ personas }: PersonaCollectionStatsProps) {
+  const {aggregatedStats} = usePersonaCollectionCalculator(personas)
 
   if (!aggregatedStats) return null
 

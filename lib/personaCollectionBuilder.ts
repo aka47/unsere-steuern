@@ -1,4 +1,4 @@
-import { type Persona } from "@/types/persona"
+import { defaultPersona, type Persona } from "@/types/persona"
 
 // Distribution configuration for Germany
 interface DistributionConfig {
@@ -150,6 +150,7 @@ class GrokPersonaBuilder {
       const inheritanceAge = i < 5 ? 55 : 50 - (i - 5);
 
       const persona: Persona = {
+        ...defaultPersona,
         id: `p${i + 1}`,
         name: this.names[i],
         description: this.descriptions[i],
@@ -164,7 +165,6 @@ class GrokPersonaBuilder {
         inheritanceTaxClass: 1,
         vatRate: 0,
         vatApplicableRate: 0,
-        incomeGrowth: 1.02,
         yearlySpendingFromWealth,
         currentWealth,
         inheritanceHousing,
@@ -172,8 +172,6 @@ class GrokPersonaBuilder {
         inheritanceFinancial,
         inheritanceTaxable,
         inheritanceTax,
-        examples: [],
-        examples_summary: ""
       };
       this.personas.push(persona);
     }

@@ -6,7 +6,7 @@ import { TaxScenario } from "@/types/life-income"
 import { useMemo } from 'react'
 import { useTaxScenario } from "./useTaxScenario"
 
-export interface PersonaSegmentStats {
+export interface PersonaCollectionStats {
   persona: Persona
   totalTaxPaid: number
   totalIncomeReceived: number
@@ -45,7 +45,7 @@ export interface PersonaSegmentStats {
   results: LifeIncomeCalculatorResult
 }
 
-const emptyStats: PersonaSegmentStats = {
+const emptyStats: PersonaCollectionStats = {
   persona: {} as Persona,
   totalTaxPaid: 0,
   totalIncomeReceived: 0,
@@ -110,7 +110,7 @@ const personaScale = 8300000; // Example scaling factor to represent a larger se
 // Helper function to scale values
 const scaleValue = (value: number): number => value * personaScale;
 
-export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxScenario): PersonaSegmentStats {
+export function usePersonaCalculator(persona: Persona, taxScenario?: TaxScenario): PersonaCollectionStats {
   const { calculateLifeIncome } = useLifeIncomeCalculator()
   const { taxParams } = useTaxScenario()
 
@@ -180,9 +180,9 @@ export function usePersonaSegmentCalculator(persona: Persona, taxScenario?: TaxS
   }, [persona, taxScenario, calculateLifeIncome, taxParams]) // Add taxParams as a dependency
 }
 
-export function usePersonaSegmentCollectionCalculator(personas: Persona[], taxScenario?: TaxScenario): { personaStats: PersonaSegmentStats[]; aggregatedStats: PersonaSegmentStats } {
+export function usePersonaCollectionCalculator(personas: Persona[], taxScenario?: TaxScenario): { personaStats: PersonaCollectionStats[]; aggregatedStats: PersonaCollectionStats } {
   // Call hooks at the top level for each persona
-  const individualStats = personas.map(persona => usePersonaSegmentCalculator(persona, taxScenario));
+  const individualStats = personas.map(persona => usePersonaCalculator(persona, taxScenario));
 
   // Then memoize the final stats array and include taxScenario in dependencies
   const personaStats = useMemo(() => individualStats, [individualStats, taxScenario]);

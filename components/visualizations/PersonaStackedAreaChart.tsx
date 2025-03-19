@@ -14,7 +14,7 @@ import {
 } from "recharts"
 import * as d3 from "d3"
 import type { Persona } from "@/types/persona"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 
 interface DataPoint {
   year: number
@@ -26,7 +26,7 @@ interface DataPoint {
 
 interface PersonaStackedAreaChartProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
 }
 
 export function PersonaStackedAreaChart({ personas, personaStats }: PersonaStackedAreaChartProps) {

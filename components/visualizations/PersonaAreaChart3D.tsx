@@ -7,7 +7,7 @@ import * as d3 from "d3"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Persona } from "@/types/persona"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 
 interface DataPoint {
   year: number
@@ -21,7 +21,7 @@ interface DataPoint {
 
 interface PersonaAreaChart3DProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
 }
 
 export function PersonaAreaChart3D({ personas, personaStats }: PersonaAreaChart3DProps) {

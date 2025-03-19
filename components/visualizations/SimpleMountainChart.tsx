@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useMemo } from "react"
 import * as d3 from "d3"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Persona } from "@/types/persona"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 
 interface DataPoint {
   year: number
@@ -26,7 +26,7 @@ interface PersonaData {
 
 interface SimpleMountainChartProps {
   personas: Persona[]
-  personaStats: PersonaSegmentStats[]
+  personaStats: PersonaCollectionStats[]
 }
 
 export function SimpleMountainChart({ personas, personaStats }: SimpleMountainChartProps) {

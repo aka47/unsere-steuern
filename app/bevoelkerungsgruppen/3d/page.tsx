@@ -8,11 +8,11 @@ import { TaxScenarioProvider, useTaxScenario } from "@/hooks/useTaxScenario"
 import { TaxScenario } from "@/types/life-income"
 import { useLifeIncomeCalculator } from "@/hooks/useLifeIncomeCalculator"
 import { defaultTaxScenario } from "@/constants/tax-scenarios"
-import { PersonaSegmentStats } from "@/hooks/usePersonaSegmentCalculator"
+import { PersonaCollectionStats } from "@/hooks/usePersonaCollectionCalculations"
 
 // Sample data generator function
 function GenerateSampleData(personas: Persona[], startYear: number, endYear: number, taxScenario: TaxScenario) {
-  const data: PersonaSegmentStats[] = []
+  const data: PersonaCollectionStats[] = []
   const { calculateLifeIncome } = useLifeIncomeCalculator()
 
   for (const persona of personas) {
@@ -128,7 +128,7 @@ function GenerateSampleData(personas: Persona[], startYear: number, endYear: num
 }
 
 function PersonaLandscapeContent() {
-  const [data, setData] = useState<PersonaSegmentStats[]>([])
+  const [data, setData] = useState<PersonaCollectionStats[]>([])
   const { selectedTaxScenario } = useTaxScenario()
 
   // Define the time range
