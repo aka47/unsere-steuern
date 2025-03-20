@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 import { grokPersonas } from "@/types/persona"
 import { grok2Personas } from "@/data/persona/grok"
+import { grok100PersonasCollection } from "@/types/personaCollection"
 import { PersonaCollection } from "@/components/personas/persona-collection"
 import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
 import { TaxScenarioBuilderOrDetails } from "@/components/tax-scenarios/tax-scenario-builder-or-details"
@@ -20,7 +21,7 @@ export default function TaxScenariosPage() {
     id: "grok",
     title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
     description: "Eine Auswahl repräsentativer Lebensrealitäten",
-    personas: grok2Personas
+    personas: grok100PersonasCollection.personas
   }
 
   return (
@@ -55,7 +56,7 @@ export default function TaxScenariosPage() {
           <TaxScenarioBuilderOrDetails />
           <PersonalTaxImpact userPersona={userPersona} />
 
-          <PersonaCollection collection={personaCollection} />
+          <PersonaCollection collection={grok100PersonasCollection} />
         </div>
 
         {/* <div className="p-8 pt-2">

@@ -59,7 +59,8 @@ function GenerateSampleData(personas: Persona[], startYear: number, endYear: num
           vat: calculationResult.totals.totalVAT,
           spending: calculationResult.totals.totalSpending,
           tax: calculationResult.totals.totalTax,
-          taxRate: calculationResult.totals.totalTax / (calculationResult.totals.totalIncome + calculationResult.totals.totalWealth)
+          taxRate: calculationResult.totals.totalTax / (calculationResult.totals.totalIncome + calculationResult.totals.totalWealth),
+          savings: calculationResult.totals.totalSavings
         })
       }
     }

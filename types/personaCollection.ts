@@ -1,4 +1,5 @@
 import { Persona, defaultPersona, initialPersonas, avgPersonas, highIncomePersonas, grokPersonas } from "./persona"
+import { GrokPersonaBuilder } from "@/lib/personaCollectionBuilder"
 
 export interface PersonaCollection {
   id: string
@@ -99,3 +100,56 @@ export const allPersonaCollections: PersonaCollection[] = [
   highIncomePersonasCollection,
   hundredAvgPersonas
 ]
+
+// Distribution configuration for Germany
+const germanyConfig = {
+  totalWealth: 13000e9, // 13 trillion euros
+  totalIncome: 2580e9,  // 2,580 billion euros
+  totalInheritance: 400e9, // 400 billion euros annually
+  totalHouseholds: 42e6, // 42 million households
+  annualDeaths: 1e6     // ~1 million deaths per year
+}
+
+// Store the collection in memory
+let personaCollection: PersonaCollection | null = null
+
+export function getPersonaCollection(): PersonaCollection {
+  // Return cached collection if available
+  if (personaCollection) {
+    return personaCollection
+  }
+
+  // Create new collection if not cached
+  const builder = new GrokPersonaBuilder(germanyConfig)
+  const personas = builder.buildPersonas()
+
+  personaCollection = {
+    id: "grok-100-personas",
+    title: "100 Grok Personas",
+    description: "Eine statistisch repräsentative Sammlung von 100 Personas, basierend auf der deutschen Einkommens-, Vermögens- und Erbschaftsverteilung.",
+    personas
+  }
+
+  return personaCollection
+}
+
+// Function to clear the cache if needed
+export function clearPersonaCollection(): void {
+  personaCollection = null
+}
+
+// Function to validate the collection totals
+export function validatePersonaCollectionTotals() {
+  if (!personaCollection) {
+    getPersonaCollection()
+  }
+
+  const builder = new GrokPersonaBuilder(germanyConfig)
+  return builder.validateTotals()
+}
+
+// Export the config for reference
+export const config = germanyConfig
+
+// Export the collection for direct access
+export const grok100PersonasCollection = getPersonaCollection()

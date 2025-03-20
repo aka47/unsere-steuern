@@ -14,6 +14,7 @@ export type LifeIncomeYearlyResult = {
   spending: number
   tax: number
   taxRate: number
+  savings: number
 }
 
 export type LifeIncomeResults = LifeIncomeYearlyResult[] | null
