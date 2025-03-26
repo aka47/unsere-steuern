@@ -11,12 +11,20 @@ import { TaxRevenueChart } from "./tax-revenue-chart"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TaxScenarioDetails } from "@/components/tax-scenarios/tax-scenario-details"
+import { grokPersonasCollection } from "@/types/personaCollection"
+import { PersonaCollection } from "@/types/personaCollection"
+
 const TAX_FREE_AMOUNTS = [0, 11000, 22000, 33000]
 const WEALTH_TAX_RATES = [0, 0.01, 0.02, 0.03, 0.05, 0.1]
 const WEALTH_INCOME_TAX_RATES = [0.10, 0.25, 0.30, 0.35, 0.42]
 
-export const TaxScenarioBuilder = () => {
-  const { results, calculateScenario } = useTaxScenarioCalculator()
+interface TaxScenarioBuilderProps {
+  collection?: PersonaCollection
+  usePersonaSize?: boolean
+}
+
+export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePersonaSize = false }: TaxScenarioBuilderProps) => {
+  const { results, calculateScenario } = useTaxScenarioCalculator(undefined, collection, usePersonaSize)
   const { taxParams, setTaxParams } = useTaxScenario()
 
   // Calculate on mount
@@ -255,7 +263,7 @@ export const TaxScenarioBuilder = () => {
         </Button>
       </div> */}
 
-      <TaxScenarioDetails />
+      <TaxScenarioDetails collection={collection} />
 
     </div>
   )

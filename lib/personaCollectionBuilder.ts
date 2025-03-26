@@ -180,52 +180,42 @@ export class GrokPersonaBuilder {
   ): number[] {
     const result: number[] = [];
     const decileCount = decileDistribution.length;
+    const personasPerDecile = targetCount / decileCount;
 
-    // Calculate cumulative distribution for original deciles
-    const cumulativeDistribution = decileDistribution.reduce((acc, val, idx) => {
-      acc[idx] = (idx === 0 ? 0 : acc[idx - 1]) + val;
-      return acc;
-    }, [] as number[]);
+    // Generate values for each decile
+    for (let decileIndex = 0; decileIndex < decileCount; decileIndex++) {
+      const decileTotal = decileDistribution[decileIndex];
+      const startIdx = decileIndex * personasPerDecile;
+      const endIdx = (decileIndex + 1) * personasPerDecile;
 
-    // Generate values using Pareto distribution
-    for (let i = 0; i < targetCount; i++) {
-      // Calculate which decile this persona belongs to
-      const decileIndex = Math.floor((i / targetCount) * decileCount);
-      const nextDecileIndex = Math.min(decileIndex + 1, decileCount - 1);
+      // Generate values within this decile
+      for (let i = startIdx; i < endIdx; i++) {
+        // Calculate position within the decile (0 to 1)
+        const positionInDecile = (i - startIdx) / personasPerDecile;
 
-      // Calculate position within the decile (0 to 1)
-      const positionInDecile = (i / targetCount) * decileCount - decileIndex;
+        // Use Pareto distribution within each decile
+        const value = Math.pow(1 - positionInDecile, -1/alpha);
 
-      // For the top 10% (last 10 personas), use a more extreme Pareto distribution
-      if (i >= targetCount - 10) {
-        const topPosition = (targetCount - i) / 10; // 1 to 0
-        const extremeValue = Math.pow(topPosition, -alpha) * decileDistribution[decileCount - 1] * 0.5;
-        result.push(extremeValue);
-        continue;
+        // Normalize to ensure the decile sum matches the target
+        result.push(value);
       }
-
-      // For other positions, use normal interpolation with minimum value
-      const targetCumulative = cumulativeDistribution[decileIndex] * (1 - positionInDecile) +
-                              cumulativeDistribution[nextDecileIndex] * positionInDecile;
-
-      const prevCumulative = i === 0 ? 0 : result.reduce((a, b) => a + b, 0);
-      let value = targetCumulative - prevCumulative;
-
-      // Ensure minimum value based on decile
-      const minValue = decileDistribution[decileIndex] * 0.1; // At least 10% of the decile value
-      value = Math.max(value, minValue);
-
-      // Ensure minimum value for the last position
-      if (i === targetCount - 1) {
-        value = decileDistribution[decileCount - 1];
-      }
-
-      result.push(value);
     }
 
-    // Ensure the sum is exactly 1
-    const sum = result.reduce((a, b) => a + b, 0);
-    return result.map(v => v / sum);
+    // Normalize each decile to match the target distribution
+    for (let decileIndex = 0; decileIndex < decileCount; decileIndex++) {
+      const startIdx = decileIndex * personasPerDecile;
+      const endIdx = (decileIndex + 1) * personasPerDecile;
+      const decileValues = result.slice(startIdx, endIdx);
+      const decileSum = decileValues.reduce((a, b) => a + b, 0);
+      const targetSum = decileDistribution[decileIndex];
+
+      // Scale the values in this decile
+      for (let i = startIdx; i < endIdx; i++) {
+        result[i] = (result[i] / decileSum) * targetSum;
+      }
+    }
+
+    return result;
   }
 
   // Example usage:
@@ -275,6 +265,20 @@ export class GrokPersonaBuilder {
     const interpolatedInheritanceDistribution = this.interpolateDistributionPareto(this.inheritanceDistribution, this.decileCount, 1.2);
     const interpolatedCompanyAssetDistribution = this.interpolateDistributionPareto(this.companyAssetDistribution, this.decileCount, 1.2);
 
+    // Validate income distribution
+    console.log("\nIncome Distribution Validation:");
+    console.log("Total sum:", interpolatedIncomeDistribution.reduce((a, b) => a + b, 0));
+    console.log("First 10 values:", interpolatedIncomeDistribution.slice(0, 10));
+    console.log("Last 10 values:", interpolatedIncomeDistribution.slice(-10));
+
+    // Check each decile sum matches the original distribution
+    for (let i = 0; i < 10; i++) {
+      const startIdx = i * 10;
+      const endIdx = (i + 1) * 10;
+      const decileSum = interpolatedIncomeDistribution.slice(startIdx, endIdx).reduce((a, b) => a + b, 0);
+      console.log(`Decile ${i + 1} (${startIdx}-${endIdx}) sum:`, decileSum, "Expected:", this.incomeDistribution[i]);
+    }
+
     // Validate the interpolated distributions
     // console.log("Wealth Distribution Validation:");
     // console.log("First 10 personas sum:", interpolatedWealthDistribution.slice(0, 10).reduce((a, b) => a + b, 0));
@@ -291,7 +295,11 @@ export class GrokPersonaBuilder {
       const totalWealthInDecile = this.config.totalWealth * interpolatedWealthDistribution[i];
       const currentWealth = Math.round(totalWealthInDecile / householdsPerDecile);
 
+      // Fix income calculation
       const totalIncomeInDecile = this.config.totalIncome * interpolatedIncomeDistribution[i];
+      console.log("totalIncomeInDecile", totalIncomeInDecile)
+      console.log("householdsPerDecile", householdsPerDecile)
+      console.log("interpolatedIncomeDistribution", interpolatedIncomeDistribution)
       const currentIncome = Math.round(totalIncomeInDecile / householdsPerDecile);
 
       // Adjust wealth return rate for higher percentiles

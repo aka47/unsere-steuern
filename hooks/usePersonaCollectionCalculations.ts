@@ -5,6 +5,7 @@ import { avgPersonas } from "@/types/persona"
 import { TaxScenario } from "@/types/life-income"
 import { useMemo } from 'react'
 import { useTaxScenario } from "./useTaxScenario"
+import { PersonaCollection } from "@/types/personaCollection"
 
 export interface PersonaCollectionStats {
   persona: Persona
@@ -180,9 +181,12 @@ export function usePersonaCalculator(persona: Persona, taxScenario?: TaxScenario
   }, [persona, taxScenario, calculateLifeIncome, taxParams]) // Add taxParams as a dependency
 }
 
-export function usePersonaCollectionCalculator(personas: Persona[], taxScenario?: TaxScenario): { personaStats: PersonaCollectionStats[]; aggregatedStats: PersonaCollectionStats } {
+export function usePersonaCollectionCalculator(collection: PersonaCollection, taxScenario?: TaxScenario): { personaStats: PersonaCollectionStats[]; aggregatedStats: PersonaCollectionStats } {
+  // Calculate persona size based on collection size and number of personas
+  const personaSize = collection.size / collection.personas.length;
+
   // Call hooks at the top level for each persona
-  const individualStats = personas.map(persona => usePersonaCalculator(persona, taxScenario));
+  const individualStats = collection.personas.map(persona => usePersonaCalculator(persona, taxScenario));
 
   // Then memoize the final stats array and include taxScenario in dependencies
   const personaStats = useMemo(() => individualStats, [individualStats, taxScenario]);
@@ -199,10 +203,10 @@ export function usePersonaCollectionCalculator(personas: Persona[], taxScenario?
       acc.totalSavings += stats.totalSavings;
       acc.totalSpendingFromWealth += stats.totalSpendingFromWealth;
       acc.totalSpendingFromIncome += stats.totalSpendingFromIncome;
-      acc.populationSize += 1;
+      acc.populationSize += personaSize;
       return acc;
     }, { ...emptyStats });
-  }, [personaStats]);
+  }, [personaStats, personaSize]);
 
   return {
     personaStats,

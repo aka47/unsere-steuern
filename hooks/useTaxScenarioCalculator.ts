@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react"
-import { TaxDistribution } from "@/types/life-income"
+import { TaxDistribution, type LifeIncomeTotals } from "@/types/life-income"
 import { Persona } from "@/types/persona"
 import { InheritanceTaxClass } from "@/types/inheritance-tax"
 import { grokPersonas } from "@/types/persona"
 import { useLifeIncomeCalculator, type LifeIncomeCalculatorResult } from "./useLifeIncomeCalculator"
 import { type TaxScenario } from "@/types/life-income"
 import { useTaxScenario } from "./useTaxScenario"
+import { PersonaCollection } from "@/types/personaCollection"
 
 // Common tax bracket calculation function
 const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
@@ -96,10 +97,18 @@ const TAX_BRACKETS = {
   },
 }
 
-export function useTaxScenarioCalculator(scenarioOverride?: TaxScenario) {
+export function useTaxScenarioCalculator(
+  scenarioOverride?: TaxScenario,
+  collection?: PersonaCollection,
+  usePersonaSize: boolean = false
+) {
   const [results, setResults] = useState<LifeIncomeCalculatorResult | null>(null)
   const { calculateLifeIncome } = useLifeIncomeCalculator()
   const { selectedTaxScenario } = useTaxScenario()
+
+  // Calculate persona size based on collection size and number of personas
+  const collectionSize = collection?.size || 42e6
+  const personaSize = collectionSize / (collection?.personas.length || 1)
 
   const createCustomTaxScenario = useCallback((params: TaxParams): TaxScenario => {
     return {
@@ -139,7 +148,7 @@ export function useTaxScenarioCalculator(scenarioOverride?: TaxScenario) {
     const taxScenario = scenarioOverride || (selectedTaxScenario.id === "custom" ? createCustomTaxScenario(params) : selectedTaxScenario)
 
     // Calculate results for each persona
-    const personaResults = grokPersonas.map(persona => {
+    const personaResults = (collection?.personas || []).map(persona => {
       const result = calculateLifeIncome({
         currentIncome: persona.currentIncome,
         currentAge: persona.currentAge,
@@ -157,63 +166,90 @@ export function useTaxScenarioCalculator(scenarioOverride?: TaxScenario) {
         taxScenario,
         inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
         inheritanceTaxableCompany: persona.inheritanceCompany,
-        inheritanceHardship: false
+        inheritanceHardship: false,
+        personaSize: usePersonaSize ? personaSize : undefined
       })
-      return result
-    }).filter((result): result is NonNullable<typeof result> => result !== null)
+      return { result, persona }
+    }).filter((item): item is { result: NonNullable<typeof item.result>, persona: Persona } => item.result !== null)
 
-    // Calculate average results
-    const avgResult = personaResults.reduce((acc, result) => ({
-      totals: {
-        totalWealth: acc.totals.totalWealth + result.totals.totalWealth,
-        totalIncome: acc.totals.totalIncome + result.totals.totalIncome,
-        totalIncomeTax: acc.totals.totalIncomeTax + result.totals.totalIncomeTax,
-        totalWealthIncome: acc.totals.totalWealthIncome + result.totals.totalWealthIncome,
-        totalWealthIncomeTax: acc.totals.totalWealthIncomeTax + result.totals.totalWealthIncomeTax,
-        totalWealthTax: acc.totals.totalWealthTax + result.totals.totalWealthTax,
-        totalVAT: acc.totals.totalVAT + result.totals.totalVAT,
-        totalInheritance: acc.totals.totalInheritance + result.totals.totalInheritance,
-        totalInheritanceTax: acc.totals.totalInheritanceTax + result.totals.totalInheritanceTax,
-        totalSpending: acc.totals.totalSpending + result.totals.totalSpending,
-        totalSavings: acc.totals.totalSavings + result.totals.totalSavings,
-        totalSpendingFromWealth: acc.totals.totalSpendingFromWealth + result.totals.totalSpendingFromWealth,
-        totalSpendingFromIncome: acc.totals.totalSpendingFromIncome + result.totals.totalSpendingFromIncome,
-        totalTax: acc.totals.totalTax + result.totals.totalTax,
-        totalTaxWithVAT: acc.totals.totalTaxWithVAT + result.totals.totalTaxWithVAT,
-        totalWealthGrowth: acc.totals.totalWealthGrowth + result.totals.totalWealthGrowth
-      },
-      details: result.details,
-    }), {
-      totals: {
-        totalWealth: 0,
-        totalIncome: 0,
-        totalIncomeTax: 0,
-        totalWealthIncome: 0,
-        totalWealthIncomeTax: 0,
-        totalWealthTax: 0,
-        totalVAT: 0,
-        totalInheritance: 0,
-        totalInheritanceTax: 0,
-        totalSpending: 0,
-        totalSavings: 0,
-        totalSpendingFromWealth: 0,
-        totalSpendingFromIncome: 0,
-        totalTax: 0,
-        totalTaxWithVAT: 0,
-        totalWealthGrowth: 0
-      },
-      details: [],
+    // Initialize totals
+    const totals: LifeIncomeTotals = {
+      totalWealth: 0,
+      totalIncome: 0,
+      totalIncomeTax: 0,
+      totalWealthIncome: 0,
+      totalWealthIncomeTax: 0,
+      totalWealthTax: 0,
+      totalVAT: 0,
+      totalInheritance: 0,
+      totalInheritanceTax: 0,
+      totalSpending: 0,
+      totalSavings: 0,
+      totalSpendingFromWealth: 0,
+      totalSpendingFromIncome: 0,
+      totalTax: 0,
+      totalTaxWithVAT: 0,
+      totalWealthGrowth: 0
+    }
+
+    // Sum up current year results for all personas
+    personaResults.forEach(({ result, persona }) => {
+      // Find current year's result
+      const currentYearResult = result.details.find(detail => detail.age === persona.currentAge)
+      if (!currentYearResult) return
+
+      // Calculate current year values
+      const income = currentYearResult.income
+      const incomeTax = currentYearResult.incomeTax
+      const wealthIncome = currentYearResult.wealthIncome
+      const wealthIncomeTax = taxScenario.calculateWealthIncomeTax(wealthIncome)
+      const wealthTax = currentYearResult.wealthTax
+      const vat = currentYearResult.vat
+      const inheritance = currentYearResult.age === persona.inheritanceAge ? currentYearResult.inheritance : 0
+      const inheritanceTax = currentYearResult.age === persona.inheritanceAge ? currentYearResult.inheritanceTax : 0
+      const spending = currentYearResult.spending
+      const savings = currentYearResult.savings
+      const spendingFromWealth = persona.yearlySpendingFromWealth
+      const spendingFromIncome = spending - spendingFromWealth
+      const wealthGrowth = currentYearResult.wealthGrowth
+      const wealth = currentYearResult.wealth
+
+      // Add to totals
+      totals.totalWealth += wealth
+      totals.totalIncome += income
+      totals.totalIncomeTax += incomeTax
+      totals.totalWealthIncome += wealthIncome
+      totals.totalWealthIncomeTax += wealthIncomeTax
+      totals.totalWealthTax += wealthTax
+      totals.totalVAT += vat
+      totals.totalInheritance += inheritance
+      totals.totalInheritanceTax += inheritanceTax
+      totals.totalSpending += spending
+      totals.totalSavings += savings
+      totals.totalSpendingFromWealth += spendingFromWealth
+      totals.totalSpendingFromIncome += spendingFromIncome
+      totals.totalTax += incomeTax + wealthTax + inheritanceTax + wealthIncomeTax
+      totals.totalTaxWithVAT += incomeTax + wealthTax + inheritanceTax + wealthIncomeTax + vat
+      totals.totalWealthGrowth += wealthGrowth
     })
 
-    // Divide by number of personas to get average
-    const numPersonas = personaResults.length
-    Object.keys(avgResult.totals).forEach(key => {
-      avgResult.totals[key as keyof typeof avgResult.totals] /= numPersonas
-    })
+    // If we're not using persona size, calculate averages
+    if (!usePersonaSize && personaResults.length > 0) {
+      const personaCount = personaResults.length
+      Object.keys(totals).forEach(key => {
+        totals[key as keyof LifeIncomeTotals] = Math.round(totals[key as keyof LifeIncomeTotals] / personaCount)
+      })
+    }
 
-    setResults(avgResult)
-    return avgResult
-  }, [calculateLifeIncome, createCustomTaxScenario, selectedTaxScenario])
+    // Create result object with the same interface as before
+    const result: LifeIncomeCalculatorResult = {
+      totals,
+      details: personaResults.map(({ result }) => result.details).flat()
+    }
+
+    setResults(result)
+    return result
+  }, [calculateLifeIncome, createCustomTaxScenario, selectedTaxScenario, collection, usePersonaSize, personaSize])
 
   return { calculateScenario, results, createCustomTaxScenario }
 }

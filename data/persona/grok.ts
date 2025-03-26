@@ -23,7 +23,7 @@ export const grok2Personas: Persona[] = [
     inheritanceTaxable: 0,
     inheritanceTax: 0,
     examples: [
-      { name: "Monika Schulz", profession: "Gepensionierte Putzfrau", familyStatus: "Witwe, keine Kinder", monthlyIncome: 950, yearlyIncome: 11400, createdWealth: 2500 },
+      { name: "Monika Schulz", profession: "Pensionierte Putzfrau", familyStatus: "Witwe, keine Kinder", monthlyIncome: 950, yearlyIncome: 11400, createdWealth: 2500 },
       { name: "Klaus Meier", profession: "Ehemaliger Sicherheitsdienstmitarbeiter", familyStatus: "Ledig", monthlyIncome: 1000, yearlyIncome: 12000, createdWealth: 3000 },
       { name: "Hannelore Becker", profession: "Pensionierte Küchenhilfe", familyStatus: "Geschieden, 1 Kind", monthlyIncome: 975, yearlyIncome: 11700, createdWealth: 2800 },
       { name: "Dieter Wagner", profession: "Pensionierter Lagerarbeiter", familyStatus: "Verheiratet, keine Kinder", monthlyIncome: 980, yearlyIncome: 11760, createdWealth: 2900 },

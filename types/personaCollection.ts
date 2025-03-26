@@ -6,6 +6,7 @@ export interface PersonaCollection {
   title: string
   description: string
   personas: Persona[]
+  size: number // Total population size this collection represents
 }
 
 // Helper functions for generating persona data
@@ -63,35 +64,40 @@ export const initialPersonasCollection: PersonaCollection = {
   id: "initial-personas",
   title: "Karrierewege und Lebenssituationen",
   description: "Eine Sammlung von Personas, die verschiedene typische Karrierewege und Lebenssituationen darstellen, vom Werkstudenten bis zum Großerben.",
-  personas: initialPersonas
+  personas: initialPersonas,
+  size: 42e6 // Assuming 42 million households
 }
 
 export const avgPersonasCollection: PersonaCollection = {
   id: "avg-personas",
   title: "Einkommensverteilung",
   description: "Repräsentative Personas für verschiedene Einkommensschichten, von Geringverdienern bis zur vermögenden Elite.",
-  personas: avgPersonas
+  personas: avgPersonas,
+  size: 42e6 // Assuming 42 million households
 }
 
 export const grokPersonasCollection: PersonaCollection = {
   id: "grok-personas",
   title: "Grok Einkommensverteilung",
   description: "Repräsentative Personas für verschiedene Einkommensschichten, von Geringverdienern bis zur vermögenden Elite.",
-  personas: grokPersonas
+  personas: grokPersonas,
+  size: 42e6 // Assuming 42 million households
 }
 
 export const highIncomePersonasCollection: PersonaCollection = {
   id: "high-income-personas",
   title: "Hocheinkommensgruppen",
   description: "Detaillierte Darstellung der oberen Einkommens- und Vermögensschichten, von der wohlhabenden Oberschicht bis zu Milliardären.",
-  personas: highIncomePersonas
+  personas: highIncomePersonas,
+  size: 42e6 // Assuming 42 million households
 }
 
 export const hundredAvgPersonas: PersonaCollection = {
   id: "100-avg-personas",
   title: "100 Durchschnittliche Personas",
   description: "Eine Sammlung von 100 Personas, die das gesamte Spektrum der Einkommens- und Vermögensverteilung repräsentieren, vom 1. bis zum 100. Perzentil.",
-  personas: generate100Personas()
+  personas: generate100Personas(),
+  size: 42e6 // Assuming 42 million households
 }
 
 export const allPersonaCollections: PersonaCollection[] = [
@@ -127,7 +133,8 @@ export function getPersonaCollection(): PersonaCollection {
     id: "grok-100-personas",
     title: "100 Grok Personas",
     description: "Eine statistisch repräsentative Sammlung von 100 Personas, basierend auf der deutschen Einkommens-, Vermögens- und Erbschaftsverteilung.",
-    personas
+    personas,
+    size: 42e6 // Assuming 42 million households
   }
 
   return personaCollection

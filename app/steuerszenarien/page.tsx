@@ -3,25 +3,28 @@
 import { PersonalTaxImpact } from "@/components/tax-scenarios/personal-tax-impact"
 import { PageHeader } from "@/components/ui/page-header"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
-import { grokPersonas } from "@/types/persona"
+// import { grokPersonas } from "@/types/persona"
 import { grok2Personas } from "@/data/persona/grok"
-import { grok100PersonasCollection } from "@/types/personaCollection"
+// import { grokPersonasCollection } from "@/types/personaCollection"
 import { PersonaCollection } from "@/components/personas/persona-collection"
 import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
 import { TaxScenarioBuilderOrDetails } from "@/components/tax-scenarios/tax-scenario-builder-or-details"
 import { WarningBox } from "@/components/warning-box"
 import { CollapsibleBox, DismissibleBox } from "@/components/onboarding"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
+import { useState } from "react"
 
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
   const userPersona = currentPersona || null
+  const [usePersonaSize] = useState(true)
 
   const personaCollection = {
     id: "grok",
     title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
     description: "Eine Auswahl repräsentativer Lebensrealitäten",
-    personas: grok100PersonasCollection.personas
+    personas: grok2Personas,
+    size: 42000000 // Default to 42 million households in Germany
   }
 
   return (
@@ -53,10 +56,10 @@ export default function TaxScenariosPage() {
 
       <div className="flex-1 space-y-4">
         <div className="p-8 pt-2">
-          <TaxScenarioBuilderOrDetails />
+          <TaxScenarioBuilderOrDetails collection={personaCollection} usePersonaSize={usePersonaSize} />
           <PersonalTaxImpact userPersona={userPersona} />
 
-          <PersonaCollection collection={grok100PersonasCollection} />
+          <PersonaCollection collection={personaCollection} />
         </div>
 
         {/* <div className="p-8 pt-2">

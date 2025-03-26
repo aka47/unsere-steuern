@@ -1641,6 +1641,7 @@ export const grok100Personas: Persona[] = [
     inheritanceTaxClass: 1
   },
   {
+    ...defaultPersona,
     id: 'p76',
     name: 'Vermögender Investor',
     description: '75-76% Vermögen,  Spitzeneinkommen.',
@@ -1663,6 +1664,7 @@ export const grok100Personas: Persona[] = [
     inheritanceTaxClass: 1
   },
   {
+    ...defaultPersona,
     id: 'p77',
     name: 'Vermögender Investor',
     description: '76-77% Vermögen,  Spitzeneinkommen.',

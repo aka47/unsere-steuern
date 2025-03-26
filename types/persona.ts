@@ -21,6 +21,7 @@ export interface Persona {
   inheritanceFinancial: number
   inheritanceTaxable: number
   inheritanceTax: number
+  size?: number // Number of households this persona represents
   yearlyOverrides?: {
     age: number
     income: number

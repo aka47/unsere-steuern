@@ -4,14 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { usePersonaCollectionCalculator } from "@/hooks/usePersonaCollectionCalculations"
 import { TaxRevenueChart } from "./tax-revenue-chart"
 import { PersonaGroupStats } from "./persona-group-stats"
-import { Persona } from "@/types/persona"
+import { PersonaCollection } from "@/types/personaCollection"
 
 interface PersonaCollectionStatsProps {
-  personas: Persona[]
+  collection: PersonaCollection
 }
 
-export function PersonaCollectionStats({ personas }: PersonaCollectionStatsProps) {
-  const {aggregatedStats} = usePersonaCollectionCalculator(personas)
+export function PersonaCollectionStats({ collection }: PersonaCollectionStatsProps) {
+  const {aggregatedStats} = usePersonaCollectionCalculator(collection)
 
   if (!aggregatedStats) return null
 
@@ -128,7 +128,7 @@ export function PersonaCollectionStats({ personas }: PersonaCollectionStatsProps
 
       <div>
         <h2 className="text-2xl font-bold mb-4">Statistiken pro Bevölkerungsgruppe</h2>
-        <PersonaGroupStats personas={personas} />
+        <PersonaGroupStats collection={collection} />
       </div>
     </div>
   )

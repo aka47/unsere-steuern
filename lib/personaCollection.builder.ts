@@ -255,7 +255,8 @@ export class PersonaCollectionBuilder {
       id: this.id,
       title: this.title,
       description: this.description,
-      personas: this.personas
+      personas: this.personas,
+      size: 42e6
     }
   }
 

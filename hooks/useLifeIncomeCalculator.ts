@@ -28,6 +28,7 @@ type CalculateLifeIncomeParams = {
   currentIncomeFromWealth?: number
   taxScenario?: TaxScenario
   yearlyOverrides?: {age: number; income: number; wealth: number }[]
+  personaSize?: number
 }
 
 type LifeIncomeTotals = {
@@ -133,7 +134,8 @@ export function useLifeIncomeCalculator() {
     currentPersona,
     initialAge = 20,
     taxScenario = defaultTaxScenario,
-    yearlyOverrides = []
+    yearlyOverrides = [],
+    personaSize = 1
   }: CalculateLifeIncomeParams): LifeIncomeCalculatorResult | null => {
     // Validate all required numeric inputs
     const validationErrors = []
@@ -182,7 +184,6 @@ export function useLifeIncomeCalculator() {
       console.error('Validation errors:', validationErrors)
       return null
     }
-
 
     const defaultGrowthRate = 1.02
     const growthRate = currentPersona?.incomeGrowth || defaultGrowthRate
@@ -327,6 +328,24 @@ export function useLifeIncomeCalculator() {
     totals.totalTax = Math.round(totals.totalIncomeTax + totals.totalWealthIncomeTax + totals.totalWealthTax + totals.totalInheritanceTax)
     totals.totalTaxWithVAT = Math.round(totals.totalTax + totals.totalVAT)
     totals.totalWealthGrowth = Math.round(totals.totalWealthGrowth)
+
+    // Scale all totals and details by personaSize if it's greater than 0
+    if (personaSize > 0) {
+      // Scale totals
+      Object.keys(totals).forEach(key => {
+        totals[key as keyof LifeIncomeTotals] = Math.round(totals[key as keyof LifeIncomeTotals] * personaSize)
+      })
+
+      // Scale details
+      results.forEach(result => {
+        Object.keys(result).forEach(key => {
+          if (typeof result[key as keyof LifeIncomeResult] === 'number' && key !== 'age' && key !== 'taxRate') {
+            result[key as keyof LifeIncomeResult] = Math.round(result[key as keyof LifeIncomeResult] * personaSize)
+          }
+        })
+      })
+    }
+
     return { totals, details: results }
   }
 
