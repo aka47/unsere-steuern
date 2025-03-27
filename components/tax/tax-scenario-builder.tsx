@@ -13,6 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TaxScenarioDetails } from "@/components/tax-scenarios/tax-scenario-details"
 import { grokPersonasCollection } from "@/types/personaCollection"
 import { PersonaCollection } from "@/types/personaCollection"
+import { incomeTaxLevels, wealthTaxLevels, vatLevels, wealthIncomeTaxLevels } from "@/constants/tax-scenarios"
+import { TaxParams } from "@/hooks/useTaxScenario"
+import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 
 const TAX_FREE_AMOUNTS = [0, 11000, 22000, 33000]
 const WEALTH_TAX_RATES = [0, 0.01, 0.02, 0.03, 0.05, 0.1]
@@ -36,43 +39,58 @@ export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePer
     calculateScenario(taxParams)
   }
 
-  const handleIncomeTaxChange = (field: keyof typeof taxParams.incomeTax, value: string | number) => {
+  const handleIncomeTaxChange = (value: string) => {
     setTaxParams({
       ...taxParams,
       incomeTax: {
         ...taxParams.incomeTax,
-        [field]: value
+        taxLevel: value as keyof typeof incomeTaxLevels
       }
     })
   }
 
-  const handleWealthTaxChange = (field: keyof typeof taxParams.wealthTax, value: string | number) => {
+  const handleWealthTaxChange = (value: string) => {
     setTaxParams({
       ...taxParams,
       wealthTax: {
         ...taxParams.wealthTax,
-        [field]: value
+        taxLevel: value as keyof typeof wealthTaxLevels
       }
     })
+  }
+
+  const handleVATChange = (value: string) => {
+    setTaxParams({
+      ...taxParams,
+      vatTax: {
+        ...taxParams.vatTax,
+        taxLevel: value as keyof typeof vatLevels
+      }
+    })
+  }
+
+  const handleTaxParamChange = (
+    taxType: keyof TaxParams,
+    param: keyof TaxParams[keyof TaxParams],
+    value: TaxParams[keyof TaxParams][keyof TaxParams[keyof TaxParams]]
+  ) => {
+    setTaxParams((prev) => ({
+      ...prev,
+      [taxType]: {
+        ...prev[taxType],
+        [param]: value
+      }
+    }))
   }
 
   const handleInheritanceTaxChange = (field: keyof typeof taxParams.inheritanceTax, value: string | number) => {
-    setTaxParams({
-      ...taxParams,
+    setTaxParams((prev) => ({
+      ...prev,
       inheritanceTax: {
-        ...taxParams.inheritanceTax,
+        ...prev.inheritanceTax,
         [field]: value
       }
-    })
-  }
-
-  const handleWealthIncomeTaxChange = (value: string | number) => {
-    setTaxParams({
-      ...taxParams,
-      wealthIncomeTax: {
-        taxRate: Number(value)
-      }
-    })
+    }))
   }
 
   // Calculate tax distribution from results
@@ -105,36 +123,20 @@ export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePer
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Steuerfreigrenze</label>
-              <Select
-                value={taxParams.incomeTax.taxFreeAmount.toString()}
-                onValueChange={(value) => handleIncomeTaxChange("taxFreeAmount", Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TAX_FREE_AMOUNTS.map((amount) => (
-                    <SelectItem key={amount} value={amount.toString()}>
-                      {amount.toLocaleString()} €
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Steuersätze</label>
+              <label className="text-sm font-medium">Steuersystem</label>
               <Select
                 value={taxParams.incomeTax.taxLevel}
-                onValueChange={(value) => handleIncomeTaxChange("taxLevel", value)}
+                onValueChange={handleIncomeTaxChange}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="lower">Niedriger</SelectItem>
-                  <SelectItem value="current">Aktuell</SelectItem>
-                  <SelectItem value="adenauer">Adenauer</SelectItem>
+                  {Object.entries(incomeTaxLevels).map(([key, level]) => (
+                    <SelectItem key={key} value={key}>
+                      {level.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -148,34 +150,45 @@ export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePer
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Steuerfreigrenze</label>
+              <label className="text-sm font-medium">Steuersystem</label>
               <Select
-                value={taxParams.wealthTax.taxFreeAmount.toString()}
-                onValueChange={(value) => handleWealthTaxChange("taxFreeAmount", Number(value))}
+                value={taxParams.wealthTax.taxLevel}
+                onValueChange={handleWealthTaxChange}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1000000">1.000.000 €</SelectItem>
-                  <SelectItem value="2000000">2.000.000 €</SelectItem>
-                  <SelectItem value="3000000">3.000.000 €</SelectItem>
+                  {Object.entries(wealthTaxLevels).map(([key, level]) => (
+                    <SelectItem key={key} value={key}>
+                      {level.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* VAT Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Mehrwertsteuer</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Steuersatz</label>
+              <label className="text-sm font-medium">Steuersystem</label>
               <Select
-                value={taxParams.wealthTax.taxRate.toString()}
-                onValueChange={(value) => handleWealthTaxChange("taxRate", Number(value))}
+                value={taxParams.vatTax.taxLevel}
+                onValueChange={handleVATChange}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {WEALTH_TAX_RATES.map((rate) => (
-                    <SelectItem key={rate} value={rate.toString()}>
-                      {rate === 0 ? "0%" : `${(rate * 100).toFixed(1)}%`}
+                  {Object.entries(vatLevels).map(([key, level]) => (
+                    <SelectItem key={key} value={key}>
+                      {level.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -209,16 +222,16 @@ export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePer
             <div className="space-y-2">
               <label className="text-sm font-medium">Steuersätze</label>
               <Select
-                value={taxParams.inheritanceTax.taxLevel}
-                onValueChange={(value) => handleInheritanceTaxChange("taxLevel", value)}
+                value={taxParams.inheritanceTax.taxLevel.toString()}
+                onValueChange={(value) => handleInheritanceTaxChange("taxLevel", Number(value))}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="lower">Niedriger</SelectItem>
-                  <SelectItem value="current">Aktuell</SelectItem>
-                  <SelectItem value="higher">Höher</SelectItem>
+                  <SelectItem value="1">Niedriger</SelectItem>
+                  <SelectItem value="2">Aktuell</SelectItem>
+                  <SelectItem value="3">Höher</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -234,18 +247,18 @@ export const TaxScenarioBuilder = ({ collection = grokPersonasCollection, usePer
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Effektive Steuerquote</label>
+              <label className="text-sm font-medium">Steuersystem</label>
               <Select
-                value={taxParams.wealthIncomeTax?.taxRate.toString() || "0.10"}
-                onValueChange={(value) => handleWealthIncomeTaxChange(value)}
+                value={taxParams.wealthIncomeTax.taxLevel}
+                onValueChange={(value) => handleTaxParamChange("wealthIncomeTax", "taxLevel", value)}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {WEALTH_INCOME_TAX_RATES.map((rate) => (
-                    <SelectItem key={rate} value={rate.toString()}>
-                      {(rate * 100).toFixed(0)}%
+                  {Object.entries(wealthIncomeTaxLevels).map(([key, level]) => (
+                    <SelectItem key={key} value={key}>
+                      {level.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -66,9 +66,10 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
               <StatCard
                 title="Gesamtsteuern"
+                description={selectedTaxScenario.taxSummary?.totalTax}
                 value={formatCurrency(results.totals.totalTaxWithVAT)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalTaxWithVAT,
                   statusQuoResults.totals.totalTaxWithVAT
                 )) ?? undefined}
@@ -77,7 +78,8 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
                 title="Einkommensteuer"
                 value={formatCurrency(results.totals.totalIncomeTax)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                description={selectedTaxScenario.taxSummary?.incomeTax}
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalIncomeTax,
                   statusQuoResults.totals.totalIncomeTax
                 )) ?? undefined}
@@ -86,7 +88,8 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
                 title="Erbschaftsteuer"
                 value={formatCurrency(results.totals.totalInheritanceTax)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                description={selectedTaxScenario.taxSummary?.inheritanceTax}
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalInheritanceTax,
                   statusQuoResults.totals.totalInheritanceTax
                 )) ?? undefined}
@@ -95,7 +98,8 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
                 title="Kapitalertragsteuer"
                 value={formatCurrency(results.totals.totalWealthIncomeTax)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                description={selectedTaxScenario.taxSummary?.wealthIncomeTax}
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalWealthIncomeTax,
                   statusQuoResults.totals.totalWealthIncomeTax
                 )) ?? undefined}
@@ -104,7 +108,8 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
                 title="Vermögenssteuer"
                 value={formatCurrency(results.totals.totalWealthTax)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                description={selectedTaxScenario.taxSummary?.wealthTax}
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalWealthTax,
                   statusQuoResults.totals.totalWealthTax
                 )) ?? undefined}
@@ -113,7 +118,8 @@ export function TaxScenarioDetails({ collection, usePersonaSize = true }: TaxSce
                 title="Mehrwertsteuer"
                 value={formatCurrency(results.totals.totalVAT)}
                 suffix=""
-                description={(statusQuoResults && formatDifference(
+                description={selectedTaxScenario.taxSummary?.vatTax}
+                content={(statusQuoResults && formatDifference(
                   results.totals.totalVAT,
                   statusQuoResults.totals.totalVAT
                 )) ?? undefined}

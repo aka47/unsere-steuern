@@ -7,6 +7,17 @@ import { useLifeIncomeCalculator, type LifeIncomeCalculatorResult } from "./useL
 import { type TaxScenario } from "@/types/life-income"
 import { useTaxScenario } from "./useTaxScenario"
 import { PersonaCollection } from "@/types/personaCollection"
+import {
+  calculateIncomeTaxFromBrackets,
+  calculateWealthTaxFromBrackets,
+  calculateVATFromBrackets,
+  statusQuoScenario,
+  incomeTaxLevels,
+  wealthTaxLevels,
+  vatLevels,
+  calculateWealthIncomeTaxFromBrackets,
+  wealthIncomeTaxLevels
+} from "@/constants/tax-scenarios"
 
 // Common tax bracket calculation function
 const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
@@ -24,19 +35,19 @@ const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, numbe
 
 interface TaxParams {
   incomeTax: {
-    taxFreeAmount: number
-    taxLevel: "lower" | "current" | "adenauer"
+    taxLevel: keyof typeof incomeTaxLevels
   }
   wealthTax: {
-    taxFreeAmount: number
-    taxRate: number
+    taxLevel: keyof typeof wealthTaxLevels
   }
   inheritanceTax: {
-    taxFreeAmount: number
-    taxLevel: "lower" | "current" | "higher"
+    taxLevel: InheritanceTaxClass
   }
   wealthIncomeTax: {
-    taxRate: number
+    taxLevel: keyof typeof incomeTaxLevels
+  }
+  vatTax: {
+    taxLevel: keyof typeof vatLevels
   }
 }
 
@@ -118,27 +129,23 @@ export function useTaxScenarioCalculator(
       detailedDescription: "Passe die Steuerparameter an, um dein eigenes Steuersystem zu erstellen.",
 
       calculateIncomeTax: (income: number) => {
-        const adjustedIncome = Math.max(0, income - params.incomeTax.taxFreeAmount)
-        return calculateTaxWithBrackets(adjustedIncome, TAX_BRACKETS.income[params.incomeTax.taxLevel])
+        return calculateIncomeTaxFromBrackets(income, params.incomeTax.taxLevel)
       },
 
       calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: InheritanceTaxClass) => {
-        const adjustedAmount = Math.max(0, inheritanceTaxableHousingFinancial + inheritanceTaxableCompany - params.inheritanceTax.taxFreeAmount)
-        return calculateTaxWithBrackets(adjustedAmount, TAX_BRACKETS.inheritance[params.inheritanceTax.taxLevel])
+        return statusQuoScenario.calculateInheritanceTax(inheritanceTaxableHousingFinancial, inheritanceTaxableCompany, inheritanceHardship, taxClass)
       },
 
       calculateWealthTax: (wealth: number) => {
-        const adjustedWealth = Math.max(0, wealth - params.wealthTax.taxFreeAmount)
-        return adjustedWealth * (params.wealthTax.taxRate / 100)
+        return calculateWealthTaxFromBrackets(wealth, params.wealthTax.taxLevel)
       },
 
       calculateWealthIncomeTax: (wealthIncome: number) => {
-        return wealthIncome * params.wealthIncomeTax.taxRate
+        return calculateWealthIncomeTaxFromBrackets(wealthIncome, params.wealthIncomeTax.taxLevel as "status-quo" | "lower" | "higher" | "highest")
       },
 
       calculateVAT: (income: number, vatRate: number, vatApplicableRate: number) => {
-        const grossSpending = income * (vatApplicableRate / 100)
-        return grossSpending * (vatRate / (100 + vatRate))
+        return calculateVATFromBrackets(income, vatRate, vatApplicableRate, params.vatTax.taxLevel)
       }
     }
   }, [])

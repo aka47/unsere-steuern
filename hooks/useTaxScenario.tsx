@@ -1,9 +1,10 @@
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react"
-import { taxScenarios, defaultTaxScenario } from "@/constants/tax-scenarios"
+import { taxScenarios, defaultTaxScenario, incomeTaxLevels, wealthTaxLevels, vatLevels, wealthIncomeTaxLevels } from "@/constants/tax-scenarios"
 import { TaxScenario } from "@/types/life-income"
 import { useTaxScenarioCalculator } from "./useTaxScenarioCalculator"
+import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
 
 type ScenarioStat = {
   name: string
@@ -90,21 +91,22 @@ const scenarioIdMap: Record<ScenarioId, string> = {
   "custom": "custom"
 }
 
-interface TaxParams {
+export interface TaxParams {
   incomeTax: {
-    taxFreeAmount: number
-    taxLevel: "lower" | "current" | "adenauer"
+    taxLevel: keyof typeof incomeTaxLevels
   }
   wealthTax: {
-    taxFreeAmount: number
-    taxRate: number
+    taxLevel: keyof typeof wealthTaxLevels
   }
   inheritanceTax: {
+    taxLevel: keyof typeof INHERITANCE_TAX_CLASSES
     taxFreeAmount: number
-    taxLevel: "lower" | "current" | "higher"
   }
   wealthIncomeTax: {
-    taxRate: number
+    taxLevel: keyof typeof wealthIncomeTaxLevels
+  }
+  vatTax: {
+    taxLevel: keyof typeof vatLevels
   }
 }
 
@@ -113,24 +115,25 @@ interface TaxScenarioContextType {
   selectedScenarioId: string
   setSelectedScenarioId: (id: string) => void
   taxParams: TaxParams
-  setTaxParams: (params: TaxParams) => void
+  setTaxParams: React.Dispatch<React.SetStateAction<TaxParams>>
 }
 
 const defaultTaxParams: TaxParams = {
   incomeTax: {
-    taxFreeAmount: 11000,
-    taxLevel: "current"
+    taxLevel: "status-quo"
   },
   wealthTax: {
-    taxFreeAmount: 1000000,
-    taxRate: 0
+    taxLevel: "status-quo"
   },
   inheritanceTax: {
-    taxFreeAmount: 400000,
-    taxLevel: "current"
+    taxLevel: 1,
+    taxFreeAmount: 400000
   },
   wealthIncomeTax: {
-    taxRate: 0.10
+    taxLevel: "status-quo"
+  },
+  vatTax: {
+    taxLevel: "status-quo"
   }
 }
 
