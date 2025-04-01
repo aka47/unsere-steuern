@@ -7,6 +7,10 @@ export interface Persona {
   currentAge: number
   currentIncome: number | 0
   currentIncomeFromWealth: number | 0
+  incomeTotal: number | 0
+  incomeTaxPaid: number | 0
+  incomeTaxRate: number | 0
+  households: number | 0
   savingsRate: number
   inheritanceAge: number | null
   inheritanceAmount: number
@@ -53,6 +57,10 @@ export const defaultPersona: Persona = {
   incomeGrowth: 1.02,
   yearlySpendingFromWealth: 0,
   currentWealth: 0,
+  incomeTotal: 0,
+  incomeTaxPaid: 0,
+  incomeTaxRate: 0,
+  households: 0,
   inheritanceHousing: 0,
   inheritanceCompany: 0,
   inheritanceFinancial: 0,

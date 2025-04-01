@@ -12,7 +12,7 @@ interface DistributionConfig {
 // PersonaBuilder class
 export class GrokPersonaBuilder {
   private config: DistributionConfig;
-  private decileCount: number = 100;
+  private decileCount: number = 1000;
   private personas: Persona[] = [];
 
   constructor(config: DistributionConfig) {
@@ -252,12 +252,13 @@ export class GrokPersonaBuilder {
   }
 
   // Build personas
-  public buildPersonas(): Persona[] {
+  public buildPersonas(decileCount: number): Persona[] {
     const estatesPerDecile = this.config.annualDeaths / this.decileCount;
     const totalCompanyInheritance = this.config.totalInheritance * this.totalAssetDistribution.company;
 
+    this.decileCount = decileCount
     // Generate names and descriptions for the current decile count
-    const { names, descriptions } = this.generateNamesAndDescriptions(this.decileCount);
+    const { names, descriptions } = this.generateNamesAndDescriptions(decileCount);
 
     // Interpolate distributions for the target number of personas
     const interpolatedWealthDistribution = this.interpolateDistributionPareto(this.wealthDistribution, this.decileCount, 1.5);
@@ -416,7 +417,7 @@ const germanyConfig: DistributionConfig = {
 };
 
 const builder = new GrokPersonaBuilder(germanyConfig);
-const personas = builder.buildPersonas();
+const personas = builder.buildPersonas(100);
 console.log("Generated Personas:", personas);
 
 // Validate totals

@@ -33,7 +33,7 @@ export type TaxScenario = {
     vatTax: string
   }
   // Tax calculation functions
-  calculateIncomeTax: (income: number) => number
+  calculateIncomeTax: (income: number, persona?: { incomeTaxRate?: number }) => number
   calculateInheritanceTax: (inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: InheritanceTaxClass) => number
   calculateWealthTax: (wealth: number) => number
   calculateWealthIncomeTax: (wealthIncome: number) => number

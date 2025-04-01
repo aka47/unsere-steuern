@@ -1,4 +1,5 @@
 import { Persona, defaultPersona, initialPersonas, avgPersonas, highIncomePersonas, grokPersonas } from "./persona"
+import { germanIncomePersonas2020 } from "@/data/persona/income2020"
 import { GrokPersonaBuilder } from "@/lib/personaCollectionBuilder"
 
 export interface PersonaCollection {
@@ -100,6 +101,14 @@ export const hundredAvgPersonas: PersonaCollection = {
   size: 42e6 // Assuming 42 million households
 }
 
+export const germanIncomePersonasCollection2020: PersonaCollection = {
+  id: "german-income-2020",
+  title: "Einkommensverteilung Deutschland 2020",
+  description: "Eine Sammlung von 17 Personas, die die Einkommensverteilung in Deutschland für 2020 repräsentieren, basierend auf den offiziellen Steuerdaten von 42,5 Millionen Steuerpflichtigen, aufgeteilt in Einkommensklassen von 0 bis über 1 Million Euro.",
+  personas: germanIncomePersonas2020,
+  size: 42494194 // Exact number from the table: 42,494,194 taxpayers
+};
+
 export const allPersonaCollections: PersonaCollection[] = [
   initialPersonasCollection,
   avgPersonasCollection,
@@ -119,7 +128,7 @@ const germanyConfig = {
 // Store the collection in memory
 let personaCollection: PersonaCollection | null = null
 
-export function getPersonaCollection(): PersonaCollection {
+export function getPersonaCollection(decileCount: number): PersonaCollection {
   // Return cached collection if available
   if (personaCollection) {
     return personaCollection
@@ -127,12 +136,12 @@ export function getPersonaCollection(): PersonaCollection {
 
   // Create new collection if not cached
   const builder = new GrokPersonaBuilder(germanyConfig)
-  const personas = builder.buildPersonas()
+  const personas = builder.buildPersonas(decileCount)
 
   personaCollection = {
-    id: "grok-100-personas",
-    title: "100 Grok Personas",
-    description: "Eine statistisch repräsentative Sammlung von 100 Personas, basierend auf der deutschen Einkommens-, Vermögens- und Erbschaftsverteilung.",
+    id: "grok-1000-personas",
+    title: "1000 Grok Personas",
+    description: "Eine statistisch repräsentative Sammlung von 1000 Personas, basierend auf der deutschen Einkommens-, Vermögens- und Erbschaftsverteilung.",
     personas,
     size: 42e6 // Assuming 42 million households
   }
@@ -148,7 +157,7 @@ export function clearPersonaCollection(): void {
 // Function to validate the collection totals
 export function validatePersonaCollectionTotals() {
   if (!personaCollection) {
-    getPersonaCollection()
+    getPersonaCollection(1000)
   }
 
   const builder = new GrokPersonaBuilder(germanyConfig)
@@ -159,4 +168,6 @@ export function validatePersonaCollectionTotals() {
 export const config = germanyConfig
 
 // Export the collection for direct access
-export const grok100PersonasCollection = getPersonaCollection()
+export const grok100PersonasCollection = getPersonaCollection(100)
+export const grok1000PersonasCollection = getPersonaCollection(1000)
+

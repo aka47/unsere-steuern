@@ -1,7 +1,7 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react"
-import { taxScenarios, defaultTaxScenario, incomeTaxLevels, wealthTaxLevels, vatLevels, wealthIncomeTaxLevels } from "@/constants/tax-scenarios"
+import React, { createContext, useContext, useState, ReactNode } from "react"
+import { taxScenarios, incomeTaxLevels, wealthTaxLevels, vatLevels, wealthIncomeTaxLevels } from "@/constants/tax-scenarios"
 import { TaxScenario } from "@/types/life-income"
 import { useTaxScenarioCalculator } from "./useTaxScenarioCalculator"
 import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
@@ -61,27 +61,27 @@ const scenarioStats: Record<string, ScenarioStat> = {
 }
 
 type ScenarioId = keyof typeof scenarioStats
-type ScenarioContextType = {
-  selectedScenarioId: ScenarioId
-  setSelectedScenarioId: (scenarioId: ScenarioId) => void
-  scenarioDetails: ScenarioStat
-  selectedTaxScenario: TaxScenario
-  customTaxParams: {
-    incomeTax: {
-      taxFreeAmount: number
-      taxLevel: "lower" | "current" | "adenauer"
-    }
-    wealthTax: {
-      taxFreeAmount: number
-      taxRate: number
-    }
-    inheritanceTax: {
-      taxFreeAmount: number
-      taxLevel: "lower" | "current" | "higher"
-    }
-  }
-  setCustomTaxParams: (params: ScenarioContextType["customTaxParams"]) => void
-}
+// type ScenarioContextType = {
+//   selectedScenarioId: ScenarioId
+//   setSelectedScenarioId: (scenarioId: ScenarioId) => void
+//   scenarioDetails: ScenarioStat
+//   selectedTaxScenario: TaxScenario
+//   customTaxParams: {
+//     incomeTax: {
+//       taxFreeAmount: number
+//       taxLevel: "lower" | "current" | "adenauer"
+//     }
+//     wealthTax: {
+//       taxFreeAmount: number
+//       taxRate: number
+//     }
+//     inheritanceTax: {
+//       taxFreeAmount: number
+//       taxLevel: "lower" | "current" | "higher"
+//     }
+//   }
+//   setCustomTaxParams: (params: ScenarioContextType["customTaxParams"]) => void
+// }
 
 // Map scenario IDs from scenarioStats to tax scenario IDs
 const scenarioIdMap: Record<ScenarioId, string> = {

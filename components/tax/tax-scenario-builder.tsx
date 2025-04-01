@@ -4,22 +4,14 @@ import { useEffect } from "react"
 import { useTaxScenario } from "@/hooks/useTaxScenario"
 import { useTaxScenarioCalculator } from "@/hooks/useTaxScenarioCalculator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Slider } from "@/components/ui/slider"
-// import { Switch } from "@/components/ui/switch"
 import { TaxDistribution } from "@/types/life-income"
 import { TaxRevenueChart } from "./tax-revenue-chart"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TaxScenarioDetails } from "@/components/tax-scenarios/tax-scenario-details"
 import { grokPersonasCollection } from "@/types/personaCollection"
 import { PersonaCollection } from "@/types/personaCollection"
 import { incomeTaxLevels, wealthTaxLevels, vatLevels, wealthIncomeTaxLevels } from "@/constants/tax-scenarios"
 import { TaxParams } from "@/hooks/useTaxScenario"
-import { INHERITANCE_TAX_CLASSES } from "@/constants/tax"
-
-const TAX_FREE_AMOUNTS = [0, 11000, 22000, 33000]
-const WEALTH_TAX_RATES = [0, 0.01, 0.02, 0.03, 0.05, 0.1]
-const WEALTH_INCOME_TAX_RATES = [0.10, 0.25, 0.30, 0.35, 0.42]
 
 interface TaxScenarioBuilderProps {
   collection?: PersonaCollection

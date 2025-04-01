@@ -19,19 +19,19 @@ import {
   wealthIncomeTaxLevels
 } from "@/constants/tax-scenarios"
 
-// Common tax bracket calculation function
-const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
-  let tax = 0
-  for (let i = 0; i < brackets.length - 1; i++) {
-    const [lowerLimit, rate] = brackets[i]
-    const [upperLimit] = brackets[i + 1]
-    if (amount > lowerLimit) {
-      const taxableAmount = Math.min(amount - lowerLimit, upperLimit - lowerLimit)
-      tax += taxableAmount * rate
-    }
-  }
-  return tax
-}
+// // Common tax bracket calculation function
+// const calculateTaxWithBrackets = (amount: number, brackets: Array<[number, number]>) => {
+//   let tax = 0
+//   for (let i = 0; i < brackets.length - 1; i++) {
+//     const [lowerLimit, rate] = brackets[i]
+//     const [upperLimit] = brackets[i + 1]
+//     if (amount > lowerLimit) {
+//       const taxableAmount = Math.min(amount - lowerLimit, upperLimit - lowerLimit)
+//       tax += taxableAmount * rate
+//     }
+//   }
+//   return tax
+// }
 
 interface TaxParams {
   incomeTax: {
@@ -170,11 +170,14 @@ export function useTaxScenarioCalculator(
         currentPersona: persona,
         initialAge: persona.initialAge,
         currentIncomeFromWealth: persona.currentIncomeFromWealth,
-        taxScenario,
+        taxScenario: {
+          ...taxScenario,
+          calculateIncomeTax: (income: number) => taxScenario.calculateIncomeTax(income, persona)
+        },
         inheritanceTaxableHousingFinancial: persona.inheritanceHousing,
         inheritanceTaxableCompany: persona.inheritanceCompany,
         inheritanceHardship: false,
-        personaSize: usePersonaSize ? personaSize : undefined
+        personaSize: usePersonaSize ? (persona.households > 0 ? persona.households : personaSize) : undefined
       })
       return { result, persona }
     }).filter((item): item is { result: NonNullable<typeof item.result>, persona: Persona } => item.result !== null)

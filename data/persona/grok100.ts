@@ -2133,6 +2133,7 @@ export const grok100Personas: Persona[] = [
     examples_summary: ''
   },
   {
+    ...defaultPersona,
     id: 'p96',
     name: 'Spitzenvermögensinhaber',
     description: '95-96% Vermögen,  extrem hohes Einkommen.',

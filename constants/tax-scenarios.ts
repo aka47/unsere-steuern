@@ -176,8 +176,13 @@ export const statusQuoScenario: TaxScenario = {
     vatTax: "Standardmäßig 19% (ermäßigt 7%)"
   },
 
-  calculateIncomeTax: (income: number) => {
-    return calculateIncomeTaxFromBrackets(income, "status-quo")
+  calculateIncomeTax: (income: number, persona?: { incomeTaxRate?: number }) => {
+    // If persona has a specific income tax rate, use it
+    if (persona?.incomeTaxRate !== undefined && persona.incomeTaxRate > 0) {
+      return income * persona.incomeTaxRate
+    } else {
+      return calculateIncomeTaxFromBrackets(income, "status-quo")
+    }
   },
 
   calculateInheritanceTax(inheritanceTaxableHousingFinancial: number, inheritanceTaxableCompany: number, inheritanceHardship: boolean, taxClass: TaxClass): number {

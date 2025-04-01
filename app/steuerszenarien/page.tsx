@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header"
 import { useSessionPersona } from "@/hooks/useSessionPersona"
 // import { grokPersonas } from "@/types/persona"
 import { grok2Personas } from "@/data/persona/grok"
+
 // import { grokPersonasCollection } from "@/types/personaCollection"
 import { PersonaCollection } from "@/components/personas/persona-collection"
 import { TaxScenarioNavigation } from "@/components/tax-scenarios/tax-scenario-navigation"
@@ -13,19 +14,25 @@ import { WarningBox } from "@/components/warning-box"
 import { CollapsibleBox, DismissibleBox } from "@/components/onboarding"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import { useState } from "react"
+import { grok1000PersonasCollection, grok100PersonasCollection, grokPersonasCollection } from "@/types/personaCollection"
+import { germanIncomePersonasCollection2020 } from "@/types/personaCollection"
+import { grok100Personas } from "@/data/persona/grok100"
+
+
 
 export default function TaxScenariosPage() {
   const { currentPersona } = useSessionPersona()
   const userPersona = currentPersona || null
   const [usePersonaSize] = useState(true)
 
-  const personaCollection = {
-    id: "grok",
-    title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
-    description: "Eine Auswahl repräsentativer Lebensrealitäten",
-    personas: grok2Personas,
-    size: 42000000 // Default to 42 million households in Germany
-  }
+  // const personaCollection = {
+  //   id: "grok",
+  //   title: "Wie übersetzt sich das Steuermodell in Lebensrealitäten?",
+  //   description: "Eine Auswahl repräsentativer Lebensrealitäten",
+  //   personas: grok100Personas,
+  //   size: 42000000 // Default to 42 million households in Germany
+  // }
+  const personaCollection = germanIncomePersonasCollection2020
 
   return (
     <div className="flex flex-col ">

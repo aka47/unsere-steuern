@@ -46,6 +46,10 @@ const mapToPersona = (dbPersona: Record<string, unknown>): PersonaType => {
     yearlyOverrides: parseYearlyOverrides(dbPersona.yearlyOverridesJson as string | null),
     examples: dbPersona.examples as [{ name: string; profession: string; familyStatus: string; monthlyIncome: number; yearlyIncome: number; createdWealth: number; }],
     examples_summary: dbPersona.examples_summary as string,
+    incomeTotal: 0,
+    incomeTaxPaid: 0,
+    incomeTaxRate: 0,
+    households: 0
   };
 };
 

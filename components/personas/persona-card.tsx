@@ -45,6 +45,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
   // Calculate results for both scenarios
   const defaultScenarioResults = calculateLifeIncome({
     ...persona,
+    currentPersona: persona,
     taxScenario: defaultTaxScenario,
     yearlySpendingFromWealth: persona.yearlySpendingFromWealth || 0,
     currentWealth: persona.currentWealth || 0,
@@ -58,6 +59,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
 
   const selectedScenarioResults = calculateLifeIncome({
     ...persona,
+    currentPersona: persona,
     taxScenario: activeTaxScenario,
     yearlySpendingFromWealth: persona.yearlySpendingFromWealth || 0,
     currentWealth: persona.currentWealth || 0,
@@ -461,6 +463,7 @@ export function PersonaCard({ persona, taxScenario: propsTaxScenario, onClick }:
                     )}
                   </p>
                 </div>
+
               </div>
             </div>
           </>

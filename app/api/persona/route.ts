@@ -97,7 +97,11 @@ export async function POST(req: Request) {
       ...validatedData,
       id: crypto.randomUUID(),
       examples: validatedData.examples || [],
-      examples_summary: validatedData.examples_summary || ""
+      examples_summary: validatedData.examples_summary || "",
+      incomeTotal: 0,
+      incomeTaxPaid: 0,
+      incomeTaxRate: 0,
+      households: 0
     };
 
     const createdPersona = await PersonaRepository.create(newPersona, session.user.id);
